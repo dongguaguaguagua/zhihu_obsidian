@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 class QRCodeModal extends Modal {
   private link: string;
   private canvas: HTMLCanvasElement | null = null;
+  onCloseCallback: (() => void) | null = null;
 
   constructor(app: any, link: string) {
     super(app);
@@ -48,6 +49,13 @@ class QRCodeModal extends Modal {
   onClose() {
     const { contentEl } = this;
     contentEl.empty();
+    if (this.onCloseCallback) {
+      this.onCloseCallback();
+    }
+  }
+
+  setOnCloseCallback(callback: () => void) {
+    this.onCloseCallback = callback;
   }
 }
 
@@ -116,6 +124,10 @@ export default class MyPlugin extends Plugin {
                     clearInterval(interval);
                 }
             }, 2000);
+            // 确保手动关闭modal也能清除轮询
+            modal.setOnCloseCallback(() => {
+              clearInterval(interval);
+            });
           }
         });
 
@@ -201,7 +213,7 @@ export default class MyPlugin extends Plugin {
         try {
             const data = await this.loadData();
             const cookies = data?.cookies
-            const cookiesHeader = cookies?.join(' ') ?? '';
+            const cookiesHeader = cookies?.join('; ') ?? '';
             const response = await requestUrl({
                 url: "https://www.zhihu.com/signin?next=%2F",
                 headers: {
@@ -233,7 +245,7 @@ export default class MyPlugin extends Plugin {
         try {
             const data = await this.loadData();
             const cookies = data?.cookies
-            const cookiesHeader = cookies?.join(' ') ?? '';
+            const cookiesHeader = cookies?.join('; ') ?? '';
             const xsrfCookie = await this.selectCookies(['_xsrf'])
             const xsrftoken = this.extractToken(xsrfCookie[0])
             console.log(xsrftoken)
@@ -270,7 +282,7 @@ export default class MyPlugin extends Plugin {
         try {
             const data = await this.loadData();
             const cookies = await this.selectCookies(['_zap','_xsrf','BEC'])
-            const cookiesHeader = cookies?.join(' ') ?? '';
+            const cookiesHeader = cookies?.join('; ') ?? '';
             const response = await requestUrl({
                 url: "https://www.zhihu.com/sc-profiler",
                 headers: {
@@ -308,7 +320,7 @@ export default class MyPlugin extends Plugin {
         try {
             const data = await this.loadData();
             const cookies = data?.cookies
-            const cookiesHeader = cookies?.join(' ') ?? '';
+            const cookiesHeader = cookies?.join('; ') ?? '';
             const response = await requestUrl({
                 url: "https://www.zhihu.com/api/v3/account/api/login/qrcode",
                 headers: {
@@ -339,7 +351,7 @@ export default class MyPlugin extends Plugin {
         try {
             const data = await this.loadData();
             const cookies = data?.cookies
-            const cookiesHeader = cookies?.join(' ') ?? '';
+            const cookiesHeader = cookies?.join('; ') ?? '';
             const response = await requestUrl({
                 url: "https://www.zhihu.com/api/v3/oauth/captcha/v2?type=captcha_sign_in",
                 headers: {
@@ -405,7 +417,7 @@ export default class MyPlugin extends Plugin {
         try {
             const data = await this.loadData();
             const cookies = data?.cookies
-            const cookiesHeader = cookies?.join(' ') ?? '';
+            const cookiesHeader = cookies?.join('; ') ?? '';
             const url = `https://www.zhihu.com/api/v3/account/api/login/qrcode/${token}/scan_info`
             const response = await requestUrl({
                 url: url,
@@ -468,7 +480,7 @@ export default class MyPlugin extends Plugin {
         }
         new_cookies = new_cookies.map(cookie => {
             const match = cookie.match(/^[^;]+;/);
-            return match ? match[0] : '';
+            return match ? match[0].replace(/;$/, '') : '';
         }).filter(Boolean);
         return new_cookies;
     }
