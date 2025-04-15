@@ -3,6 +3,7 @@ import QRCode from 'qrcode';
 
 class QRCodeModal extends Modal {
   private link: string;
+  private canvas: HTMLCanvasElement | null = null;
 
   constructor(app: any, link: string) {
     super(app);
@@ -13,16 +14,35 @@ class QRCodeModal extends Modal {
     const { contentEl } = this;
     contentEl.createEl('h2', { text: '知乎登录二维码' });
 
-    const canvas = contentEl.createEl('canvas');
+    this.canvas = contentEl.createEl('canvas');
+    await this.renderQRCode(this.link);
+  }
 
+  async renderQRCode(link: string) {
+    if (!this.canvas) return;
     try {
-      await QRCode.toCanvas(canvas, this.link, {
+      await QRCode.toCanvas(this.canvas, link, {
         width: 256,
         margin: 2
       });
     } catch (err) {
+      const { contentEl } = this;
       contentEl.createEl('p', { text: '生成二维码失败：' + err });
     }
+  }
+
+  async updateQRCode(newLink: string) {
+    this.link = newLink;
+    await this.renderQRCode(newLink);
+  }
+
+  showSuccess() {
+    const { contentEl } = this;
+    contentEl.empty();
+
+    const successEl = contentEl.createEl('div', {
+      text: '✅ 扫码成功！请在知乎app中点击确认以登录',
+    });
   }
 
   onClose() {
@@ -30,6 +50,7 @@ class QRCodeModal extends Modal {
     contentEl.empty();
   }
 }
+
 
 interface MyPluginSettings {
     mySetting: string;
@@ -64,19 +85,37 @@ export default class MyPlugin extends Plugin {
           id: 'zhihu-login-qrcode',
           name: 'Zhihu login',
           editorCallback: async (editor: Editor, view: MarkdownView) => {
-            const loginLink = await this.getLoginLink();
+            const login = await this.getLoginLink();
             await this.captchaSignIn();
-            const modal = new QRCodeModal(this.app, loginLink);
+            const modal = new QRCodeModal(this.app, login.link);
             modal.open()
-            // const scanStatus = await this.fetchQRcodeStatus();
+            let token = login.token
             const interval = setInterval(async () => {
-              const scanStatus = await this.fetchQRcodeStatus();
-              if (scanStatus === 1) {
-                clearInterval(interval);
-                new Notice('扫码成功！');
-                modal.close();
-              }
-            }, 2000); // 每5秒检查一次扫码状态
+                const response = await this.fetchQRcodeStatus(token);
+                const res = response!.json
+                if ('status' in res) {
+                    if (res.status === 1) {
+                        modal.showSuccess();
+                    } else if (res.status === 5) {
+                        if (res.new_token) {
+                            const newToken = res.new_token.Token
+                            const newLink = this.loginLinkBuilder(newToken)
+                            modal.updateQRCode(newLink);
+                            token = newToken
+                            new Notice("二维码已更新")
+                        }
+                    }
+                } else {
+                    const data = await this.loadData();
+                    const cookies = data?.cookies
+                    const zc0_cookie = this.getCookiesFromHeader(response)
+                    await this.updateData({ cookies: [...cookies, ...zc0_cookie] });
+                    await this.updateData({ bearer: res });
+                    new Notice('获取z_c0 cookie成功')
+                    modal.close()
+                    clearInterval(interval);
+                }
+            }, 2000);
           }
         });
 
@@ -151,7 +190,7 @@ export default class MyPlugin extends Plugin {
                 method: "GET",
             });
             let cookies: string[];
-            cookies = this.getCookiesFromHeader([], response)
+            cookies = this.getCookiesFromHeader(response)
             new Notice('获取初始cookies成功')
             await this.updateData({ cookies: cookies });
         } catch (error) {
@@ -161,7 +200,7 @@ export default class MyPlugin extends Plugin {
     async signInNext() {
         try {
             const data = await this.loadData();
-            let cookies = data?.cookies
+            const cookies = data?.cookies
             const cookiesHeader = cookies?.join(' ') ?? '';
             const response = await requestUrl({
                 url: "https://www.zhihu.com/signin?next=%2F",
@@ -193,7 +232,7 @@ export default class MyPlugin extends Plugin {
     async initUdidCookies() {
         try {
             const data = await this.loadData();
-            let cookies = data?.cookies
+            const cookies = data?.cookies
             const cookiesHeader = cookies?.join(' ') ?? '';
             const xsrfCookie = await this.selectCookies(['_xsrf'])
             const xsrftoken = this.extractToken(xsrfCookie[0])
@@ -219,9 +258,9 @@ export default class MyPlugin extends Plugin {
                 },
                 method: "POST",
             });
-            cookies = this.getCookiesFromHeader(cookies, response)
+            const udid_cookies = this.getCookiesFromHeader(response)
             new Notice('获取UDID成功')
-            await this.updateData({ cookies: cookies });
+            await this.updateData({ cookies: [...cookies, ...udid_cookies]});
         } catch (error) {
             new Notice(`获取UDID失败：${error}`)
         }
@@ -290,7 +329,7 @@ export default class MyPlugin extends Plugin {
             });
             new Notice('获取登录链接成功')
             await this.updateData({ login: response.json });
-            return response.json.link
+            return response.json
         } catch (error) {
             new Notice(`获取登录链接失败：${error}`)
         }
@@ -299,7 +338,7 @@ export default class MyPlugin extends Plugin {
     async captchaSignIn() {
         try {
             const data = await this.loadData();
-            let cookies = data?.cookies
+            const cookies = data?.cookies
             const cookiesHeader = cookies?.join(' ') ?? '';
             const response = await requestUrl({
                 url: "https://www.zhihu.com/api/v3/oauth/captcha/v2?type=captcha_sign_in",
@@ -320,59 +359,54 @@ export default class MyPlugin extends Plugin {
                 method: "GET",
             });
             console.log(response)
-            cookies = this.getCookiesFromHeader(cookies, response)
+            const cap_cookies = this.getCookiesFromHeader(response)
             new Notice('获取captcha_session_v2成功')
-            await this.updateData({ cookies: cookies });
+            await this.updateData({ cookies: [...cookies, ...cap_cookies]});
         } catch (error) {
             new Notice(`获取captcha_session_v2失败:${error}`)
         }
     }
 
-    async zbstEvents() {
-        try {
-            const data = await this.loadData();
-            let cookies = data?.cookies
-            const cookiesHeader = cookies?.join(' ') ?? '';
-            const response = await requestUrl({
-                url: "https://www.zhihu.com/zbst/events/r",
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0',
-                    'Accept-Encoding': 'gzip, deflate, br, zstd',
-                    'Content-Type': 'text/plain; text/plain;charset=UTF-8',
-                    'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
-                    'Referer': 'https://www.zhihu.com/no-referrer',
-                    'x-requested-with': 'fetch',
-                    'x-zse-83': '3_2.0',
-                    'Origin': 'https://www.zhihu.com',
-                    'DNT': '1',
-                    'Sec-GPC': '1',
-                    'Sec-Fetch-Dest': 'empty',
-                    'Sec-Fetch-Mode': 'cors',
-                    'Sec-Fetch-Site': 'same-origin',
-                    'Priority': 'u=4',
-                    'Cache-Control': 'max-age=0',
-                    'Cookie': cookiesHeader
-                },
-                method: "GET",
-            });
-            cookies = this.getCookiesFromHeader(cookies, response)
-            new Notice('获取captcha_session_v2成功')
-            await this.updateData({ cookies: cookies });
-        } catch (error) {
-            new Notice(`获取captcha_session_v2失败:${error}`)
-        }
-    }
+    // async zbstEvents() {
+    //     try {
+    //         const data = await this.loadData();
+    //         let cookies = data?.cookies
+    //         const cookiesHeader = cookies?.join(' ') ?? '';
+    //         const response = await requestUrl({
+    //             url: "https://www.zhihu.com/zbst/events/r",
+    //             headers: {
+    //                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0',
+    //                 'Accept-Encoding': 'gzip, deflate, br, zstd',
+    //                 'Content-Type': 'text/plain; text/plain;charset=UTF-8',
+    //                 'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+    //                 'Referer': 'https://www.zhihu.com/no-referrer',
+    //                 'x-requested-with': 'fetch',
+    //                 'x-zse-83': '3_2.0',
+    //                 'Origin': 'https://www.zhihu.com',
+    //                 'DNT': '1',
+    //                 'Sec-GPC': '1',
+    //                 'Sec-Fetch-Dest': 'empty',
+    //                 'Sec-Fetch-Mode': 'cors',
+    //                 'Sec-Fetch-Site': 'same-origin',
+    //                 'Priority': 'u=4',
+    //                 'Cache-Control': 'max-age=0',
+    //                 'Cookie': cookiesHeader
+    //             },
+    //             method: "GET",
+    //         });
+    //         cookies = this.getCookiesFromHeader(cookies, response)
+    //         await this.updateData({ cookies: cookies });
+    //     } catch (error) {
+    //         new Notice(`获取captcha_session_v2失败:${error}`)
+    //     }
+    // }
 
-    async fetchQRcodeStatus() {
+    async fetchQRcodeStatus(token: string) {
         try {
             const data = await this.loadData();
             const cookies = data?.cookies
-            const QRCodeToken = data?.login?.token
             const cookiesHeader = cookies?.join(' ') ?? '';
-            const url = `https://www.zhihu.com/api/v3/account/api/login/qrcode/${QRCodeToken}/scan_info`
-            console.log("QRCodeToken:", QRCodeToken);
-            console.log("URL:", url);
-            console.log("CookiesHeader:", cookiesHeader);
+            const url = `https://www.zhihu.com/api/v3/account/api/login/qrcode/${token}/scan_info`
             const response = await requestUrl({
                 url: url,
                 headers: {
@@ -391,11 +425,10 @@ export default class MyPlugin extends Plugin {
                 method: "GET",
             });
             new Notice(`扫描状态: ${response.json.status}`)
-            // new Notice(response.json.error.message)
-            return response.json.status
+            return response
         } catch (error) {
             console.log(error)
-            new Notice(`获取扫描状态失败${error}`)
+            new Notice(`获取扫描状态失败: ${error}`)
         }
     }
 
@@ -409,10 +442,6 @@ export default class MyPlugin extends Plugin {
         });
 
         return selectedCookies;
-    }
-
-    onunload() {
-
     }
 
     async loadSettings() {
@@ -429,7 +458,7 @@ export default class MyPlugin extends Plugin {
       await this.saveData(newData);
     }
 
-    getCookiesFromHeader(cookies: string[], response: any): string[] {
+    getCookiesFromHeader(response: any): string[] {
         let new_cookies: string[] = [];
         const res_cookies = response.headers['set-cookie'];
         if (Array.isArray(res_cookies)) {
@@ -441,7 +470,7 @@ export default class MyPlugin extends Plugin {
             const match = cookie.match(/^[^;]+;/);
             return match ? match[0] : '';
         }).filter(Boolean);
-        return [...cookies, ...new_cookies];
+        return new_cookies;
     }
 
     extractToken(str: string): string {
@@ -451,6 +480,14 @@ export default class MyPlugin extends Plugin {
             return valueWithSemicolon.slice(0, -1);  // 去除末尾的 ";"
         }
         return "";
+    }
+
+    loginLinkBuilder(token: string): string {
+        return `https://www.zhihu.com/account/scan/login/${token}?/api/login/qrcode`
+    }
+
+    onunload() {
+
     }
 }
 
