@@ -519,9 +519,9 @@ class SampleSettingTab extends PluginSettingTab {
     }
 }
 
-function toCurl({ url, headers }: { url: string, headers: Record<string, string> }) {
+function toCurl({ url, headers }: { url: string, method: string, headers: Record<string, string> }) {
   const headerStr = Object.entries(headers)
     .map(([key, value]) => `-H '${key}: ${value}'`)
     .join(' \\\n  ');
-  return `curl -X GET '${url}' \\\n  ${headerStr}`;
+  return `curl -X ${method} '${url}' \\\n  ${headerStr}`;
 }
