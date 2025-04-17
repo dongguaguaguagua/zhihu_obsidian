@@ -1,6 +1,12 @@
 import { App, TFile, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, requestUrl } from 'obsidian';
 import QRCode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
+import { marked, Renderer, Tokens } from 'marked';
+// import MarkdownIt from 'markdown-it';
+
+marked.setOptions({
+    breaks: true
+});
 
 class QRCodeModal extends Modal {
   private link: string;
@@ -232,14 +238,18 @@ export default class ZhihuObPlugin extends Plugin {
         new Notice("Zhihu on obsidian要求必须添加话题")
         return;
       }
+      // 这里链接属性缺失或者为空，都表明未发表文章
       const isPublished = typeof frontmatter.link !== "undefined" && frontmatter.link !== null;
+      const title = frontmatter.title || "untitled";
       const toc = false;
-
+      const rawContent = await app.vault.read(activeFile);
+      const content = removeFrontmatter(rawContent)
+      const zhihuHTML = await mdToZhihuHTML(content)
+      console.log(content)
+      console.log(zhihuHTML)
       if (!isPublished) {
-        const title = frontmatter.title || "untitled";
         const id = await this.newDraft(title);
-        const content = await app.vault.read(activeFile);
-        await this.patchDraft(id, title, content, toc);
+        await this.patchDraft(id, title, zhihuHTML, toc);
 
         for (const topic of topics) {
           try {
@@ -251,12 +261,31 @@ export default class ZhihuObPlugin extends Plugin {
             console.error(`Error auto-completing topic for tag "${topic}":`, err);
           }
         }
-
-        const publishResult = await this.publishDraft(id, toc);
+        const publishResult = await this.publishDraft(id, toc, false);
+        new Notice(`发布文章成功!`)
         const url = publishResult.publish.url
         if (url) {
             await addFrontmatter(app, activeFile, "link", url);
         }
+      } else {
+        if (!isZhihuArticleLink(frontmatter.link)) {
+            new Notice("link属性不是知乎文章链接")
+            return;
+        }
+        const id = frontmatter.link.replace("https://zhuanlan.zhihu.com/p/", "")
+        await this.patchDraft(id, title, zhihuHTML, toc);
+        for (const topic of topics) {
+          try {
+            const res = await this.autoCompleteTopic(id, topic);
+            if (Array.isArray(res) && res.length > 0) {
+              await this.topics2Draft(id, res[0]);
+            }
+          } catch (err) {
+            console.error(`Error auto-completing topic for tag "${topic}":`, err);
+          }
+        }
+        const publishResult = await this.publishDraft(id, toc, true);
+        new Notice("更新文章成功！")
       }
     }
 
@@ -744,7 +773,7 @@ export default class ZhihuObPlugin extends Plugin {
         }
     }
 
-    async publishDraft(id: string, toc: boolean) {
+    async publishDraft(id: string, toc: boolean, isPublished: boolean) {
         try {
             const data = await this.loadData();
             const cookiesHeader = await this.cookiesHeaderBuilder(["_zap", "_xsrf", "BEC", "d_c0", "captcha_session_v2", "z_c0", "q_c1"])
@@ -791,7 +820,7 @@ export default class ZhihuObPlugin extends Plugin {
                         "canReward":false\
                     }`
                 },
-                'draft': {'disabled': 1,'id': id,'isPublished': false},
+                'draft': {'disabled': 1,'id': id,'isPublished': isPublished},
                 'commentsPermission': {'comment_permission': 'anyone'},
                 'creationStatement': {'disclaimer_type': 'none','disclaimer_status': 'close'},
                 'contentsTables': {'table_of_contents_enabled': toc},
@@ -802,7 +831,6 @@ export default class ZhihuObPlugin extends Plugin {
               })
             });
             if (response.json.message === "success"){
-                new Notice(`发布文章成功!`)
                 const result = JSON.parse(response.json.data.result)
                 return result
             }
@@ -1017,3 +1045,53 @@ async function updateFrontmatter(app: App, file: TFile, key: string, value: stri
   }
 }
 
+function removeFrontmatter(content: string) {
+    return content.replace(/^---\n[\s\S]*?\n---\n*/, '');
+}
+
+function isZhihuArticleLink(link: string): boolean {
+  const pattern = /^https:\/\/zhuanlan\.zhihu\.com\/p\/\d+$/;
+  return pattern.test(link);
+}
+
+async function mdToZhihuHTML(md: string): Promise<string> {
+  // 处理行间公式 $$...$$
+  md = md.replace(/\$\$([^$]+)\$\$/g, (_match, eq) => {
+    eq = eq.replace(/[\n\r]/g, "")
+    const encoded = encodeURI(eq);
+    return `<img eeimg="1" src="//www.zhihu.com/equation?tex=${encoded}" alt="${eq}"/>`;
+  });
+
+  // 处理行内公式 $...$
+  md = md.replace(/([^\\])\$([^$\n]+?)\$/g, (_match, prefix, eq) => {
+    eq = eq.replace(/[\n\r]/g, "")
+    const encoded = encodeURI(eq);
+    return `${prefix}<img eeimg="1" src="//www.zhihu.com/equation?tex=${encoded}" alt="${eq}"/>`;
+  });
+
+  const renderer: Partial<Renderer> = {
+    code({ text, lang }: { text: string; lang?: string }) {
+      const language = lang || '';
+      return `<pre lang="${language}">${text.trim()}</pre>`;
+    },
+    table(token: Tokens.Table) {
+      const thead = `<tr>${token.header.map((cell: Tokens.TableCell) => this.tablecell(cell)).join('')}</tr>`;
+      const tbody = token.rows.map((row: Tokens.TableCell[]) => {
+        const rowToken = { text: row } as unknown as Tokens.TableRow;
+        return this.tablerow(rowToken);
+      }).join('\n');
+      return `<table data-draft-node="block" data-draft-type="table" data-size="normal">\n<tbody>${thead}\n${tbody}\n</tbody>\n</table>`;
+    },
+    tablerow(token: Tokens.TableRow) {
+      // Treat token.text as TableCell[] instead of string
+      const cells = (token.text as unknown as Tokens.TableCell[]).map((cell: Tokens.TableCell) => this.tablecell(cell));
+      return `<tr>${cells.join('')}</tr>`;
+    },
+    tablecell(token: Tokens.TableCell) {
+      // Use token.header to determine if it's a header cell
+      return token.header ? `<th>${token.text}</th>` : `<td>${token.text}</td>`;
+    },
+  };
+  marked.use({ renderer });
+  return await marked(md);
+}

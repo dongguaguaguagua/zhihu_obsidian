@@ -12,6 +12,7 @@
 	"author": "",
 	"license": "MIT",
 	"devDependencies": {
+		"@types/markdown-it": "^14.1.2",
 		"@types/node": "^16.11.6",
 		"@types/qrcode": "^1.5.5",
 		"@types/uuid": "^10.0.0",
@@ -24,6 +25,8 @@
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
+		"markdown-it": "^14.1.0",
+		"marked": "^15.0.8",
 		"qrcode": "^1.5.4",
 		"uuid": "^11.1.0"
 	}
