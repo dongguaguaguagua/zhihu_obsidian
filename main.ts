@@ -68,15 +68,11 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
     mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
+export default class ZhihuObPlugin extends Plugin {
     settings: MyPluginSettings;
 
     async onload() {
         await this.loadSettings();
-        await this.initCookies();
-        await this.signInNext();
-        await this.initUdidCookies();
-        await this.scProfiler();
 
         // This creates an icon in the left ribbon.
         this.addRibbonIcon('dice', '生成知乎二维码登录', async () => {
@@ -92,7 +88,11 @@ export default class MyPlugin extends Plugin {
         this.addCommand({
           id: 'zhihu-login-qrcode',
           name: 'Zhihu login',
-          editorCallback: async (editor: Editor, view: MarkdownView) => {
+          callback: async () => {
+            await this.initCookies();
+            await this.signInNext();
+            await this.initUdidCookies();
+            await this.scProfiler();
             const login = await this.getLoginLink();
             await this.captchaSignIn();
             const modal = new QRCodeModal(this.app, login.link);
@@ -120,6 +120,9 @@ export default class MyPlugin extends Plugin {
                     await this.updateData({ cookies: zc0_cookie });
                     await this.updateData({ bearer: res });
                     new Notice('获取z_c0 cookie成功')
+                    await this.signInZhihu();
+                    await this.prodTokenRefresh();
+                    await this.getUserInfo();
                     modal.close()
                     clearInterval(interval);
                 }
@@ -208,6 +211,7 @@ export default class MyPlugin extends Plugin {
             new Notice(`获取初始cookies失败：${error}`)
         }
     }
+
     async signInNext() {
         try {
             const data = await this.loadData();
@@ -237,6 +241,7 @@ export default class MyPlugin extends Plugin {
         }
     }
 
+    // 可获得cookie d_c0
     async initUdidCookies() {
         try {
             const data = await this.loadData();
@@ -336,6 +341,7 @@ export default class MyPlugin extends Plugin {
         }
     }
 
+    // 可获得cookie captcha_session_v2
     async captchaSignIn() {
         try {
             const cookiesHeader = await this.cookiesHeaderBuilder(["_zap", "_xsrf", "BEC", "d_c0"])
@@ -366,6 +372,7 @@ export default class MyPlugin extends Plugin {
         }
     }
 
+    // 可获得z_c0 cookie，这是身份识别的重要凭证
     async fetchQRcodeStatus(token: string) {
         try {
             const data = await this.loadData();
@@ -393,6 +400,113 @@ export default class MyPlugin extends Plugin {
         } catch (error) {
             console.log(error)
             new Notice(`获取扫描状态失败: ${error}`)
+        }
+    }
+
+    // 成功请求可获得 3个BEC cookie，和q_c1 cookie
+    // 3个BEC cookies中，通常用最后一个进行下一步请求, 即token refresh
+    async signInZhihu() {
+        try {
+            const cookiesHeader = await this.cookiesHeaderBuilder(["_zap", "_xsrf", "BEC", "d_c0", "captcha_session_v2", "z_c0"])
+            const response = await requestUrl({
+                url: `https://www.zhihu.com`,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0',
+                    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                    'Accept-Encoding': 'gzip, deflate, br, zstd',
+                    'accept-language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+                    'referer': 'https://www.zhihu.com/signin?next=%2F',
+                    'dnt': '1',
+                    'sec-gpc': '1',
+                    'upgrade-insecure-requests': '1',
+                    'sec-fetch-dest': 'document',
+                    'sec-fetch-mode': 'navigate',
+                    'sec-fetch-site': 'same-origin',
+                    'priority': 'u=0, i',
+                    // 'te': 'trailers',
+                    'Cookie': cookiesHeader
+                },
+                method: "GET",
+            });
+            const new_cookies = this.getCookiesFromHeader(response)
+            new Notice(`获取q_c1 cookie成功`)
+            await this.updateData({ cookies: new_cookies});
+            return response
+        } catch (error) {
+            console.log(error)
+            new Notice(`获取q_c1 cookie失败: ${error}`)
+        }
+    }
+
+    // 这里响应头的BEC会用于commercial API，所以不会存储
+    async prodTokenRefresh() {
+        try {
+            const cookiesHeader = await this.cookiesHeaderBuilder(["_zap", "_xsrf", "BEC", "d_c0", "captcha_session_v2", "z_c0", "q_c1"])
+            const response = await requestUrl({
+                url: `https://www.zhihu.com/api/account/prod/token/refresh`,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0',
+                    'Accept-Encoding': 'gzip, deflate, br, zstd',
+                    'accept-language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+                    'referer': 'https://www.zhihu.com/',
+                    'x-requested-with': 'fetch',
+                    'origin': 'https://www.zhihu.com',
+                    'dnt': '1',
+                    'sec-gpc': '1',
+                    'sec-fetch-dest': 'empty',
+                    'sec-fetch-mode': 'cors',
+                    'sec-fetch-site': 'same-origin',
+                    'priority': 'u=4',
+                    // 'te': 'trailers',
+                    'Cookie': cookiesHeader
+                },
+                method: "POST",
+            });
+            // const new_cookies = this.getCookiesFromHeader(response)
+            // console.log("new cookies:", new_cookies)
+            new Notice(`访问prod/token/refresh成功`)
+            // await this.updateData({ cookies: new_cookies});
+        } catch (error) {
+            console.log(error)
+            new Notice(`访问prod/token/refresh失败: ${error}`)
+        }
+    }
+
+    // 这里得到的BEC才会被用于后续请求。
+    async getUserInfo() {
+        try {
+            const cookiesHeader = await this.cookiesHeaderBuilder(["_zap", "_xsrf", "BEC", "d_c0", "captcha_session_v2", "z_c0", "q_c1"])
+            const response = await requestUrl({
+                url: `https://www.zhihu.com/api/v4/me?include=is_realname`,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0',
+                    'Accept-Encoding': 'gzip, deflate, br, zstd',
+                    'accept-language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+                    'referer': 'https://www.zhihu.com/',
+                    'x-requested-with': 'fetch',
+                    'x-zse-93': '101_3_3.0',
+                    // 'x-zse-96': '2.0_uomb2nYm99nKWMHwGgFO3jv3IaI27H1sOu7Hok/0M/oD=+VeYt0cQgS7=ddu+mT/',
+                    // 'dnt': '1',
+                    // 'sec-gpc': '1',
+                    // 'sec-fetch-dest': 'empty',
+                    // 'sec-fetch-mode': 'cors',
+                    // 'sec-fetch-site': 'same-origin',
+                    // 'priority': 'u=4',
+                    // 'te': 'trailers',
+                    'Cookie': cookiesHeader
+                },
+                method: "GET",
+            });
+            const new_BEC = this.getCookiesFromHeader(response)
+            const userInfo = response.json
+            console.log("new BEC:", new_BEC)
+            // new Notice(`获取用户信息成功成功`)
+            new Notice(`欢迎！知乎用户：`, userInfo.name)
+            await this.updateData({ cookies: new_BEC});
+            await this.updateData({ userInfo: userInfo});
+        } catch (error) {
+            console.log(error)
+            new Notice(`获取用户信息成功失败: ${error}`)
         }
     }
 
@@ -494,9 +608,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-    plugin: MyPlugin;
+    plugin: ZhihuObPlugin;
 
-    constructor(app: App, plugin: MyPlugin) {
+    constructor(app: App, plugin: ZhihuObPlugin) {
         super(app, plugin);
         this.plugin = plugin;
     }
@@ -519,7 +633,7 @@ class SampleSettingTab extends PluginSettingTab {
     }
 }
 
-function toCurl({ url, headers }: { url: string, method: string, headers: Record<string, string> }) {
+function toCurl({ url, method, headers }: { url: string, method: string, headers: Record<string, string> }) {
   const headerStr = Object.entries(headers)
     .map(([key, value]) => `-H '${key}: ${value}'`)
     .join(' \\\n  ');
