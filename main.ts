@@ -1,7 +1,12 @@
-import { App, TFile, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, requestUrl } from 'obsidian';
+import { App, TFile, Editor, FileSystemAdapter, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting, requestUrl, request } from 'obsidian';
 import QRCode from 'qrcode';
 import { v4 as uuidv4 } from 'uuid';
 import { marked, Renderer, Tokens } from 'marked';
+import * as fs from 'fs';
+import * as path from "path";
+import * as crypto from "crypto";
+import { fileTypeFromBuffer } from 'file-type';
+
 // import MarkdownIt from 'markdown-it';
 
 marked.setOptions({
@@ -244,11 +249,12 @@ export default class ZhihuObPlugin extends Plugin {
       const toc = false;
       const rawContent = await app.vault.read(activeFile);
       const content = removeFrontmatter(rawContent)
-      const zhihuHTML = await mdToZhihuHTML(content)
-      console.log(content)
-      console.log(zhihuHTML)
+
       if (!isPublished) {
         const id = await this.newDraft(title);
+        const transedImgContent = await this.transImgToZhihuLink(id, content)
+        const zhihuHTML = await mdToZhihuHTML(transedImgContent)
+        console.log(zhihuHTML)
         await this.patchDraft(id, title, zhihuHTML, toc);
 
         for (const topic of topics) {
@@ -273,6 +279,9 @@ export default class ZhihuObPlugin extends Plugin {
             return;
         }
         const id = frontmatter.link.replace("https://zhuanlan.zhihu.com/p/", "")
+        const transedImgContent = await this.transImgToZhihuLink(id, content)
+        const zhihuHTML = await mdToZhihuHTML(transedImgContent)
+        console.log(zhihuHTML)
         await this.patchDraft(id, title, zhihuHTML, toc);
         for (const topic of topics) {
           try {
@@ -838,6 +847,193 @@ export default class ZhihuObPlugin extends Plugin {
             console.log(error)
             new Notice(`发布文章失败: ${error}`)
         }
+    }
+
+    async getImgIdFromHash(id: string, imgHash: string) {
+        try {
+            const data = await this.loadData();
+            const cookiesHeader = await this.cookiesHeaderBuilder(["_zap", "_xsrf", "BEC", "d_c0", "captcha_session_v2", "z_c0"])
+            const response = await requestUrl({
+                url: `https://api.zhihu.com/images`,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'accept-language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+                    // 'referer': `https://zhuanlan.zhihu.com/p/${id}/edit`,
+                    // 'origin': 'https://zhuanlan.zhihu.com',
+                    // 'dnt': '1',
+                    // 'sec-gpc': '1',
+                    // 'sec-fetch-dest': 'empty',
+                    // 'sec-fetch-mode': 'cors',
+                    // 'sec-fetch-site': 'same-site',
+                    // 'priority': 'u=4',
+                    'Cookie': cookiesHeader
+                },
+                method: "POST",
+                body: JSON.stringify({
+                    'image_hash': imgHash,
+                    'source': 'article'
+                })
+            });
+            new Notice(`获取图片id成功`)
+            return response.json
+        } catch (error) {
+            console.log(error)
+            new Notice(`获取图片id失败: ${error}`)
+        }
+    }
+
+    async uploadImg(imgHash: string, imgLink: string, uploadToken: any) {
+        try {
+            const imgBuffer = fs.readFileSync(imgLink);
+            const arrayBuffer = imgBuffer.buffer.slice(imgBuffer.byteOffset, imgBuffer.byteOffset + imgBuffer.byteLength);
+            const fileType = await fileTypeFromBuffer(imgBuffer);
+            if (!fileType) throw new Error("无法识别文件类型");
+            const mimeType = fileType.mime;
+            console.log("文件类型:", mimeType)
+            console.log("文件大小:", imgBuffer.length);
+            const requestTime = Date.now()
+            const UTCDate = new Date(requestTime).toUTCString();
+            const ua = 'aliyun-sdk-js/6.8.0 Firefox 137.0 on OS X 10.15';
+            const stringToSign = this.stringToSignBuilder(
+                mimeType,
+                UTCDate,
+                uploadToken.access_token,
+                ua,
+                imgHash
+            )
+            const signature = await this.calculateSignature(
+                uploadToken.access_key,
+                stringToSign
+            )
+            const request = {
+                url: `https://zhihu-pics-upload.zhimg.com/v2-${imgHash}`,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0',
+                    'Accept-Encoding': 'gzip, deflate, br, zstd',
+                    'Content-Type': mimeType,
+                    'Accept-Language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+                    'x-oss-date': UTCDate,
+                    'x-oss-user-agent': ua,
+                    'x-oss-security-token': uploadToken.access_token,
+                    'authorization': `OSS ${uploadToken.access_id}:${signature}`,
+                    // 'Origin': 'https://zhuanlan.zhihu.com',
+                    // 'DNT': '1',
+                    // 'Sec-GPC': '1',
+                    // 'Referer': 'https://zhuanlan.zhihu.com/',
+                    // 'Sec-Fetch-Dest': 'empty',
+                    // 'Sec-Fetch-Mode': 'cors',
+                    // 'Sec-Fetch-Site': 'cross-site'
+                },
+                method: "PUT",
+                body: arrayBuffer
+            };
+            const response = await requestUrl(request);
+            new Notice("上传图片成功");
+        } catch (error) {
+            new Notice(`上传图片失败:${error}`);
+        }
+    }
+
+    async fetchImgStatus(id: string, imgId: string) {
+        try {
+            const data = await this.loadData();
+            const cookiesHeader = await this.cookiesHeaderBuilder(["_zap", "_xsrf", "BEC", "d_c0", "captcha_session_v2", "z_c0"])
+            const response = await requestUrl({
+                url: `https://api.zhihu.com/images/${imgId}`,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0',
+                    'Accept-Encoding': 'gzip, deflate, br, zstd',
+                    'accept-language': 'zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2',
+                    // 'referer': `https://zhuanlan.zhihu.com/p/${id}/edit`,
+                    // 'content-type': 'application/json',
+                    // 'origin': 'https://zhuanlan.zhihu.com',
+                    // 'dnt': '1',
+                    // 'sec-gpc': '1',
+                    // 'sec-fetch-dest': 'empty',
+                    // 'sec-fetch-mode': 'cors',
+                    // 'sec-fetch-site': 'same-site',
+                    // 'priority': 'u=4',
+                    // 'te': 'trailers',
+                    'Cookie': cookiesHeader
+                },
+                method: "GET"
+            });
+            new Notice(`获取图片status成功`)
+            return response.json
+        } catch (error) {
+            console.log(error)
+            new Notice(`获取图片status失败: ${error}`)
+        }
+    }
+
+    async transImgToZhihuLink(id: string, md: string): Promise<string> {
+        const adapter = this.app.vault.adapter;
+        if (!(adapter instanceof FileSystemAdapter)) {
+          throw new Error("Vault is not using a local file system adapter.");
+        }
+        const vaultBasePath = adapter.getBasePath();
+        const matches = [...md.matchAll(/\!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
+        for (const match of matches) {
+          const [fullMatch, imgName, caption] = match;
+          const imgLink = path.resolve(vaultBasePath, imgName);
+          if (!fs.existsSync(imgLink)) {
+            console.warn(`Image not found: ${imgLink}`);
+            return `<p><em>Image not found: ${imgName}</em></p>`;
+          }
+
+          const imgBuffer = fs.readFileSync(imgLink);
+          const hash = crypto.createHash('md5').update(imgBuffer).digest('hex');
+          const alt = caption || path.basename(imgName);
+          const getImgIdRes = await this.getImgIdFromHash(id, hash);
+          const imgId = getImgIdRes.upload_file.image_id;
+          const imgState = getImgIdRes.upload_file.state;
+          const uploadToken = getImgIdRes.upload_token;
+          console.log("img state:", imgState);
+          console.log("img hash:", hash)
+
+          if (imgState === 2) {
+            await this.uploadImg(hash, imgLink, uploadToken);
+          }
+          // const imgStatus = await new Promise<any>((resolve, reject) => {
+          //   const interval = setInterval(async () => {
+          //     try {
+          //       const status = await this.fetchImgStatus(id, imgId);
+          //       console.log("轮询中:", status);
+          //       if (status.status === "success") {
+          //         clearInterval(interval);
+          //         resolve(status);
+          //       }
+          //     } catch (err) {
+          //       clearInterval(interval);
+          //       reject(err);
+          //     }
+          //   }, 1000);
+          // });
+
+          const zhihuImgStr = `\
+<img src="https://picx.zhimg.com/v2-${hash}" \
+data-caption="${alt}" \
+data-size="normal" \
+data-watermark="watermark" \
+data-original-src="https://picx.zhimg.com/v2-${hash}" \
+data-watermark-src="" \
+data-private-watermark-src=""/>`;
+          md = md.replace(fullMatch, zhihuImgStr);
+        }
+        console.log(md)
+        return md
+    }
+
+    stringToSignBuilder(mimeType: string, date: string, securityToken: string, ua: string, imgHash: string) : string {
+        const stringToSign = `PUT\n\n${mimeType}\n${date}\nx-oss-date:${date}\nx-oss-security-token:${securityToken}\nx-oss-user-agent:${ua}\n/zhihu-pics/v2-${imgHash}`
+        return stringToSign
+    }
+
+    async calculateSignature(accessKeySecret: string, stringToSign: string): Promise<string> {
+      const hmac = crypto.createHmac('sha1', accessKeySecret);
+      hmac.update(stringToSign);
+      const signature = hmac.digest('base64');
+      return signature;
     }
 
     async cookiesHeaderBuilder(keys: string[]): Promise<string> {
