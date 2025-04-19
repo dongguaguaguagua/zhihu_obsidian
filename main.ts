@@ -200,7 +200,7 @@ export default class ZhihuObPlugin extends Plugin {
 		let token = login.token;
 		const interval = setInterval(async () => {
 			const response = await this.fetchQRcodeStatus(token);
-			const res = response!.json;
+			const res = response?.json;
 			if ("status" in res) {
 				if (res.status === 1) {
 					modal.showSuccess();
@@ -214,8 +214,6 @@ export default class ZhihuObPlugin extends Plugin {
 					}
 				}
 			} else {
-				const data = await this.loadData();
-				const cookies = data?.cookies;
 				const zc0_cookie = this.getCookiesFromHeader(response);
 				await this.updateData({ cookies: zc0_cookie });
 				await this.updateData({ bearer: res });
@@ -360,7 +358,6 @@ export default class ZhihuObPlugin extends Plugin {
 
 	async signInNext() {
 		try {
-			const data = await this.loadData();
 			const cookiesHeader = await this.cookiesHeaderBuilder([
 				"_zap",
 				"_xsrf",
@@ -553,7 +550,6 @@ export default class ZhihuObPlugin extends Plugin {
 	// 可获得z_c0 cookie，这是身份识别的重要凭证
 	async fetchQRcodeStatus(token: string) {
 		try {
-			const data = await this.loadData();
 			const cookiesHeader = await this.cookiesHeaderBuilder([
 				"_zap",
 				"_xsrf",
@@ -830,7 +826,6 @@ export default class ZhihuObPlugin extends Plugin {
 
 	async autoCompleteTopic(id: string, topic: string) {
 		try {
-			const data = await this.loadData();
 			const cookiesHeader = await this.cookiesHeaderBuilder([
 				"_zap",
 				"_xsrf",
@@ -839,7 +834,6 @@ export default class ZhihuObPlugin extends Plugin {
 				"captcha_session_v2",
 				"z_c0",
 			]);
-			const xsrftoken = data.cookies._xsrf;
 			const response = await requestUrl({
 				url: encodeURI(
 					`https://zhuanlan.zhihu.com/api/autocomplete/topics?token=${topic}&max_matches=5&use_similar=0&topic_filter=1`,
@@ -1006,7 +1000,6 @@ export default class ZhihuObPlugin extends Plugin {
 
 	async getImgIdFromHash(id: string, imgHash: string) {
 		try {
-			const data = await this.loadData();
 			const cookiesHeader = await this.cookiesHeaderBuilder([
 				"_zap",
 				"_xsrf",
@@ -1104,7 +1097,6 @@ export default class ZhihuObPlugin extends Plugin {
 
 	async fetchImgStatus(id: string, imgId: string) {
 		try {
-			const data = await this.loadData();
 			const cookiesHeader = await this.cookiesHeaderBuilder([
 				"_zap",
 				"_xsrf",
@@ -1165,7 +1157,7 @@ export default class ZhihuObPlugin extends Plugin {
 				.digest("hex");
 			const alt = caption || path.basename(imgName);
 			const getImgIdRes = await this.getImgIdFromHash(id, hash);
-			const imgId = getImgIdRes.upload_file.image_id;
+			// const imgId = getImgIdRes.upload_file.image_id;
 			const imgState = getImgIdRes.upload_file.state;
 			const uploadToken = getImgIdRes.upload_token;
 			console.log("img state:", imgState);
