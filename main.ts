@@ -19,8 +19,6 @@ import * as path from "path";
 import * as crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
 
-// import MarkdownIt from 'markdown-it';
-
 marked.setOptions({
 	breaks: true,
 });
@@ -34,7 +32,6 @@ class QRCodeModal extends Modal {
 		super(app);
 		this.link = link;
 	}
-
 	async onOpen() {
 		const { contentEl } = this;
 		contentEl.createEl("h2", { text: "知乎登录二维码" });
@@ -121,6 +118,14 @@ export default class ZhihuObPlugin extends Plugin {
 			name: "Zhihu Publish Current FIle",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				await this.publishCurrentFile(this.app);
+			},
+		});
+
+		this.addCommand({
+			id: "create-new-zhihu-article",
+			name: "Create New Zhihu Article",
+			callback: async () => {
+				await this.createNewZhihuArticle();
 			},
 		});
 
@@ -255,74 +260,135 @@ export default class ZhihuObPlugin extends Plugin {
 			return;
 		}
 		// 这里链接属性缺失或者为空，都表明未发表文章
-		const isPublished =
-			typeof frontmatter.link !== "undefined" &&
-			frontmatter.link !== null;
+		const status = publishStatus(frontmatter.link);
 		const title = frontmatter.title || "untitled";
 		const toc = false;
 		const rawContent = await app.vault.read(activeFile);
 		const content = removeFrontmatter(rawContent);
-
-		if (!isPublished) {
-			const id = await this.newDraft(title);
-			const transedImgContent = await this.transImgToZhihuLink(
-				id,
-				content,
-			);
-			const zhihuHTML = await mdToZhihuHTML(transedImgContent);
-			console.log(zhihuHTML);
-			await this.patchDraft(id, title, zhihuHTML, toc);
-
-			for (const topic of topics) {
-				try {
-					const res = await this.autoCompleteTopic(id, topic);
-					if (Array.isArray(res) && res.length > 0) {
-						await this.topics2Draft(id, res[0]);
-					}
-				} catch (err) {
-					console.error(
-						`Error auto-completing topic for tag "${topic}":`,
-						err,
-					);
-				}
-			}
-			const publishResult = await this.publishDraft(id, toc, false);
-			new Notice(`发布文章成功!`);
-			const url = publishResult.publish.url;
-			if (url) {
-				await addFrontmatter(app, activeFile, "link", url);
-			}
-		} else {
-			if (!isZhihuArticleLink(frontmatter.link)) {
-				new Notice("link属性不是知乎文章链接");
+		// 获取文章的ID，如果未发表则新建一个。
+		let articleId = "";
+		switch (status) {
+			case 0: // 未发表
+				articleId = await this.newDraft(title);
+				break;
+			case 1: // 已发表
+				articleId = frontmatter.link.replace(
+					"https://zhuanlan.zhihu.com/p/",
+					"",
+				);
+				break;
+			case 2: // 未发表但已生成草稿
+				articleId = frontmatter.link.match(
+					/^https:\/\/zhuanlan\.zhihu\.com\/p\/(\d+)(\/edit)?$/,
+				)[1];
+				break;
+			case 3: // 无效链接
+				new Notice("无效链接！");
 				return;
-			}
-			const id = frontmatter.link.replace(
-				"https://zhuanlan.zhihu.com/p/",
-				"",
-			);
-			const transedImgContent = await this.transImgToZhihuLink(
-				id,
-				content,
-			);
-			const zhihuHTML = await mdToZhihuHTML(transedImgContent);
-			console.log(zhihuHTML);
-			await this.patchDraft(id, title, zhihuHTML, toc);
-			for (const topic of topics) {
-				try {
-					const res = await this.autoCompleteTopic(id, topic);
-					if (Array.isArray(res) && res.length > 0) {
-						await this.topics2Draft(id, res[0]);
-					}
-				} catch (err) {
-					console.error(
-						`Error auto-completing topic for tag "${topic}":`,
-						err,
-					);
+			default:
+				new Notice("未知错误");
+				break;
+		}
+		// 处理文章封面上传
+		const cover = frontmatter.cover;
+		if (!(typeof cover === "undefined" || cover === null)) {
+			const coverURL = await this.uploadCover(cover);
+			const patchBody = {
+				titleImage: coverURL,
+				isTitleImageFullScreen: false,
+				delta_time: 30,
+			};
+			console.log(coverURL);
+			await this.patchDraft(articleId, patchBody);
+			new Notice("封面上传成功！");
+		}
+		const transedImgContent = await this.transImgToZhihuLink(
+			articleId,
+			content,
+		);
+		const zhihuHTML = await mdToZhihuHTML(transedImgContent);
+		const patchBody = {
+			title: title,
+			content: zhihuHTML,
+			table_of_contents: toc,
+			delta_time: 30,
+			can_reward: false,
+		};
+		await this.patchDraft(articleId, patchBody);
+		// 文章加入话题，否则通常无法发表。话题是自动选取匹配的。
+		for (const topic of topics) {
+			try {
+				const res = await this.autoCompleteTopic(articleId, topic);
+				if (Array.isArray(res) && res.length > 0) {
+					await this.topics2Draft(articleId, res[0]);
 				}
+			} catch (err) {
+				console.error(
+					`Error auto-completing topic for tag "${topic}":`,
+					err,
+				);
 			}
-			const publishResult = await this.publishDraft(id, toc, true);
-			new Notice("更新文章成功！");
+		}
+		const publishResult = await this.publishDraft(
+			articleId,
+			toc,
+			status === 1,
+		);
+		const url = publishResult.publish.url;
+		switch (status) {
+			case 0:
+				await addFrontmatter(app, activeFile, "link", url);
+				new Notice("发布文章成功！");
+				break;
+			case 1:
+				new Notice("更新文章成功！");
+				break;
+			case 2:
+				await updateFrontmatter(app, activeFile, "link", url);
+				new Notice("发布文章成功！");
+				break;
+			default:
+				new Notice("未知错误");
+				break;
+		}
+	}
+
+	async createNewZhihuArticle() {
+		const vault = this.app.vault;
+		const workspace = this.app.workspace;
+		let fileName = "untitled";
+		let filePath = `${fileName}.md`;
+		let counter = 1;
+
+		// 检查文件是否存在，如果存在则递增数字
+		while (await vault.adapter.exists(filePath)) {
+			fileName = `untitled ${counter}`;
+			filePath = `${fileName}.md`;
+			counter++;
+		}
+
+		// 创建新文件
+		try {
+			const newFile = await vault.create(filePath, "");
+			const defaultTitle = "untitled";
+			console.log(`Created new file: ${filePath}`);
+
+			await addFrontmatter(this.app, newFile, "tags", "zhihu");
+			await addFrontmatter(this.app, newFile, "title", defaultTitle);
+			await addFrontmatter(this.app, newFile, "topics", "");
+			const articleId = await this.newDraft(defaultTitle);
+			await addFrontmatter(
+				this.app,
+				newFile,
+				"link",
+				`https://zhuanlan.zhihu.com/p/${articleId}/edit`,
+			);
+			const leaf = workspace.getLeaf(false);
+			await leaf.openFile(newFile);
+			return filePath;
+		} catch (error) {
+			console.error(`Error creating or modifying file: ${error}`);
+			throw error;
 		}
 	}
 
@@ -773,7 +839,7 @@ export default class ZhihuObPlugin extends Plugin {
 		}
 	}
 
-	async patchDraft(id: string, title: string, content: string, toc: boolean) {
+	async patchDraft(id: string, patchBody: any) {
 		try {
 			const data = await this.loadData();
 			const cookiesHeader = await this.cookiesHeaderBuilder([
@@ -809,13 +875,7 @@ export default class ZhihuObPlugin extends Plugin {
 					Cookie: cookiesHeader,
 				},
 				method: "PATCH",
-				body: JSON.stringify({
-					title: title,
-					content: content,
-					table_of_contents: toc,
-					delta_time: 30,
-					can_reward: false,
-				}),
+				body: JSON.stringify(patchBody),
 			});
 			new Notice(`patch文章成功`);
 		} catch (error) {
@@ -998,7 +1058,7 @@ export default class ZhihuObPlugin extends Plugin {
 		}
 	}
 
-	async getImgIdFromHash(id: string, imgHash: string) {
+	async getImgIdFromHash(imgHash: string) {
 		try {
 			const cookiesHeader = await this.cookiesHeaderBuilder([
 				"_zap",
@@ -1035,6 +1095,39 @@ export default class ZhihuObPlugin extends Plugin {
 		} catch (error) {
 			console.log(error);
 			new Notice(`获取图片id失败: ${error}`);
+		}
+	}
+
+	async uploadCover(cover: string) {
+		const adapter = this.app.vault.adapter;
+		if (!(adapter instanceof FileSystemAdapter)) {
+			throw new Error("Vault is not using a local file system adapter.");
+		}
+		console.log(cover);
+		const match = cover.match(/\[\[(.*?)\]\]/);
+		if (!match) {
+			new Notice("封面图片格式错误");
+			return;
+		} else {
+			const imgName = match[1];
+			const vaultBasePath = adapter.getBasePath();
+			const imgLink = path.resolve(vaultBasePath, imgName);
+			if (!fs.existsSync(imgLink)) {
+				console.warn(`Image not found: ${imgLink}`);
+				return;
+			}
+			const imgBuffer = fs.readFileSync(imgLink);
+			const hash = crypto
+				.createHash("md5")
+				.update(imgBuffer)
+				.digest("hex");
+			const getImgIdRes = await this.getImgIdFromHash(hash);
+			const imgState = getImgIdRes.upload_file.state;
+			const uploadToken = getImgIdRes.upload_token;
+			if (imgState === 2) {
+				await this.uploadImg(hash, imgLink, uploadToken);
+			}
+			return `https://picx.zhimg.com/v2-${hash}`;
 		}
 	}
 
@@ -1156,7 +1249,7 @@ export default class ZhihuObPlugin extends Plugin {
 				.update(imgBuffer)
 				.digest("hex");
 			const alt = caption || path.basename(imgName);
-			const getImgIdRes = await this.getImgIdFromHash(id, hash);
+			const getImgIdRes = await this.getImgIdFromHash(hash);
 			// const imgId = getImgIdRes.upload_file.image_id;
 			const imgState = getImgIdRes.upload_file.state;
 			const uploadToken = getImgIdRes.upload_token;
@@ -1408,7 +1501,9 @@ async function addFrontmatter(
 			);
 		}
 	} else {
-		console.warn("Frontmatter not found.");
+		const newFrontmatter = `---\n${key}: ${value}\n---\n\n${content}`;
+		await app.vault.modify(file, newFrontmatter);
+		console.log(`Created and added frontmatter: ${key}: ${value}`);
 	}
 }
 
@@ -1447,6 +1542,29 @@ function removeFrontmatter(content: string) {
 function isZhihuArticleLink(link: string): boolean {
 	const pattern = /^https:\/\/zhuanlan\.zhihu\.com\/p\/\d+$/;
 	return pattern.test(link);
+}
+
+function isZhihuDraftLink(link: string): boolean {
+	const pattern = /^https:\/\/zhuanlan\.zhihu\.com\/p\/\d+(\/edit)?$/;
+	return pattern.test(link);
+}
+
+function publishStatus(link: string): number {
+	if (typeof link === "undefined" || link === null) {
+		// 如果链接为空或者不存在link这个属性
+		// 说明未发表
+		return 0;
+	} else if (isZhihuArticleLink(link)) {
+		// 如果通过了知乎文章链接的正则匹配
+		// 说明已经发表
+		return 1;
+	} else if (isZhihuDraftLink(link)) {
+		// 如果通过了知乎草稿链接的正则匹配
+		// 说明未发布但是已生成草稿
+		return 2;
+	} else {
+		return 3;
+	}
 }
 
 async function mdToZhihuHTML(md: string): Promise<string> {
