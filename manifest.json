@@ -3,9 +3,10 @@
 	"name": "Zhihu Obsidian",
 	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
+	"description": "Enable you to publish your article to Zhihu",
 	"author": "dgg",
 	"authorUrl": "https://obsidian.md",
 	"fundingUrl": "https://obsidian.md/pricing",
+	"css": "styles.css",
 	"isDesktopOnly": false
 }

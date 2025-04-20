@@ -18,6 +18,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
+import { MentionSuggest } from "./member_mention";
 
 marked.setOptions({
 	breaks: true,
@@ -93,6 +94,7 @@ export default class ZhihuObPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+		this.registerEditorSuggest(new MentionSuggest(this.app));
 		let isUserLogin = await this.checkIsUserLogin();
 
 		// This creates an icon in the left ribbon.
@@ -298,7 +300,6 @@ export default class ZhihuObPlugin extends Plugin {
 				isTitleImageFullScreen: false,
 				delta_time: 30,
 			};
-			console.log(coverURL);
 			await this.patchDraft(articleId, patchBody);
 			new Notice("封面上传成功！");
 		}
@@ -307,6 +308,7 @@ export default class ZhihuObPlugin extends Plugin {
 			content,
 		);
 		const zhihuHTML = await mdToZhihuHTML(transedImgContent);
+		console.log(zhihuHTML);
 		const patchBody = {
 			title: title,
 			content: zhihuHTML,
@@ -1600,17 +1602,30 @@ async function mdToZhihuHTML(md: string): Promise<string> {
 			return `<table data-draft-node="block" data-draft-type="table" data-size="normal">\n<tbody>${thead}\n${tbody}\n</tbody>\n</table>`;
 		},
 		tablerow(token: Tokens.TableRow) {
-			// Treat token.text as TableCell[] instead of string
 			const cells = (token.text as unknown as Tokens.TableCell[]).map(
 				(cell: Tokens.TableCell) => this.tablecell(cell),
 			);
 			return `<tr>${cells.join("")}</tr>`;
 		},
 		tablecell(token: Tokens.TableCell) {
-			// Use token.header to determine if it's a header cell
 			return token.header
 				? `<th>${token.text}</th>`
 				: `<td>${token.text}</td>`;
+		},
+		link(token: Tokens.Link) {
+			const { href, title, text } = token;
+			// 链接卡片语法：`[GitHub](https://www.github.com "card")` 可识别为卡片
+			if (title === "card") {
+				return `<a href="${href}" data-draft-node="block" data-draft-type="link-card">${text}</a>`;
+			} else if (title && title.includes("member_mention")) {
+				const hash = title.replace("member_mention_", "");
+				const peopleId = href.replace(
+					"https://www.zhihu.com/people/",
+					"",
+				);
+				return `<a class="member_mention" href="/people/${peopleId}" data-hash="${hash}">${text}</a>`;
+			}
+			return `<a href="${href}">${text}</a>`;
 		},
 	};
 	marked.use({ renderer });

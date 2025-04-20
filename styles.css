@@ -6,3 +6,40 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+.mention-suggestion .suggestion-content {
+	display: flex;
+	align-items: center;
+}
+
+.mention-suggestion .suggestion-avatar {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	margin-right: 8px;
+}
+
+.mention-suggestion .suggestion-content span {
+	line-height: 24px;
+}
+
+/* reading mode */
+.image-embed[alt]:after {
+	content: attr(alt);
+	display: block;
+	margin: 0.2rem 1rem 1rem 1rem;
+	font-size: 90%;
+	line-height: 1.4;
+	color: var(--text-faint);
+	text-align: center;
+}
+/* source view and live preview */
+.image-embed[alt]:after {
+	content: attr(alt);
+	display: block;
+	margin: 0.2rem 1rem 1rem 1rem;
+	font-size: 90%;
+	line-height: 1.4;
+	color: var(--text-faint);
+	text-align: center;
+}
