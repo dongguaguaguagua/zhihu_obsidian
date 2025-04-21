@@ -1,16 +1,8 @@
-import {
-	App,
-	FileSystemAdapter,
-	Vault,
-	Notice,
-	Modal,
-	requestUrl,
-} from "obsidian";
+import { FileSystemAdapter, Vault, Notice, requestUrl } from "obsidian";
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
-import * as utils from "./utilities";
 import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 
@@ -75,11 +67,11 @@ export async function uploadCover(vault: Vault, cover: string) {
 		}
 		const imgBuffer = fs.readFileSync(imgLink);
 		const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
-		const getImgIdRes = await this.getImgIdFromHash(vault, hash);
+		const getImgIdRes = await getImgIdFromHash(vault, hash);
 		const imgState = getImgIdRes.upload_file.state;
 		const uploadToken = getImgIdRes.upload_token;
 		if (imgState === 2) {
-			await this.uploadImg(hash, imgLink, uploadToken);
+			await uploadImg(hash, imgLink, uploadToken);
 		}
 		return `https://picx.zhimg.com/v2-${hash}`;
 	}
@@ -100,14 +92,14 @@ async function uploadImg(imgHash: string, imgLink: string, uploadToken: any) {
 		const requestTime = Date.now();
 		const UTCDate = new Date(requestTime).toUTCString();
 		const ua = "aliyun-sdk-js/6.8.0 Firefox 137.0 on OS X 10.15";
-		const stringToSign = this.stringToSignBuilder(
+		const stringToSign = stringToSignBuilder(
 			mimeType,
 			UTCDate,
 			uploadToken.access_token,
 			ua,
 			imgHash,
 		);
-		const signature = await this.calculateSignature(
+		const signature = await calculateSignature(
 			uploadToken.access_key,
 			stringToSign,
 		);
@@ -135,7 +127,7 @@ async function uploadImg(imgHash: string, imgLink: string, uploadToken: any) {
 			method: "PUT",
 			body: arrayBuffer,
 		};
-		const response = await requestUrl(request);
+		await requestUrl(request);
 		new Notice("上传图片成功");
 	} catch (error) {
 		new Notice(`上传图片失败:${error}`);
@@ -193,7 +185,7 @@ export async function transImgToZhihuLink(
 		throw new Error("Vault is not using a local file system adapter.");
 	}
 	const vaultBasePath = adapter.getBasePath();
-	const matches = [...md.matchAll(/\!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
+	const matches = [...md.matchAll(/!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
 	for (const match of matches) {
 		const [fullMatch, imgName, caption] = match;
 		const imgLink = path.resolve(vaultBasePath, imgName);
@@ -205,7 +197,7 @@ export async function transImgToZhihuLink(
 		const imgBuffer = fs.readFileSync(imgLink);
 		const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
 		const alt = caption || path.basename(imgName);
-		const getImgIdRes = await this.getImgIdFromHash(vault, hash);
+		const getImgIdRes = await getImgIdFromHash(vault, hash);
 		// const imgId = getImgIdRes.upload_file.image_id;
 		const imgState = getImgIdRes.upload_file.state;
 		const uploadToken = getImgIdRes.upload_token;
@@ -213,12 +205,12 @@ export async function transImgToZhihuLink(
 		console.log("img hash:", hash);
 
 		if (imgState === 2) {
-			await this.uploadImg(hash, imgLink, uploadToken);
+			await uploadImg(hash, imgLink, uploadToken);
 		}
 		// const imgStatus = await new Promise<any>((resolve, reject) => {
 		//   const interval = setInterval(async () => {
 		//     try {
-		//       const status = await this.fetchImgStatus(id, imgId);
+		//       const status = await fetchImgStatus(id, imgId);
 		//       console.log("轮询中:", status);
 		//       if (status.status === "success") {
 		//         clearInterval(interval);

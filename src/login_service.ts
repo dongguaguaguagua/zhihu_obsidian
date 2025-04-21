@@ -42,7 +42,7 @@ export class QRCodeModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 
-		const successEl = contentEl.createEl("div", {
+		contentEl.createEl("div", {
 			text: "✅ 扫码成功！请在知乎app中点击确认以登录",
 		});
 	}
@@ -153,7 +153,7 @@ async function signInNext(vault: Vault) {
 			"_xsrf",
 			"BEC",
 		]);
-		const response = await requestUrl({
+		await requestUrl({
 			url: "https://www.zhihu.com/signin?next=%2F",
 			headers: {
 				"User-Agent":
@@ -229,7 +229,7 @@ async function scProfiler(vault: Vault) {
 			"_xsrf",
 			"BEC",
 		]);
-		const response = await requestUrl({
+		await requestUrl({
 			url: "https://www.zhihu.com/sc-profiler",
 			headers: {
 				"User-Agent":
@@ -436,7 +436,7 @@ async function prodTokenRefresh(vault: Vault) {
 			"z_c0",
 			"q_c1",
 		]);
-		const response = await requestUrl({
+		await requestUrl({
 			url: `https://www.zhihu.com/api/account/prod/token/refresh`,
 			headers: {
 				"User-Agent":

@@ -1,40 +1,43 @@
-import { TFile, normalizePath, Vault } from "obsidian";
-
-const DATA_PATH = "data.json";
+import { Vault } from "obsidian";
+const DATA_FILE = "zhihu-data.json";
 
 export async function loadData(vault: Vault): Promise<any> {
-	const path = normalizePath(DATA_PATH);
+	const filePath = `${vault.configDir}/${DATA_FILE}`;
 
 	try {
-		const file = vault.getAbstractFileByPath(path);
-		if (file instanceof TFile) {
-			const content = await vault.read(file);
-			return JSON.parse(content);
+		const exists = await vault.adapter.exists(filePath);
+
+		if (exists) {
+			const fileContent = await vault.adapter.read(filePath);
+			try {
+				return JSON.parse(fileContent);
+			} catch (e) {
+				console.error(`Error parsing ${DATA_FILE}:`, e);
+				return {};
+			}
 		} else {
 			const defaultData = {};
-			await vault.create(path, JSON.stringify(defaultData, null, 2));
+			await vault.adapter.write(
+				filePath,
+				JSON.stringify(defaultData, null, 2),
+			);
 			return defaultData;
 		}
 	} catch (e) {
-		console.error("Failed to load data:", e);
+		console.error(`Error accessing ${DATA_FILE}:`, e);
 		return {};
 	}
 }
 
 export async function saveData(vault: Vault, data: any): Promise<void> {
-	const path = normalizePath(DATA_PATH);
+	const filePath = `${vault.configDir}/${DATA_FILE}`;
 
 	try {
-		const file = vault.getAbstractFileByPath(path);
 		const content = JSON.stringify(data, null, 2);
-
-		if (file instanceof TFile) {
-			await vault.modify(file, content);
-		} else {
-			await vault.create(path, content);
-		}
+		await vault.adapter.write(filePath, content);
 	} catch (e) {
 		console.error("Failed to save data:", e);
+		throw e; // 可根据需求决定是否抛出错误
 	}
 }
 

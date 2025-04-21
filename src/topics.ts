@@ -1,4 +1,4 @@
-import { App, Vault, Notice, Modal, requestUrl } from "obsidian";
+import { Vault, Notice, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
 import * as cookies from "./cookies";
 

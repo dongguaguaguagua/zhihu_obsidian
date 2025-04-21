@@ -1,4 +1,4 @@
-import { App, Vault, Notice, Modal, requestUrl } from "obsidian";
+import { App, Vault, Notice, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
 import * as topicsUtil from "./topics";
 import * as fm from "./frontmatter";
@@ -236,7 +236,7 @@ async function patchDraft(vault: Vault, id: string, patchBody: any) {
 			"z_c0",
 		]);
 		const xsrftoken = data.cookies._xsrf;
-		const response = await requestUrl({
+		await requestUrl({
 			url: `https://zhuanlan.zhihu.com/api/articles/${id}/draft`,
 			headers: {
 				"User-Agent":
