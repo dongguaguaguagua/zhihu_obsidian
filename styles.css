@@ -23,7 +23,58 @@ If your plugin does not need CSS, delete this file.
 	line-height: 24px;
 }
 
-/* reading mode */
+/* silde view */
+.zhihu-silde-view {
+	padding: 10px;
+}
+
+.silde-collapsible {
+	margin-bottom: 10px;
+}
+
+.silde-summary {
+	font-size: 16px;
+	font-weight: bold;
+	cursor: pointer;
+	padding: 5px;
+	color: #333;
+}
+
+.silde-summary:hover {
+	background-color: #f0f0f0;
+}
+
+.silde-list-container {
+	max-height: 80vh; /* Limit height to 80% of viewport height */
+	overflow-y: auto; /* Enable vertical scrolling */
+	padding: 5px 0;
+}
+
+.silde-item {
+	margin-bottom: 15px;
+	cursor: pointer;
+	padding: 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.silde-item:hover {
+	background-color: #f5f5f5;
+}
+
+.silde-title {
+	margin: 0 0 5px 0;
+	font-size: 16px;
+	color: #333;
+}
+
+.silde-excerpt {
+	margin: 0;
+	font-size: 14px;
+	color: #666;
+}
+
+/* image caption */
 .image-embed[alt]:after {
 	content: attr(alt);
 	display: block;
