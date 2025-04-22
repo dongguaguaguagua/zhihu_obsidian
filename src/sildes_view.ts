@@ -2,6 +2,7 @@ import { Vault, Notice, View, WorkspaceLeaf } from "obsidian";
 import { Recommendation, loadRecommendations } from "./recommend_service";
 import { Follow, loadFollows } from "./follow_service";
 import { HotList, loadHotList } from "./hot_lists_service";
+import { htmlToMd } from "./html_to_markdown";
 
 export class ZhihuSlidesView extends View {
 	private recommendations: Recommendation[] = [];
@@ -134,14 +135,14 @@ export class ZhihuSlidesView extends View {
 	async openContent(id: string, content: string) {
 		const filePath = `Zhihu_${id}.md`;
 		let file = this.vault.getAbstractFileByPath(filePath);
+		console.log(content);
+		const markdown = htmlToMd(content);
 
 		if (!file) {
-			file = await this.vault.create(filePath, content);
+			file = await this.vault.create(filePath, markdown);
 		}
 
 		const leaf = this.app.workspace.getLeaf();
 		await leaf.openFile(file as any);
 	}
-
-	async openQuestion();
 }

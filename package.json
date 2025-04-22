@@ -15,6 +15,7 @@
 		"@types/markdown-it": "^14.1.2",
 		"@types/node": "^16.11.6",
 		"@types/qrcode": "^1.5.5",
+		"@types/turndown": "^5.0.5",
 		"@types/uuid": "^10.0.0",
 		"@typescript-eslint/eslint-plugin": "5.29.0",
 		"@typescript-eslint/parser": "5.29.0",
@@ -29,6 +30,7 @@
 		"markdown-it": "^14.1.0",
 		"marked": "^15.0.8",
 		"qrcode": "^1.5.4",
+		"turndown": "^7.2.0",
 		"uuid": "^11.1.0"
 	}
 }
