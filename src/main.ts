@@ -15,7 +15,7 @@ import * as dataUtil from "./data";
 import * as login from "./login_service";
 import * as publish from "./publish_service";
 import { ZhihuSlidesView } from "./sildes_view";
-
+import * as answer from "./answer_service";
 interface MyPluginSettings {
 	mySetting: string;
 }
@@ -67,6 +67,24 @@ export default class ZhihuObPlugin extends Plugin {
 			name: "Create New Zhihu Article",
 			callback: async () => {
 				await publish.createNewZhihuArticle(this.app);
+			},
+		});
+
+		this.addCommand({
+			id: "create-new-zhihu-answer",
+			name: "Create New Zhihu Answer",
+			callback: () => {
+				new answer.ZhihuLinkModal(this.app, async (questionLink) => {
+					await answer.createNewZhihuAnswer(this.app, questionLink);
+				}).open();
+			},
+		});
+
+		this.addCommand({
+			id: "zhihu-publish-current-answer",
+			name: "Zhihu Publish Current Answer",
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				await answer.publishCurrentAnswer(this.app);
 			},
 		});
 

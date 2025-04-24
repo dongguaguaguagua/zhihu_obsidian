@@ -236,8 +236,9 @@ async function patchDraft(vault: Vault, id: string, patchBody: any) {
 			"z_c0",
 		]);
 		const xsrftoken = data.cookies._xsrf;
+		const url = `https://zhuanlan.zhihu.com/api/articles/${id}/draft`;
 		await requestUrl({
-			url: `https://zhuanlan.zhihu.com/api/articles/${id}/draft`,
+			url: url,
 			headers: {
 				"User-Agent":
 					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
