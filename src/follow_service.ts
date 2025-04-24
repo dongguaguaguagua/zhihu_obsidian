@@ -4,11 +4,13 @@ import { Vault, Notice, requestUrl } from "obsidian";
 
 export interface Follow {
 	id: string;
-	action_text: string;
 	type: string;
 	title: string;
 	excerpt: string;
+	authorName: string;
+	url: string;
 	content: string;
+	action_text: string;
 }
 
 async function getFollows(vault: Vault) {
@@ -62,6 +64,11 @@ export async function loadFollows(vault: Vault) {
 					? item.target.title
 					: item.target.question.title,
 			excerpt: item.target.excerpt_new || item.target.excerpt,
+			authorName: item.target.author.name,
+			url:
+				item.target.type === "article"
+					? `https://zhuanlan.zhihu.com/p/${item.target.id}`
+					: `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`,
 			content: item.target.content,
 		}));
 	} catch (error) {

@@ -3,7 +3,7 @@ import { Recommendation, loadRecommendations } from "./recommend_service";
 import { Follow, loadFollows } from "./follow_service";
 import { HotList, loadHotList } from "./hot_lists_service";
 import { htmlToMd } from "./html_to_markdown";
-
+import { addFrontmatter } from "./frontmatter";
 export class ZhihuSlidesView extends View {
 	private recommendations: Recommendation[] = [];
 	private follows: Follow[] = [];
@@ -64,7 +64,13 @@ export class ZhihuSlidesView extends View {
 			excerpt.addClass("silde-excerpt");
 
 			item.onClickEvent(() =>
-				this.openContent(recommendation.id, recommendation.content),
+				this.openContent(
+					recommendation.title,
+					recommendation.authorName,
+					recommendation.url,
+					recommendation.content,
+					recommendation.type,
+				),
 			);
 		});
 
@@ -95,7 +101,13 @@ export class ZhihuSlidesView extends View {
 			excerpt.addClass("silde-excerpt");
 
 			item.onClickEvent(() =>
-				this.openContent(follow.id, follow.content),
+				this.openContent(
+					follow.title,
+					follow.authorName,
+					follow.url,
+					follow.content,
+					follow.type,
+				),
 			);
 		});
 
@@ -132,12 +144,19 @@ export class ZhihuSlidesView extends View {
 		});
 	}
 
-	async openContent(id: string, content: string) {
-		const filePath = `Zhihu_${id}.md`;
+	async openContent(
+		title: string,
+		authorName: string,
+		url: string,
+		content: string,
+		type: string,
+	) {
+		const typeStr = type === "article" ? "文章" : "回答";
+		const filePath = `${title}-${authorName}的${typeStr}.md`;
 		let file = this.vault.getAbstractFileByPath(filePath);
 		console.log(content);
-		const markdown = htmlToMd(content);
-
+		let markdown = htmlToMd(content);
+		markdown = addFrontmatter(markdown, "link", url);
 		if (!file) {
 			file = await this.vault.create(filePath, markdown);
 		}

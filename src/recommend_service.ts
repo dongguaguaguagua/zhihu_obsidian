@@ -1,12 +1,14 @@
 import * as cookies from "./cookies";
 import * as dataUtil from "./data";
-import { Vault, Notice, requestUrl, View, WorkspaceLeaf } from "obsidian";
+import { Vault, Notice, requestUrl } from "obsidian";
 
 export interface Recommendation {
 	id: string;
 	type: string;
 	title: string;
 	excerpt: string;
+	authorName: string;
+	url: string;
 	content: string;
 }
 
@@ -61,6 +63,11 @@ export async function loadRecommendations(vault: Vault) {
 					? item.target.title
 					: item.target.question.title,
 			excerpt: item.target.excerpt_new || item.target.excerpt,
+			authorName: item.target.author.name,
+			url:
+				item.target.type === "article"
+					? `https://zhuanlan.zhihu.com/p/${item.target.id}`
+					: `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`,
 			content: item.target.content,
 		}));
 	} catch (error) {

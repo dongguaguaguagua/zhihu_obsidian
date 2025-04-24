@@ -11,7 +11,7 @@ export function htmlToMd(html: string): string {
 			linkStyle: "inlined",
 		});
 
-		// 规则 1：数学公式图片转为 $公式$
+		// 规则 1：数学公式图片转为 $公式$ 或 $$公式$$
 		turndownService.addRule("mathImgToLatex", {
 			filter: function (node) {
 				return (
@@ -21,7 +21,13 @@ export function htmlToMd(html: string): string {
 			},
 			replacement: function (content, node) {
 				const alt = (node as HTMLElement).getAttribute("alt") || "";
-				return `$${alt.trim()}$`;
+				const trimmedAlt = alt.trim();
+				// 检测是否以 \\ 结尾，如果是代表了行间公式，用$$包裹
+				if (trimmedAlt.endsWith("\\\\")) {
+					const cleanAlt = trimmedAlt.slice(0, -2);
+					return `$$${cleanAlt}$$`;
+				}
+				return `$${trimmedAlt}$`;
 			},
 		});
 

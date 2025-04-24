@@ -1,22 +1,11 @@
-import {
-	App,
-	ButtonComponent,
-	TextComponent,
-	Vault,
-	Modal,
-	Notice,
-	requestUrl,
-} from "obsidian";
+import { App, TextComponent, Vault, Modal, Notice, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
-import * as topicsUtil from "./topics";
 import * as fm from "./frontmatter";
 import * as render from "./custom_render";
 import { v4 as uuidv4 } from "uuid";
 import * as cookies from "./cookies";
 import * as imageService from "./image_service";
 import { normalizeStr } from "./utilities";
-import * as publish from "./publish_service";
-import * as utils from "./utilities";
 
 export class ZhihuLinkModal extends Modal {
 	inputEl: TextComponent;
