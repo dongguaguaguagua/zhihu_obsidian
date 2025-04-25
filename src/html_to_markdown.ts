@@ -22,7 +22,6 @@ export function htmlToMd(html: string): string {
 			replacement: function (content, node) {
 				const alt = (node as HTMLElement).getAttribute("alt") || "";
 				const trimmedAlt = alt.trim();
-				// 检测是否以 \\ 结尾，如果是代表了行间公式，用$$包裹
 				if (trimmedAlt.endsWith("\\\\")) {
 					const cleanAlt = trimmedAlt.slice(0, -2);
 					return `$$${cleanAlt}$$`;
@@ -43,6 +42,49 @@ export function htmlToMd(html: string): string {
 				const lang = (node as HTMLElement).getAttribute("lang") || "";
 				const code = node.textContent || "";
 				return `\`\`\`${lang}\n${code.trim()}\n\`\`\``;
+			},
+		});
+
+		// 规则 3：将 HTML 表格转换为 Markdown 表格
+		turndownService.addRule("tableToMarkdown", {
+			filter: ["table"],
+			replacement: function (content, node) {
+				const rows = Array.from(node.querySelectorAll("tr"));
+				if (rows.length === 0) return "";
+
+				let markdown = "";
+				const headers = Array.from(rows[0].querySelectorAll("th, td"));
+				const headerTexts = headers.map(
+					(cell) => cell.textContent?.trim() || "",
+				);
+				markdown += `| ${headerTexts.join(" | ")} |\n`;
+				markdown += `| ${headerTexts.map(() => "-----").join(" | ")} |\n`;
+				rows.slice(1).forEach((row) => {
+					const cells = Array.from(row.querySelectorAll("td, th"));
+					const cellTexts = cells.map(
+						(cell) => cell.textContent?.trim() || "",
+					);
+					markdown += `| ${cellTexts.join(" | ")} |\n`;
+				});
+
+				return markdown;
+			},
+		});
+
+		// 规则 4：将 <figure> 包含的 <img> 和 <figcaption> 转为 Markdown 图片
+		turndownService.addRule("figureToImage", {
+			filter: ["figure"],
+			replacement: function (content, node) {
+				const img = node.querySelector("img");
+				const figcaption = node.querySelector("figcaption");
+				if (!img) return "";
+				console.log("img:", img);
+				console.log("figcaption:", figcaption);
+				const src = img.getAttribute("src") || "";
+				console.log("src:", src);
+				const alt = figcaption?.textContent?.trim() || "";
+				console.log("alt:", alt);
+				return `![${alt}](${src})`;
 			},
 		});
 
