@@ -13,7 +13,7 @@ export interface Follow {
 	action_text: string;
 }
 
-async function getFollows(vault: Vault) {
+export async function getFollows(vault: Vault, url: string) {
 	try {
 		const data = await dataUtil.loadData(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
@@ -26,7 +26,7 @@ async function getFollows(vault: Vault) {
 			"q_c1",
 		]);
 		const response = await requestUrl({
-			url: `https://www.zhihu.com/api/v3/moments?limit=10&desktop=true`,
+			url: url,
 			headers: {
 				"User-Agent":
 					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
@@ -46,9 +46,8 @@ async function getFollows(vault: Vault) {
 	}
 }
 
-export async function loadFollows(vault: Vault) {
+export function loadFollows(response: any) {
 	try {
-		const response = await getFollows(vault);
 		const filteredData = response.data.filter(
 			(item: any) =>
 				item.type !== "feed_advert" &&
@@ -73,6 +72,6 @@ export async function loadFollows(vault: Vault) {
 		}));
 	} catch (error) {
 		console.error("Failed to load follows:", error);
-		this.follows = [];
+		return [];
 	}
 }

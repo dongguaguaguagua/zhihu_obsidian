@@ -93,3 +93,9 @@ If your plugin does not need CSS, delete this file.
 	color: var(--text-faint);
 	text-align: center;
 }
+
+:is(.markdown-source-view, .markdown-preview-view) img {
+	left: 50%;
+	position: relative;
+	transform: translateX(-50%);
+}

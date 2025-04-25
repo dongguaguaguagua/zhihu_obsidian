@@ -47,14 +47,12 @@ async function getHotLists(vault: Vault) {
 export async function loadHotList(vault: Vault) {
 	try {
 		const response = await getHotLists(vault);
-		console.log(response.data);
 		const filteredData = response.data.filter(
 			(item: any) =>
 				item.type === "hot_list_feed" &&
 				item.target &&
 				Object.keys(item.target).length > 0,
 		);
-		console.log(filteredData);
 		return filteredData.map((item: any) => ({
 			id: item.target.id,
 			title: item.target.title,
@@ -64,6 +62,6 @@ export async function loadHotList(vault: Vault) {
 		}));
 	} catch (error) {
 		console.error("Failed to load hot lists:", error);
-		this.follows = [];
+		return [];
 	}
 }

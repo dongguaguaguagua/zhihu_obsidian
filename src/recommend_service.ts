@@ -12,7 +12,7 @@ export interface Recommendation {
 	content: string;
 }
 
-async function getRecommend(vault: Vault) {
+export async function getRecommend(vault: Vault, url: string) {
 	try {
 		const data = await dataUtil.loadData(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
@@ -25,7 +25,7 @@ async function getRecommend(vault: Vault) {
 			"q_c1",
 		]);
 		const response = await requestUrl({
-			url: `https://www.zhihu.com/api/v3/feed/topstory/recommend?action=down&ad_interval=-10&desktop=true&page_number=7`,
+			url: url,
 			headers: {
 				"User-Agent":
 					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
@@ -46,9 +46,8 @@ async function getRecommend(vault: Vault) {
 	}
 }
 
-export async function loadRecommendations(vault: Vault) {
+export function loadRecommendations(response: any) {
 	try {
-		const response = await getRecommend(vault);
 		const filteredData = response.data.filter(
 			(item: any) =>
 				item.type !== "feed_advert" &&
@@ -72,6 +71,6 @@ export async function loadRecommendations(vault: Vault) {
 		}));
 	} catch (error) {
 		console.error("Failed to load recommendations:", error);
-		this.recommendations = [];
+		return [];
 	}
 }

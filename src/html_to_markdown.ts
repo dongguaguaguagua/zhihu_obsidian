@@ -21,7 +21,9 @@ export function htmlToMd(html: string): string {
 			},
 			replacement: function (content, node) {
 				const alt = (node as HTMLElement).getAttribute("alt") || "";
-				const trimmedAlt = alt.trim();
+				// 有些答主喜欢在 \text{文字} 中插入字母，如\text{文字$i$}，会导致无法识别
+				const escapedAlt = alt.replace(/\$/g, "\\$");
+				const trimmedAlt = escapedAlt.trim();
 				if (trimmedAlt.endsWith("\\\\")) {
 					const cleanAlt = trimmedAlt.slice(0, -2);
 					return `$$${cleanAlt}$$`;
@@ -78,12 +80,8 @@ export function htmlToMd(html: string): string {
 				const img = node.querySelector("img");
 				const figcaption = node.querySelector("figcaption");
 				if (!img) return "";
-				console.log("img:", img);
-				console.log("figcaption:", figcaption);
 				const src = img.getAttribute("src") || "";
-				console.log("src:", src);
 				const alt = figcaption?.textContent?.trim() || "";
-				console.log("alt:", alt);
 				return `![${alt}](${src})`;
 			},
 		});
