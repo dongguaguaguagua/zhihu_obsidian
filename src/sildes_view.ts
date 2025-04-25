@@ -52,7 +52,6 @@ export class ZhihuSlidesView extends View {
 		});
 		recom_summary.addClass("silde-summary");
 
-		// 添加刷新按钮
 		const recom_refresh_button = recom_summary.createEl("button", {
 			text: "刷新",
 		});
@@ -73,7 +72,6 @@ export class ZhihuSlidesView extends View {
 		});
 		follow_summary.addClass("silde-summary");
 
-		// 添加刷新按钮
 		const follow_refresh_button = follow_summary.createEl("button", {
 			text: "刷新",
 		});
@@ -86,7 +84,7 @@ export class ZhihuSlidesView extends View {
 		const follow_list = follow_list_container.createEl("ul");
 		await this.refreshFollows(follow_list); // 初始加载关注
 
-		// hot lists (保持不变)
+		// hot lists
 		const hotlist_details = container.createEl("details");
 		hotlist_details.addClass("silde-collapsible");
 		const hotlist_summary = hotlist_details.createEl("summary", {
@@ -114,7 +112,6 @@ export class ZhihuSlidesView extends View {
 		});
 	}
 
-	// 新增刷新推荐的函数
 	private async refreshRecommendations(recom_list?: HTMLElement) {
 		const list =
 			recom_list ||
@@ -150,7 +147,6 @@ export class ZhihuSlidesView extends View {
 		});
 	}
 
-	// 新增刷新关注的函数
 	private async refreshFollows(follow_list?: HTMLElement) {
 		const list =
 			follow_list ||

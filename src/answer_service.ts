@@ -407,11 +407,6 @@ function isZhihuQuestionLink(link: string): boolean {
 	return pattern.test(link);
 }
 
-function isZhihuAnswerDraftLink(link: string): boolean {
-	const pattern = /^https:\/\/www\.zhihu\.com\/question\/\d+\/draft$/;
-	return pattern.test(link);
-}
-
 function extractQuestionId(url: string): string | null {
 	const match = url.match(/zhihu\.com\/question\/(\d+)/);
 	return match ? match[1] : "";

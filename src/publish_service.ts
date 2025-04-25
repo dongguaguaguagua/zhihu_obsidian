@@ -107,6 +107,14 @@ export async function publishCurrentFile(app: App) {
 			);
 		}
 	}
+	// 把文章投稿至问题
+	const toAnswer = frontmatter.answer;
+	if (toAnswer) {
+		const questionId = extractQuestionId(toAnswer);
+		if (questionId) {
+			await checkQuestion(vault, articleId, questionId);
+		}
+	}
 	const publishResult = await publishDraft(
 		vault,
 		articleId,
@@ -359,6 +367,59 @@ async function publishDraft(
 	}
 }
 
+async function checkQuestion(
+	vault: Vault,
+	articleId: string,
+	questionId: string,
+) {
+	try {
+		const data = await dataUtil.loadData(vault);
+		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
+			"_zap",
+			"_xsrf",
+			"BEC",
+			"d_c0",
+			"captcha_session_v2",
+			"z_c0",
+			"q_c1",
+		]);
+		const xsrftoken = data.cookies._xsrf;
+		const url = `https://www.zhihu.com/api/v4/creators/article_publish/check/question`;
+		await requestUrl({
+			url: url,
+			headers: {
+				"User-Agent":
+					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"Accept-Encoding": "gzip, deflate, br, zstd",
+				"Content-Type": "application/json",
+				"accept-language":
+					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+				// referer: `https://zhuanlan.zhihu.com/p/${articleId}/edit`,
+				"x-requested-with": "fetch",
+				"x-xsrftoken": xsrftoken,
+				// origin: "https://zhuanlan.zhihu.com",
+				// 'dnt': '1',
+				// 'sec-gpc': '1',
+				// 'sec-fetch-dest': 'empty',
+				// 'sec-fetch-mode': 'cors',
+				// 'sec-fetch-site': 'same-origin',
+				// 'priority': 'u=4',
+				// 'te': 'trailers',
+				Cookie: cookiesHeader,
+			},
+			method: "POST",
+			body: JSON.stringify({
+				article_token: articleId,
+				question_token: questionId,
+			}),
+		});
+		new Notice(`添加回答成功`);
+	} catch (error) {
+		console.log(error);
+		new Notice(`添加回答失败: ${error}`);
+	}
+}
+
 function publishStatus(link: string): number {
 	if (typeof link === "undefined" || link === null) {
 		// 如果链接为空或者不存在link这个属性
@@ -385,4 +446,9 @@ function isZhihuArticleLink(link: string): boolean {
 function isZhihuDraftLink(link: string): boolean {
 	const pattern = /^https:\/\/zhuanlan\.zhihu\.com\/p\/\d+(\/edit)?$/;
 	return pattern.test(link);
+}
+
+function extractQuestionId(url: string): string | null {
+	const match = url.match(/zhihu\.com\/question\/(\d+)/);
+	return match ? match[1] : "";
 }
