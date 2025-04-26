@@ -45,8 +45,8 @@ If your plugin does not need CSS, delete this file.
 }
 
 .silde-list-container {
-	max-height: 80vh; /* Limit height to 80% of viewport height */
-	overflow-y: auto; /* Enable vertical scrolling */
+	max-height: 80vh;
+	overflow-y: auto;
 	padding: 5px 0;
 }
 
@@ -94,8 +94,8 @@ If your plugin does not need CSS, delete this file.
 	text-align: center;
 }
 
-:is(.markdown-source-view, .markdown-preview-view) img {
+/* :is(.markdown-source-view, .markdown-preview-view) img {
 	left: 50%;
 	position: relative;
 	transform: translateX(-50%);
-}
+} */

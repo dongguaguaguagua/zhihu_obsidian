@@ -6,8 +6,9 @@ import { v4 as uuidv4 } from "uuid";
 import * as cookies from "./cookies";
 import * as imageService from "./image_service";
 import { normalizeStr } from "./utilities";
+import { addPopularizeStr } from "./popularize";
 
-export class ZhihuLinkModal extends Modal {
+export class ZhihuQuestionLinkModal extends Modal {
 	inputEl: TextComponent;
 	onSubmit: (input: string) => void;
 
@@ -77,6 +78,8 @@ export async function publishCurrentAnswer(app: App) {
 	const status = publishStatus(frontmatter.link);
 	const toc = false;
 	let rawContent = await app.vault.read(activeFile);
+	// 加上推广文字
+	rawContent = addPopularizeStr(rawContent);
 	const rmFmContent = fm.removeFrontmatter(rawContent);
 	// 获取回答的ID
 	let answerId = "";
@@ -101,7 +104,8 @@ export async function publishCurrentAnswer(app: App) {
 		answerId,
 		rmFmContent,
 	);
-	const zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
+	let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
+	zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
 	console.log(zhihuHTML);
 	const patchBody = {
 		content: zhihuHTML,

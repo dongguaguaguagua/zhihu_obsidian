@@ -74,9 +74,15 @@ export default class ZhihuObPlugin extends Plugin {
 			id: "create-new-zhihu-answer",
 			name: "Create New Zhihu Answer",
 			callback: () => {
-				new answer.ZhihuLinkModal(this.app, async (questionLink) => {
-					await answer.createNewZhihuAnswer(this.app, questionLink);
-				}).open();
+				new answer.ZhihuQuestionLinkModal(
+					this.app,
+					async (questionLink) => {
+						await answer.createNewZhihuAnswer(
+							this.app,
+							questionLink,
+						);
+					},
+				).open();
 			},
 		});
 

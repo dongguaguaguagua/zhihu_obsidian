@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from "uuid";
 import * as cookies from "./cookies";
 import * as imageService from "./image_service";
 import { normalizeStr } from "./utilities";
+import { addPopularizeStr } from "./popularize";
 
 export async function publishCurrentFile(app: App) {
 	const activeFile = app.workspace.getActiveFile();
@@ -79,7 +80,8 @@ export async function publishCurrentFile(app: App) {
 		articleId,
 		rmFmContent,
 	);
-	const zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
+	let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
+	zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
 	console.log(zhihuHTML);
 	const patchBody = {
 		title: title,

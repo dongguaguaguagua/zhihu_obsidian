@@ -8,7 +8,7 @@ import { Follow, loadFollows, getFollows } from "./follow_service";
 import { HotList, loadHotList } from "./hot_lists_service";
 import { htmlToMd } from "./html_to_markdown";
 import { addFrontmatter } from "./frontmatter";
-
+import { touchToRead } from "./read_service";
 export class ZhihuSlidesView extends View {
 	private recommendations: Recommendation[] = [];
 	private follows: Follow[] = [];
@@ -135,15 +135,20 @@ export class ZhihuSlidesView extends View {
 			});
 			excerpt.addClass("silde-excerpt");
 
-			item.onClickEvent(() =>
+			item.onClickEvent(async () => {
+				await touchToRead(
+					this.vault,
+					recommendation.type,
+					recommendation.id,
+				);
 				this.openContent(
 					recommendation.title,
 					recommendation.authorName,
 					recommendation.url,
 					recommendation.content,
 					recommendation.type,
-				),
-			);
+				);
+			});
 		});
 	}
 
@@ -170,15 +175,16 @@ export class ZhihuSlidesView extends View {
 			});
 			excerpt.addClass("silde-excerpt");
 
-			item.onClickEvent(() =>
+			item.onClickEvent(async () => {
+				await touchToRead(this.vault, follow.type, follow.id);
 				this.openContent(
 					follow.title,
 					follow.authorName,
 					follow.url,
 					follow.content,
 					follow.type,
-				),
-			);
+				);
+			});
 		});
 	}
 
