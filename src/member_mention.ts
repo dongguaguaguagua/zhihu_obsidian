@@ -7,8 +7,10 @@ import {
 	requestUrl,
 	Notice,
 	Vault,
+	TFile,
 } from "obsidian";
 import * as dataUtil from "./data";
+
 // 定义 autoCompletePeople 返回的数据结构
 interface PeopleEntry {
 	type: string;
@@ -72,15 +74,27 @@ export async function autoCompletePeople(
 }
 
 export class MentionSuggest extends EditorSuggest<MentionSuggestion> {
-	constructor(app: any) {
+	shouldRestrict: boolean;
+
+	constructor(app: any, restrict: boolean) {
 		super(app);
+		this.shouldRestrict = restrict;
 	}
 
 	onTrigger(
 		cursor: EditorPosition,
 		editor: Editor,
-		file: any,
+		file: TFile | null,
 	): EditorSuggestTriggerInfo | null {
+		// Check if the note has a 'zhihu' tag in frontmatter when restrictToZhihuTag is enabled
+		if (this.shouldRestrict && file) {
+			const metadata = this.app.metadataCache.getFileCache(file);
+			const tags = metadata?.frontmatter?.tags || [];
+			if (!tags.includes("zhihu")) {
+				return null;
+			}
+		}
+
 		const line = editor.getLine(cursor.line);
 		const beforeCursor = line.slice(0, cursor.ch);
 

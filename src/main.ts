@@ -15,12 +15,15 @@ import * as publish from "./publish_service";
 import { ZhihuSlidesView } from "./sildes_view";
 import * as answer from "./answer_service";
 import { ZhihuSettingTab } from "./settings_tab";
-
+import { loadData } from "./data";
 const SLIDES_VIEW_TYPE = "zhihu-slides-view";
 
 export default class ZhihuObPlugin extends Plugin {
 	async onload() {
-		this.registerEditorSuggest(new MentionSuggest(this.app));
+		const data = await loadData(this.app.vault);
+		this.registerEditorSuggest(
+			new MentionSuggest(this.app, data.settings.restrictToZhihuTag),
+		);
 		await login.checkIsUserLogin(this.app.vault);
 
 		this.addRibbonIcon("star", "Open Zhihu Sildes", () => {
@@ -84,14 +87,6 @@ export default class ZhihuObPlugin extends Plugin {
 
 		// Register the settings tab
 		this.addSettingTab(new ZhihuSettingTab(this.app, this));
-
-		this.registerDomEvent(document, "click", (evt: MouseEvent) => {
-			console.log("click", evt);
-		});
-
-		this.registerInterval(
-			window.setInterval(() => console.log("setInterval"), 5 * 60 * 1000),
-		);
 	}
 
 	async activateView() {

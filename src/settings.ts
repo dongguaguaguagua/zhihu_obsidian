@@ -4,16 +4,18 @@ import { loadData, updateData } from "./data";
 // Define the structure of the settings
 interface ZhihuSettings {
 	user_agent: string;
+	restrictToZhihuTag: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
 const DEFAULT_SETTINGS: ZhihuSettings = {
 	user_agent:
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
+	restrictToZhihuTag: false,
 };
 
 /**
- * Load settings from zhiyu-data.json
+ * Load settings from zhihu-data.json
  * @param vault Obsidian Vault instance
  * @returns Promise resolving to ZhihuSettings
  */
@@ -29,7 +31,7 @@ export async function loadSettings(vault: Vault): Promise<ZhihuSettings> {
 }
 
 /**
- * Save settings to zhiyu-data.json
+ * Save settings to zhihu-data.json
  * @param vault Obsidian Vault instance
  * @param settings Partial settings to update
  */
