@@ -71,14 +71,20 @@ export async function uploadCover(vault: Vault, cover: string) {
 		const imgState = getImgIdRes.upload_file.state;
 		const uploadToken = getImgIdRes.upload_token;
 		if (imgState === 2) {
-			await uploadImg(hash, imgLink, uploadToken);
+			await uploadImg(vault, hash, imgLink, uploadToken);
 		}
 		return `https://picx.zhimg.com/v2-${hash}`;
 	}
 }
 
-async function uploadImg(imgHash: string, imgLink: string, uploadToken: any) {
+async function uploadImg(
+	vault: Vault,
+	imgHash: string,
+	imgLink: string,
+	uploadToken: any,
+) {
 	try {
+		const data = await dataUtil.loadData(vault);
 		const imgBuffer = fs.readFileSync(imgLink);
 		const arrayBuffer = imgBuffer.buffer.slice(
 			imgBuffer.byteOffset,
@@ -106,8 +112,7 @@ async function uploadImg(imgHash: string, imgLink: string, uploadToken: any) {
 		const request = {
 			url: `https://zhihu-pics-upload.zhimg.com/v2-${imgHash}`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": mimeType,
 				"Accept-Language":
@@ -148,8 +153,7 @@ async function fetchImgStatus(vault: Vault, id: string, imgId: string) {
 		const response = await requestUrl({
 			url: `https://api.zhihu.com/images/${imgId}`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -205,7 +209,7 @@ export async function transImgToZhihuLink(
 		console.log("img hash:", hash);
 
 		if (imgState === 2) {
-			await uploadImg(hash, imgLink, uploadToken);
+			await uploadImg(vault, hash, imgLink, uploadToken);
 		}
 		// const imgStatus = await new Promise<any>((resolve, reject) => {
 		//   const interval = setInterval(async () => {

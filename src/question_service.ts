@@ -1,6 +1,4 @@
-import * as cookies from "./cookies";
-import * as dataUtil from "./data";
-import { Vault, Notice, requestUrl, View, WorkspaceLeaf } from "obsidian";
+export {};
 
 // export interface Recommendation {
 // 	id: string;
@@ -26,7 +24,7 @@ import { Vault, Notice, requestUrl, View, WorkspaceLeaf } from "obsidian";
 // 			url: `https://www.zhihu.com/api/v3/feed/topstory/recommend?action=down&ad_interval=-10&desktop=true&page_number=7`,
 // 			headers: {
 // 				"User-Agent":
-// 					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+// 					data.settings.user_agent,
 // 				"accept-language":
 // 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
 // 				referer: "https://www.zhihu.com/question/1897565739235398916",

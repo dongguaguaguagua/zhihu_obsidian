@@ -197,8 +197,7 @@ async function newDraft(vault: Vault, title: string) {
 		const response = await requestUrl({
 			url: `https://zhuanlan.zhihu.com/api/articles/drafts`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
@@ -250,8 +249,7 @@ async function patchDraft(vault: Vault, id: string, patchBody: any) {
 		await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
@@ -302,8 +300,7 @@ async function publishDraft(
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/api/v4/content/publish`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
@@ -390,8 +387,7 @@ async function checkQuestion(
 		await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":

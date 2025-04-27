@@ -1,6 +1,6 @@
 import * as cookies from "./cookies";
 import * as dataUtil from "./data";
-import { Vault, Notice, requestUrl, View, WorkspaceLeaf } from "obsidian";
+import { Vault, Notice, requestUrl } from "obsidian";
 
 export interface HotList {
 	link: string;
@@ -25,8 +25,7 @@ async function getHotLists(vault: Vault) {
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/api/v3/feed/topstory/hot-lists/total?limit=50&desktop=true`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
 				"accept-encoding": "gzip, deflate, br, zstd",

@@ -50,6 +50,17 @@ export async function updateData(
 	await saveData(vault, newData);
 }
 
+export async function deleteData(vault: Vault, key: string): Promise<void> {
+	const data = (await loadData(vault)) || {};
+	if (key in data) {
+		delete data[key];
+		await saveData(vault, data);
+	} else {
+		console.warn(`Key "${key}" not found in ${DATA_FILE}`);
+	}
+}
+
+
 function deepMerge(target: any, source: any): any {
 	if (typeof target !== "object" || target === null) return source;
 	if (typeof source !== "object" || source === null) return source;

@@ -6,8 +6,9 @@ import {
 	EditorSuggestContext,
 	requestUrl,
 	Notice,
+	Vault,
 } from "obsidian";
-
+import * as dataUtil from "./data";
 // 定义 autoCompletePeople 返回的数据结构
 interface PeopleEntry {
 	type: string;
@@ -27,14 +28,15 @@ export interface MentionSuggestion {
 }
 
 export async function autoCompletePeople(
+	vault: Vault,
 	people: string,
 ): Promise<PeopleEntry[]> {
 	try {
+		const data = await dataUtil.loadData(vault);
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/people/autocomplete?token=${encodeURI(people)}&max_matches=10&use_similar=0`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -98,7 +100,7 @@ export class MentionSuggest extends EditorSuggest<MentionSuggestion> {
 		context: EditorSuggestContext,
 	): Promise<MentionSuggestion[]> {
 		const query = context.query;
-		const people = await autoCompletePeople(query);
+		const people = await autoCompletePeople(this.app.vault, query);
 
 		return people.map((person) => ({
 			displayText: person.name,

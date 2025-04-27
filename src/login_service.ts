@@ -106,7 +106,7 @@ export async function zhihuQRcodeLogin(app: App) {
 
 export async function checkIsUserLogin(vault: Vault) {
 	const data = await dataUtil.loadData(vault);
-	if (data && "userInfo" in data) {
+	if (data && "userInfo" in data && data.userInfo) {
 		new Notice(`欢迎! 知乎用户 ${data.userInfo.name}`);
 		return true;
 	} else {
@@ -117,11 +117,11 @@ export async function checkIsUserLogin(vault: Vault) {
 
 async function initCookies(vault: Vault) {
 	try {
+		const data = await dataUtil.loadData(vault);
 		const response = await requestUrl({
 			url: "https://www.zhihu.com",
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
@@ -156,8 +156,7 @@ async function signInNext(vault: Vault) {
 		await requestUrl({
 			url: "https://www.zhihu.com/signin?next=%2F",
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
@@ -193,8 +192,7 @@ async function initUdidCookies(vault: Vault) {
 		const response = await requestUrl({
 			url: "https://www.zhihu.com/udid",
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -232,8 +230,7 @@ async function scProfiler(vault: Vault) {
 		await requestUrl({
 			url: "https://www.zhihu.com/sc-profiler",
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"Accept-Language":
@@ -275,8 +272,7 @@ async function getLoginLink(vault: Vault) {
 		const response = await requestUrl({
 			url: "https://www.zhihu.com/api/v3/account/api/login/qrcode",
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -313,8 +309,7 @@ async function captchaSignIn(vault: Vault) {
 		const response = await requestUrl({
 			url: "https://www.zhihu.com/api/v3/oauth/captcha/v2?type=captcha_sign_in",
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -354,8 +349,7 @@ async function fetchQRcodeStatus(vault: Vault, token: string) {
 		const response = await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -394,8 +388,7 @@ async function signInZhihu(vault: Vault) {
 		const response = await requestUrl({
 			url: `https://www.zhihu.com`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
@@ -439,8 +432,7 @@ async function prodTokenRefresh(vault: Vault) {
 		await requestUrl({
 			url: `https://www.zhihu.com/api/account/prod/token/refresh`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -484,8 +476,7 @@ async function getUserInfo(vault: Vault) {
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/api/v4/me?include=is_realname`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",

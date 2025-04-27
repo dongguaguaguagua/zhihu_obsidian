@@ -20,8 +20,7 @@ export async function touchToRead(vault: Vault, type: string, id: string) {
 		const response = await requestUrl({
 			url: "https://www.zhihu.com/lastread/touch",
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
 				referer: "https://www.zhihu.com/",

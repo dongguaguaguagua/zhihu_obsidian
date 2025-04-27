@@ -22,8 +22,7 @@ export async function autoCompleteTopic(
 				`https://zhuanlan.zhihu.com/api/autocomplete/topics?token=${topic}&max_matches=5&use_similar=0&topic_filter=1`,
 			),
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -66,8 +65,7 @@ export async function topics2Draft(vault: Vault, id: string, topics: any) {
 		const response = await requestUrl({
 			url: `https://zhuanlan.zhihu.com/api/articles/${id}/topics`,
 			headers: {
-				"User-Agent":
-					"Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:137.0) Gecko/20100101 Firefox/137.0",
+				"User-Agent": data.settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
