@@ -3,8 +3,6 @@ import {
 	Editor,
 	MarkdownView,
 	Plugin,
-	PluginSettingTab,
-	Setting,
 	WorkspaceLeaf,
 	Notice,
 } from "obsidian";
@@ -16,19 +14,28 @@ import { ZhihuSlidesView } from "./sildes_view";
 import * as answer from "./answer_service";
 import { ZhihuSettingTab } from "./settings_tab";
 import { loadData } from "./data";
+import { loadIcons, updateIcon } from "./icon";
 const SLIDES_VIEW_TYPE = "zhihu-slides-view";
 
 export default class ZhihuObPlugin extends Plugin {
 	async onload() {
 		const data = await loadData(this.app.vault);
 		this.registerEditorSuggest(
-			new MentionSuggest(this.app, data.settings.restrictToZhihuTag),
+			new MentionSuggest(
+				this.app,
+				data.settings.restrictToZhihuTag || false,
+			),
 		);
 		await login.checkIsUserLogin(this.app.vault);
 
-		this.addRibbonIcon("star", "Open Zhihu Sildes", () => {
-			this.activateView();
-		});
+		loadIcons();
+		const zhihuIconEL = this.addRibbonIcon(
+			"zhihu-light",
+			"Open Zhihu Sildes",
+			() => {
+				this.activateView();
+			},
+		);
 		this.registerView(
 			SLIDES_VIEW_TYPE,
 			(leaf) => new ZhihuSlidesView(leaf, this.app.vault),
@@ -87,6 +94,11 @@ export default class ZhihuObPlugin extends Plugin {
 
 		// Register the settings tab
 		this.addSettingTab(new ZhihuSettingTab(this.app, this));
+		this.registerEvent(
+			this.app.workspace.on("css-change", () => {
+				updateIcon(zhihuIconEL);
+			}),
+		);
 	}
 
 	async activateView() {
