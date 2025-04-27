@@ -66,6 +66,8 @@ export async function uploadCover(vault: Vault, cover: string) {
 			return;
 		}
 		const imgBuffer = fs.readFileSync(imgLink);
+		const fileType = await fileTypeFromBuffer(imgBuffer);
+		if (!fileType) throw new Error("无法识别文件类型");
 		const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
 		const getImgIdRes = await getImgIdFromHash(vault, hash);
 		const imgState = getImgIdRes.upload_file.state;
@@ -73,7 +75,8 @@ export async function uploadCover(vault: Vault, cover: string) {
 		if (imgState === 2) {
 			await uploadImg(vault, hash, imgLink, uploadToken);
 		}
-		return `https://picx.zhimg.com/v2-${hash}`;
+		const imgOriginalPath = imgOriginalPathBuilder(hash, fileType.ext);
+		return imgOriginalPath;
 	}
 }
 
@@ -93,8 +96,6 @@ async function uploadImg(
 		const fileType = await fileTypeFromBuffer(imgBuffer);
 		if (!fileType) throw new Error("无法识别文件类型");
 		const mimeType = fileType.mime;
-		console.log("文件类型:", mimeType);
-		console.log("文件大小:", imgBuffer.length);
 		const requestTime = Date.now();
 		const UTCDate = new Date(requestTime).toUTCString();
 		const ua = "aliyun-sdk-js/6.8.0 Firefox 137.0 on OS X 10.15";
@@ -199,6 +200,8 @@ export async function transImgToZhihuLink(
 		}
 
 		const imgBuffer = fs.readFileSync(imgLink);
+		const fileType = await fileTypeFromBuffer(imgBuffer);
+		if (!fileType) throw new Error("无法识别文件类型");
 		const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
 		const alt = caption || path.basename(imgName);
 		const getImgIdRes = await getImgIdFromHash(vault, hash);
@@ -226,13 +229,13 @@ export async function transImgToZhihuLink(
 		//     }
 		//   }, 1000);
 		// });
-
+		const imgOriginalPath = imgOriginalPathBuilder(hash, fileType.ext)
 		const zhihuImgStr = `\
-<img src="https://picx.zhimg.com/v2-${hash}" \
+<img src=${imgOriginalPath} \
 data-caption="${alt}" \
 data-size="normal" \
 data-watermark="watermark" \
-data-original-src="https://picx.zhimg.com/v2-${hash}" \
+data-original-src=${imgOriginalPath} \
 data-watermark-src="" \
 data-private-watermark-src=""/>`;
 		md = md.replace(fullMatch, zhihuImgStr);
@@ -260,4 +263,8 @@ async function calculateSignature(
 	hmac.update(stringToSign);
 	const signature = hmac.digest("base64");
 	return signature;
+}
+
+function imgOriginalPathBuilder(hash: string, ext: string) {
+	return `https://picx.zhimg.com/v2-${hash}.${ext}`;
 }
