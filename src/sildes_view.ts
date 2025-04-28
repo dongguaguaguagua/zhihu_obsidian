@@ -32,7 +32,7 @@ export class ZhihuSlidesView extends View {
 	}
 
 	getIcon(): string {
-		return "star";
+		return "zhihu-icon";
 	}
 
 	async onOpen() {
@@ -196,12 +196,16 @@ export class ZhihuSlidesView extends View {
 		type: string,
 	) {
 		const typeStr = type === "article" ? "文章" : "回答";
-		const filePath = removeSpecialChars(
-			`${title}-${authorName}的${typeStr}.md`,
-		);
+		const folderPath = "zhihu";
+		const fileName = removeSpecialChars(`${title}-${authorName}的${typeStr}.md`);
+		const filePath = `${folderPath}/${fileName}`;
+
+		let folder = this.vault.getAbstractFileByPath(folderPath);
+		if (!folder) {
+			await this.vault.createFolder(folderPath);
+		}
 
 		let file = this.vault.getAbstractFileByPath(filePath);
-		console.log(content);
 		let markdown = htmlToMd(content);
 		markdown = addFrontmatter(markdown, "link", url);
 		if (!file) {

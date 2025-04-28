@@ -14,7 +14,7 @@ import { ZhihuSlidesView } from "./sildes_view";
 import * as answer from "./answer_service";
 import { ZhihuSettingTab } from "./settings_tab";
 import { loadData } from "./data";
-import { loadIcons, updateIcon } from "./icon";
+import { loadIcons } from "./icon";
 const SLIDES_VIEW_TYPE = "zhihu-slides-view";
 
 export default class ZhihuObPlugin extends Plugin {
@@ -30,7 +30,7 @@ export default class ZhihuObPlugin extends Plugin {
 
 		loadIcons();
 		const zhihuIconEL = this.addRibbonIcon(
-			"zhihu-light",
+			"zhihu-icon",
 			"Open Zhihu Sildes",
 			() => {
 				this.activateView();
@@ -94,11 +94,6 @@ export default class ZhihuObPlugin extends Plugin {
 
 		// Register the settings tab
 		this.addSettingTab(new ZhihuSettingTab(this.app, this));
-		this.registerEvent(
-			this.app.workspace.on("css-change", () => {
-				updateIcon(zhihuIconEL);
-			}),
-		);
 	}
 
 	async activateView() {
