@@ -5,6 +5,7 @@ import * as crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
 import * as cookies from "./cookies";
 import * as dataUtil from "./data";
+import * as file from "./files";
 
 async function getImgIdFromHash(vault: Vault, imgHash: string) {
 	try {
@@ -48,10 +49,6 @@ async function getImgIdFromHash(vault: Vault, imgHash: string) {
 }
 
 export async function uploadCover(vault: Vault, cover: string) {
-	const adapter = vault.adapter;
-	if (!(adapter instanceof FileSystemAdapter)) {
-		throw new Error("Vault is not using a local file system adapter.");
-	}
 	console.log(cover);
 	const match = cover.match(/\[\[(.*?)\]\]/);
 	if (!match) {
@@ -59,12 +56,7 @@ export async function uploadCover(vault: Vault, cover: string) {
 		return;
 	} else {
 		const imgName = match[1];
-		const vaultBasePath = adapter.getBasePath();
-		const imgLink = path.resolve(vaultBasePath, imgName);
-		if (!fs.existsSync(imgLink)) {
-			console.warn(`Image not found: ${imgLink}`);
-			return;
-		}
+		const imgLink = await file.getFilePathFromName(vault, imgName);
 		const imgBuffer = fs.readFileSync(imgLink);
 		const fileType = await fileTypeFromBuffer(imgBuffer);
 		if (!fileType) throw new Error("无法识别文件类型");
@@ -189,15 +181,10 @@ export async function transImgToZhihuLink(
 	if (!(adapter instanceof FileSystemAdapter)) {
 		throw new Error("Vault is not using a local file system adapter.");
 	}
-	const vaultBasePath = adapter.getBasePath();
 	const matches = [...md.matchAll(/!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
 	for (const match of matches) {
 		const [fullMatch, imgName, caption] = match;
-		const imgLink = path.resolve(vaultBasePath, imgName);
-		if (!fs.existsSync(imgLink)) {
-			console.warn(`Image not found: ${imgLink}`);
-			return `<p><em>Image not found: ${imgName}</em></p>`;
-		}
+		const imgLink = await file.getFilePathFromName(vault, imgName);
 
 		const imgBuffer = fs.readFileSync(imgLink);
 		const fileType = await fileTypeFromBuffer(imgBuffer);
@@ -229,7 +216,7 @@ export async function transImgToZhihuLink(
 		//     }
 		//   }, 1000);
 		// });
-		const imgOriginalPath = imgOriginalPathBuilder(hash, fileType.ext)
+		const imgOriginalPath = imgOriginalPathBuilder(hash, fileType.ext);
 		const zhihuImgStr = `\
 <img src=${imgOriginalPath} \
 data-caption="${alt}" \
