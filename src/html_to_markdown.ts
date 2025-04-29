@@ -21,7 +21,6 @@ export function htmlToMd(html: string): string {
 			},
 			replacement: function (content, node) {
 				const alt = (node as HTMLElement).getAttribute("alt") || "";
-				// 有些答主喜欢在 \text{文字} 中插入字母，如\text{文字$i$}，会导致无法识别
 				const escapedAlt = alt.replace(/\$/g, "\\$");
 				const trimmedAlt = escapedAlt.trim();
 				if (trimmedAlt.endsWith("\\\\")) {
@@ -83,6 +82,19 @@ export function htmlToMd(html: string): string {
 				const src = img.getAttribute("src") || "";
 				const alt = figcaption?.textContent?.trim() || "";
 				return `![${alt}](${src})`;
+			},
+		});
+
+		// 规则 5：忽略 <h*> 标签中的 <br> 标签
+		turndownService.addRule("ignoreBrInHeading", {
+			filter: function (node, options) {
+				return (
+					node.nodeName === "BR" &&
+					node.parentElement?.nodeName.match(/^H[1-6]$/) !== null
+				);
+			},
+			replacement: function () {
+				return "";
 			},
 		});
 

@@ -132,7 +132,7 @@ export class ZhihuSlidesView extends View {
 
 			const excerpt = item.createEl("p");
 			excerpt.addClass("silde-excerpt");
-			excerpt.innerHTML = `${recommendation.excerpt}`;
+			excerpt.innerHTML = `<b>${recommendation.authorName}</b>: ${recommendation.excerpt}`;
 
 			item.onClickEvent(async () => {
 				await touchToRead(
@@ -171,7 +171,7 @@ export class ZhihuSlidesView extends View {
 
 			const excerpt = item.createEl("p");
 			excerpt.addClass("silde-excerpt");
-			excerpt.innerHTML = `${follow.action_text}: ${follow.excerpt}`;
+			excerpt.innerHTML = `<b>${follow.action_text}</b>: ${follow.excerpt}`;
 
 			item.onClickEvent(async () => {
 				await touchToRead(this.vault, follow.type, follow.id);
