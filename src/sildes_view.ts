@@ -130,10 +130,9 @@ export class ZhihuSlidesView extends View {
 			const title = item.createEl("h4", { text: recommendation.title });
 			title.addClass("silde-title");
 
-			const excerpt = item.createEl("p", {
-				text: recommendation.excerpt,
-			});
+			const excerpt = item.createEl("p");
 			excerpt.addClass("silde-excerpt");
+			excerpt.innerHTML = `${recommendation.excerpt}`;
 
 			item.onClickEvent(async () => {
 				await touchToRead(
@@ -170,10 +169,9 @@ export class ZhihuSlidesView extends View {
 			const title = item.createEl("h4", { text: follow.title });
 			title.addClass("silde-title");
 
-			const excerpt = item.createEl("p", {
-				text: `${follow.action_text}: ${follow.excerpt}`,
-			});
+			const excerpt = item.createEl("p");
 			excerpt.addClass("silde-excerpt");
+			excerpt.innerHTML = `${follow.action_text}: ${follow.excerpt}`;
 
 			item.onClickEvent(async () => {
 				await touchToRead(this.vault, follow.type, follow.id);
@@ -195,9 +193,12 @@ export class ZhihuSlidesView extends View {
 		content: string,
 		type: string,
 	) {
-		const typeStr = type === "article" ? "文章" : "回答";
+		const typeStr = fromTypeGetStr(type);
 		const folderPath = "zhihu";
-		const fileName = removeSpecialChars(`${title}-${authorName}的${typeStr}.md`);
+		title = stripHtmlTags(title);
+		const fileName = removeSpecialChars(
+			`${title}-${authorName}的${typeStr}.md`,
+		);
 		const filePath = `${folderPath}/${fileName}`;
 
 		let folder = this.vault.getAbstractFileByPath(folderPath);
@@ -218,5 +219,24 @@ export class ZhihuSlidesView extends View {
 }
 
 function removeSpecialChars(input: string): string {
-	return input.replace(/[/\\[\]|#^]/g, "");
+	return input.replace(/[/\\[\]|#^:]/g, "");
+}
+
+function stripHtmlTags(input: string): string {
+	return input.replace(/<[^>]*>/g, "");
+}
+
+function fromTypeGetStr(type: string) {
+	switch (type) {
+		case "article":
+			return "文章";
+		case "question":
+			return "提问";
+		case "answer":
+			return "回答";
+		case "pin":
+			return "想法";
+		default:
+			return "Unknown Item Type";
+	}
 }

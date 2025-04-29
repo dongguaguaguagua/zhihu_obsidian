@@ -53,24 +53,80 @@ export function loadFollows(response: any) {
 				item.target &&
 				Object.keys(item.target).length > 0,
 		);
+		console.log(filteredData);
 		return filteredData.map((item: any) => ({
 			id: item.target.id,
 			action_text: item.action_text,
 			type: item.target.type,
-			title:
-				item.target.type === "article"
-					? item.target.title
-					: item.target.question.title,
-			excerpt: item.target.excerpt_new || item.target.excerpt,
+			title: fromItemGetTitle(item),
+			excerpt:
+				item.target.excerpt_new ||
+				item.target.excerpt ||
+				item.target.excerpt_title,
 			authorName: item.target.author.name,
-			url:
-				item.target.type === "article"
-					? `https://zhuanlan.zhihu.com/p/${item.target.id}`
-					: `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`,
-			content: item.target.content,
+			url: fromItemGetUrl(item),
+			content: fromItemGetContent(item),
 		}));
 	} catch (error) {
 		console.error("Failed to load follows:", error);
 		return [];
 	}
+}
+
+function fromItemGetTitle(item: any) {
+	switch (item.target.type) {
+		case "article":
+			return item.target.title;
+		case "question":
+			return item.target.title;
+		case "answer":
+			return item.target.question.title;
+		case "pin":
+			return truncateString(
+				stripHtmlTags(item.target.content[0].content),
+			);
+		default:
+			return "Unknown Item Type";
+	}
+}
+
+function fromItemGetUrl(item: any) {
+	switch (item.target.type) {
+		case "article":
+			return `https://zhuanlan.zhihu.com/p/${item.target.id}`;
+		case "question":
+			return `https://www.zhihu.com/question/${item.target.id}`;
+		case "answer":
+			return `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`;
+		case "pin":
+			return `https://www.zhihu.com/pin/${item.target.id}`;
+		default:
+			return "Unknown Item Type";
+	}
+}
+
+function fromItemGetContent(item: any) {
+	switch (item.target.type) {
+		case "article":
+			return item.target.content;
+		case "question":
+			return item.target.detail;
+		case "answer":
+			return item.target.content;
+		case "pin":
+			return item.target.content_html;
+		default:
+			return "Unknown Item Type";
+	}
+}
+
+function stripHtmlTags(input: string): string {
+	return input.replace(/<[^>]*>/g, "");
+}
+
+function truncateString(str: string, maxLength = 200): string {
+	if (str.length <= maxLength) {
+		return str;
+	}
+	return str.slice(0, maxLength) + "...";
 }
