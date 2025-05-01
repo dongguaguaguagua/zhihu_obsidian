@@ -58,12 +58,21 @@
 	background: var(--background-modifier-hover);
 }
 
-.silde-refresh-icon {
+.silde-icon {
 	cursor: pointer;
 	color: var(--icon-color);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 }
 
-.silde-refresh-icon:hover {
+.silde-icons {
+	display: flex;
+	gap: 4px;
+	margin-left: auto;
+}
+
+.silde-icon:hover {
 	color: var(--icon-color-hover);
 }
 
@@ -73,10 +82,20 @@
 	padding: 10px;
 	border: 1px solid var(--background-modifier-border);
 	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
 }
 
 .silde-item:hover {
 	background: var(--background-modifier-hover);
+}
+
+.silde-excerpt {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
 }
 
 .silde-title {

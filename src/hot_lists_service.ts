@@ -52,6 +52,7 @@ export async function loadHotList(vault: Vault) {
 				item.target &&
 				Object.keys(item.target).length > 0,
 		);
+		new Notice(response.fresh_text);
 		return filteredData.map((item: any) => ({
 			id: item.target.id,
 			title: item.target.title,
