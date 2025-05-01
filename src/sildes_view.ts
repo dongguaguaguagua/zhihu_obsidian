@@ -9,6 +9,7 @@ import { HotList, loadHotList } from "./hot_lists_service";
 import { htmlToMd } from "./html_to_markdown";
 import { addFrontmatter } from "./frontmatter";
 import { touchToRead } from "./read_service";
+
 export class ZhihuSlidesView extends View {
 	private recommendations: Recommendation[] = [];
 	private follows: Follow[] = [];
@@ -28,7 +29,7 @@ export class ZhihuSlidesView extends View {
 	}
 
 	getDisplayText(): string {
-		return "Zhihu Sildes";
+		return "Zhihu Slides";
 	}
 
 	getIcon(): string {
@@ -52,11 +53,10 @@ export class ZhihuSlidesView extends View {
 		});
 		recom_summary.addClass("silde-summary");
 
-		const recom_refresh_button = recom_summary.createEl("button", {
-			text: "刷新",
-		});
-		recom_refresh_button.addClass("silde-refresh-button");
-		recom_refresh_button.onClickEvent(() => this.refreshRecommendations());
+		const recom_refresh_icon = recom_summary.createEl("span");
+		recom_refresh_icon.addClass("silde-refresh-icon");
+		setIcon(recom_refresh_icon, "refresh-cw");
+		recom_refresh_icon.onClickEvent(() => this.refreshRecommendations());
 
 		const recom_list_container = recom_details.createEl("div");
 		recom_list_container.addClass("silde-list-container");
@@ -72,11 +72,10 @@ export class ZhihuSlidesView extends View {
 		});
 		follow_summary.addClass("silde-summary");
 
-		const follow_refresh_button = follow_summary.createEl("button", {
-			text: "刷新",
-		});
-		follow_refresh_button.addClass("silde-refresh-button");
-		follow_refresh_button.onClickEvent(() => this.refreshFollows());
+		const follow_refresh_icon = follow_summary.createEl("span");
+		follow_refresh_icon.addClass("silde-refresh-icon");
+		setIcon(follow_refresh_icon, "refresh-cw");
+		follow_refresh_icon.onClickEvent(() => this.refreshFollows());
 
 		const follow_list_container = follow_details.createEl("div");
 		follow_list_container.addClass("silde-list-container");
@@ -92,24 +91,16 @@ export class ZhihuSlidesView extends View {
 		});
 		hotlist_summary.addClass("silde-summary");
 
+		const hotlist_refresh_icon = hotlist_summary.createEl("span");
+		hotlist_refresh_icon.addClass("silde-refresh-icon");
+		setIcon(hotlist_refresh_icon, "refresh-cw");
+		hotlist_refresh_icon.onClickEvent(() => this.refreshHotLists());
+
 		const hotlist_container = hotlist_details.createEl("div");
 		hotlist_container.addClass("silde-list-container");
 
 		const hotlist = hotlist_container.createEl("ul");
-		new Notice("正在加载热榜...");
-		this.hotLists = await loadHotList(this.vault);
-		this.hotLists.forEach((hot) => {
-			const item = hotlist.createEl("li");
-			item.addClass("silde-item");
-
-			const title = item.createEl("h4", { text: hot.title });
-			title.addClass("silde-title");
-
-			const excerpt = item.createEl("p", {
-				text: `${hot.detail_text}: ${hot.excerpt}`,
-			});
-			excerpt.addClass("silde-excerpt");
-		});
+		await this.refreshHotLists(hotlist); // 初始加载热榜
 	}
 
 	private async refreshRecommendations(recom_list?: HTMLElement) {
@@ -160,7 +151,7 @@ export class ZhihuSlidesView extends View {
 		list.empty();
 		new Notice("正在加载关注...");
 		const response = await getFollows(this.vault, this.nextFollowUrl);
-		this.follows = loadFollows(response); // 注意这里使用 loadFollows 而非 loadRecommendations
+		this.follows = loadFollows(response);
 		this.nextFollowUrl = response.paging.next;
 		this.follows.forEach((follow) => {
 			const item = list.createEl("li");
@@ -183,6 +174,29 @@ export class ZhihuSlidesView extends View {
 					follow.type,
 				);
 			});
+		});
+	}
+
+	private async refreshHotLists(hotlist?: HTMLElement) {
+		const list =
+			hotlist ||
+			(this.containerEl.querySelectorAll(
+				".zhihu-slides-view .silde-list-container ul",
+			)[2] as HTMLElement);
+		list.empty();
+		new Notice("正在加载热榜...");
+		this.hotLists = await loadHotList(this.vault);
+		this.hotLists.forEach((hot) => {
+			const item = list.createEl("li");
+			item.addClass("silde-item");
+
+			const title = item.createEl("h4", { text: hot.title });
+			title.addClass("silde-title");
+
+			const excerpt = item.createEl("p", {
+				text: `${hot.detail_text}: ${hot.excerpt}`,
+			});
+			excerpt.addClass("silde-excerpt");
 		});
 	}
 
