@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from "obsidian";
+import { App, PluginSettingTab, Setting, Notice } from "obsidian";
 import ZhihuObPlugin from "./main";
 import { loadSettings, saveSettings } from "./settings";
 import * as login from "./login_service";
@@ -169,5 +169,25 @@ export class ZhihuSettingTab extends PluginSettingTab {
 						}
 					}),
 			);
+
+		// Clear Image Cahce in `data.cache`
+		new Setting(containerEl)
+			.setName("Clear Image Cache")
+			.setDesc(
+				"With image cache, you can reduce access requency to the Zhihu API",
+			)
+			.then((setting) => {
+				// Log out button
+				setting.addButton((button) =>
+					button.setButtonText("Clear").onClick(async () => {
+						try {
+							await deleteData(this.app.vault, "cache");
+							new Notice("Image Cache Cleared!");
+						} catch (e) {
+							console.error("Failed to Clear Image Cache", e);
+						}
+					}),
+				);
+			});
 	}
 }

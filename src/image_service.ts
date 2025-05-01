@@ -183,6 +183,7 @@ export async function transImgToZhihuLink(
 	}
 	const matches = [...md.matchAll(/!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
 	for (const match of matches) {
+		const data = await dataUtil.loadData(vault);
 		const [fullMatch, imgName, caption] = match;
 		const imgLink = await file.getFilePathFromName(vault, imgName);
 
@@ -191,15 +192,28 @@ export async function transImgToZhihuLink(
 		if (!fileType) throw new Error("无法识别文件类型");
 		const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
 		const alt = caption || path.basename(imgName);
-		const getImgIdRes = await getImgIdFromHash(vault, hash);
-		// const imgId = getImgIdRes.upload_file.image_id;
-		const imgState = getImgIdRes.upload_file.state;
-		const uploadToken = getImgIdRes.upload_token;
-		console.log("img state:", imgState);
-		console.log("img hash:", hash);
+		if (
+			!data.cache ||
+			Object.keys(data.cache).length === 0 ||
+			!data.cache.includes(hash) // hash 不在data里面
+		) {
+			const getImgIdRes = await getImgIdFromHash(vault, hash);
+			// const imgId = getImgIdRes.upload_file.image_id;
+			const imgState = getImgIdRes.upload_file.state;
+			const uploadToken = getImgIdRes.upload_token;
+			console.log("img state:", imgState);
+			console.log("img hash:", hash);
 
-		if (imgState === 2) {
-			await uploadImg(vault, hash, imgLink, uploadToken);
+			if (imgState === 2) {
+				await uploadImg(vault, hash, imgLink, uploadToken);
+			}
+			if (typeof data.cache !== "object" || data.cache === null) {
+				await dataUtil.updateData(vault, { cache: [hash] });
+			} else {
+				await dataUtil.updateData(vault, {
+					cache: [...data.cache, hash],
+				});
+			}
 		}
 		// const imgStatus = await new Promise<any>((resolve, reject) => {
 		//   const interval = setInterval(async () => {
