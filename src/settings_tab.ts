@@ -189,5 +189,53 @@ export class ZhihuSettingTab extends PluginSettingTab {
 					}),
 				);
 			});
+
+		// If send read to Zhihu
+		new Setting(containerEl)
+			.setName("Send Read to Zhihu")
+			.setDesc(
+				"Send read information to Zhihu when you click the slide view articles or answers",
+			)
+			.addToggle((toggle) =>
+				toggle
+					.setValue(settings.sendReadToZhihu)
+					.onChange(async (value) => {
+						try {
+							await saveSettings(this.app.vault, {
+								sendReadToZhihu: value,
+							});
+						} catch (e) {
+							console.error(
+								"Failed to save sendReadToZhihu setting:",
+								e,
+							);
+						}
+					}),
+			);
+
+		// // Recommend Count setting
+		// new Setting(containerEl)
+		// 	.setName("Recommendation Count")
+		// 	.setDesc(
+		// 		"Number of recommended items to fetch from Zhihu API (5-12)",
+		// 	)
+		// 	.addSlider((slider) =>
+		// 		slider
+		// 			.setLimits(5, 12, 1)
+		// 			.setValue(settings.recommendCount)
+		// 			.setDynamicTooltip()
+		// 			.onChange(async (value) => {
+		// 				try {
+		// 					await saveSettings(this.app.vault, {
+		// 						recommendCount: value,
+		// 					});
+		// 				} catch (e) {
+		// 					console.error(
+		// 						"Failed to save recommendCount setting:",
+		// 						e,
+		// 					);
+		// 				}
+		// 			}),
+		// 	);
 	}
 }

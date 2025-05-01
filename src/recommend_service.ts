@@ -1,6 +1,7 @@
 import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 import { Vault, Notice, requestUrl } from "obsidian";
+import { loadSettings } from "./settings";
 
 export interface Recommendation {
 	id: string;
@@ -15,6 +16,7 @@ export interface Recommendation {
 export async function getRecommend(vault: Vault, url: string) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -27,7 +29,7 @@ export async function getRecommend(vault: Vault, url: string) {
 		const response = await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",

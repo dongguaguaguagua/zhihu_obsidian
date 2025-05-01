@@ -7,6 +7,7 @@ import * as cookies from "./cookies";
 import * as imageService from "./image_service";
 import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
+import { loadSettings } from "./settings";
 
 export class ZhihuQuestionLinkModal extends Modal {
 	inputEl: TextComponent;
@@ -167,6 +168,7 @@ async function patchDraft(
 ) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -182,7 +184,7 @@ async function patchDraft(
 		// 		url: url,
 		// 		headers: {
 		// 			"User-Agent":
-		// 				data.settings.user_agent,
+		// 				settings.user_agent,
 		// 			"Accept-Encoding": "gzip, deflate, br, zstd",
 		// 			"Content-Type": "application/json",
 		// 			"accept-language":
@@ -208,7 +210,7 @@ async function patchDraft(
 		await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
@@ -247,6 +249,7 @@ async function publishAnswerDraft(
 ) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -261,7 +264,7 @@ async function publishAnswerDraft(
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/api/v4/content/publish`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":

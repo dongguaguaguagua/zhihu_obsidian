@@ -8,6 +8,7 @@ import * as cookies from "./cookies";
 import * as imageService from "./image_service";
 import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
+import { loadSettings } from "./settings";
 
 export async function publishCurrentFile(app: App) {
 	const activeFile = app.workspace.getActiveFile();
@@ -185,6 +186,7 @@ export async function createNewZhihuArticle(app: App) {
 async function newDraft(vault: Vault, title: string) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -197,7 +199,7 @@ async function newDraft(vault: Vault, title: string) {
 		const response = await requestUrl({
 			url: `https://zhuanlan.zhihu.com/api/articles/drafts`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
@@ -236,6 +238,7 @@ async function newDraft(vault: Vault, title: string) {
 async function patchDraft(vault: Vault, id: string, patchBody: any) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -249,7 +252,7 @@ async function patchDraft(vault: Vault, id: string, patchBody: any) {
 		await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
@@ -286,6 +289,7 @@ async function publishDraft(
 ) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -300,7 +304,7 @@ async function publishDraft(
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/api/v4/content/publish`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":
@@ -373,6 +377,7 @@ async function checkQuestion(
 ) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -387,7 +392,7 @@ async function checkQuestion(
 		await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":

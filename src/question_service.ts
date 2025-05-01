@@ -24,7 +24,7 @@ export {};
 // 			url: `https://www.zhihu.com/api/v3/feed/topstory/recommend?action=down&ad_interval=-10&desktop=true&page_number=7`,
 // 			headers: {
 // 				"User-Agent":
-// 					data.settings.user_agent,
+// 					settings.user_agent,
 // 				"accept-language":
 // 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
 // 				referer: "https://www.zhihu.com/question/1897565739235398916",

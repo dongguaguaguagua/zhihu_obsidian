@@ -6,6 +6,7 @@ import { fileTypeFromBuffer } from "file-type";
 import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 import * as file from "./files";
+import { loadSettings } from "./settings";
 
 async function getImgIdFromHash(vault: Vault, imgHash: string) {
 	try {
@@ -79,7 +80,7 @@ async function uploadImg(
 	uploadToken: any,
 ) {
 	try {
-		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const imgBuffer = fs.readFileSync(imgLink);
 		const arrayBuffer = imgBuffer.buffer.slice(
 			imgBuffer.byteOffset,
@@ -105,7 +106,7 @@ async function uploadImg(
 		const request = {
 			url: `https://zhihu-pics-upload.zhimg.com/v2-${imgHash}`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": mimeType,
 				"Accept-Language":
@@ -135,6 +136,7 @@ async function uploadImg(
 async function fetchImgStatus(vault: Vault, id: string, imgId: string) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -146,7 +148,7 @@ async function fetchImgStatus(vault: Vault, id: string, imgId: string) {
 		const response = await requestUrl({
 			url: `https://api.zhihu.com/images/${imgId}`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",

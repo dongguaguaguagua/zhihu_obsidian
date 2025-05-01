@@ -1,6 +1,7 @@
 import { Vault, Notice, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
 import * as cookies from "./cookies";
+import { loadSettings } from "./settings";
 
 export async function autoCompleteTopic(
 	vault: Vault,
@@ -9,6 +10,7 @@ export async function autoCompleteTopic(
 ) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -22,7 +24,7 @@ export async function autoCompleteTopic(
 				`https://zhuanlan.zhihu.com/api/autocomplete/topics?token=${topic}&max_matches=5&use_similar=0&topic_filter=1`,
 			),
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -53,6 +55,7 @@ export async function autoCompleteTopic(
 export async function topics2Draft(vault: Vault, id: string, topics: any) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookies.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -65,7 +68,7 @@ export async function topics2Draft(vault: Vault, id: string, topics: any) {
 		const response = await requestUrl({
 			url: `https://zhuanlan.zhihu.com/api/articles/${id}/topics`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"accept-language":

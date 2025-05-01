@@ -9,7 +9,7 @@ import {
 	Vault,
 	TFile,
 } from "obsidian";
-import * as dataUtil from "./data";
+import { loadSettings } from "./settings";
 
 // 定义 autoCompletePeople 返回的数据结构
 interface PeopleEntry {
@@ -34,11 +34,11 @@ export async function autoCompletePeople(
 	people: string,
 ): Promise<PeopleEntry[]> {
 	try {
-		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/people/autocomplete?token=${encodeURI(people)}&max_matches=10&use_similar=0`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",

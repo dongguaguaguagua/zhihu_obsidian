@@ -1,11 +1,4 @@
-import {
-	App,
-	Editor,
-	MarkdownView,
-	Plugin,
-	WorkspaceLeaf,
-	Notice,
-} from "obsidian";
+import { Editor, MarkdownView, Plugin, WorkspaceLeaf, Notice } from "obsidian";
 
 import { MentionSuggest } from "./member_mention";
 import * as login from "./login_service";
@@ -13,18 +6,15 @@ import * as publish from "./publish_service";
 import { ZhihuSlidesView } from "./sildes_view";
 import * as answer from "./answer_service";
 import { ZhihuSettingTab } from "./settings_tab";
-import { loadData } from "./data";
 import { loadIcons } from "./icon";
+import { loadSettings } from "./settings";
 const SLIDES_VIEW_TYPE = "zhihu-slides-view";
 
 export default class ZhihuObPlugin extends Plugin {
 	async onload() {
-		const data = await loadData(this.app.vault);
+		const settings = await loadSettings(this.app.vault);
 		this.registerEditorSuggest(
-			new MentionSuggest(
-				this.app,
-				data.settings.restrictToZhihuTag || false,
-			),
+			new MentionSuggest(this.app, settings.restrictToZhihuTag),
 		);
 		await login.checkIsUserLogin(this.app.vault);
 

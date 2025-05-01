@@ -9,6 +9,7 @@ import { HotList, loadHotList } from "./hot_lists_service";
 import { htmlToMd } from "./html_to_markdown";
 import { addFrontmatter } from "./frontmatter";
 import { touchToRead } from "./read_service";
+import { loadSettings } from "./settings";
 
 export class ZhihuSlidesView extends View {
 	private recommendations: Recommendation[] = [];
@@ -146,6 +147,7 @@ export class ZhihuSlidesView extends View {
 			(this.containerEl.querySelector(
 				".zhihu-slides-view .silde-list-container ul",
 			) as HTMLElement);
+		const settings = await loadSettings(this.vault);
 		list.empty();
 		const response = await getRecommend(this.vault, url);
 		console.log(response);
@@ -165,11 +167,13 @@ export class ZhihuSlidesView extends View {
 			excerpt.innerHTML = `<b>${recommendation.authorName}</b>: ${recommendation.excerpt}`;
 
 			item.onClickEvent(async () => {
-				await touchToRead(
-					this.vault,
-					recommendation.type,
-					recommendation.id,
-				);
+				if (settings.sendReadToZhihu !== false) {
+					await touchToRead(
+						this.vault,
+						recommendation.type,
+						recommendation.id,
+					);
+				}
 				this.openContent(
 					recommendation.title,
 					recommendation.authorName,
@@ -187,6 +191,7 @@ export class ZhihuSlidesView extends View {
 			(this.containerEl.querySelectorAll(
 				".zhihu-slides-view .silde-list-container ul",
 			)[1] as HTMLElement);
+		const settings = await loadSettings(this.vault);
 		list.empty();
 		const response = await getFollows(this.vault, url);
 		console.log(response);
@@ -206,7 +211,9 @@ export class ZhihuSlidesView extends View {
 			excerpt.innerHTML = `<b>${follow.action_text}</b>: ${follow.excerpt}`;
 
 			item.onClickEvent(async () => {
-				await touchToRead(this.vault, follow.type, follow.id);
+				if (settings.sendReadToZhihu !== false) {
+					await touchToRead(this.vault, follow.type, follow.id);
+				}
 				this.openContent(
 					follow.title,
 					follow.authorName,
@@ -254,7 +261,7 @@ export class ZhihuSlidesView extends View {
 		);
 		const filePath = `${folderPath}/${fileName}`;
 
-		let folder = this.vault.getAbstractFileByPath(folderPath);
+		const folder = this.vault.getAbstractFileByPath(folderPath);
 		if (!folder) {
 			await this.vault.createFolder(folderPath);
 		}
@@ -268,6 +275,17 @@ export class ZhihuSlidesView extends View {
 
 		const leaf = this.app.workspace.getLeaf();
 		await leaf.openFile(file as any);
+	}
+}
+
+function changePageNumber(url: string, pageNumber: number): string {
+	try {
+		const parsedUrl = new URL(url);
+		parsedUrl.searchParams.set("page_number", pageNumber.toString());
+		return parsedUrl.toString();
+	} catch (error) {
+		console.error("Invalid URL:", error);
+		return url;
 	}
 }
 

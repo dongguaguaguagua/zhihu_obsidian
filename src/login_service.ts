@@ -2,6 +2,7 @@ import { App, Vault, Notice, Modal, requestUrl } from "obsidian";
 import QRCode from "qrcode";
 import * as dataUtil from "./data";
 import * as cookieUtil from "./cookies";
+import { loadSettings } from "./settings";
 
 export class QRCodeModal extends Modal {
 	private link: string;
@@ -117,11 +118,11 @@ export async function checkIsUserLogin(vault: Vault) {
 
 async function initCookies(vault: Vault) {
 	try {
-		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const response = await requestUrl({
 			url: "https://www.zhihu.com",
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
@@ -148,6 +149,7 @@ async function initCookies(vault: Vault) {
 async function signInNext(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -156,7 +158,7 @@ async function signInNext(vault: Vault) {
 		await requestUrl({
 			url: "https://www.zhihu.com/signin?next=%2F",
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
@@ -183,6 +185,7 @@ async function signInNext(vault: Vault) {
 async function initUdidCookies(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -192,7 +195,7 @@ async function initUdidCookies(vault: Vault) {
 		const response = await requestUrl({
 			url: "https://www.zhihu.com/udid",
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -222,6 +225,7 @@ async function initUdidCookies(vault: Vault) {
 async function scProfiler(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -230,7 +234,7 @@ async function scProfiler(vault: Vault) {
 		await requestUrl({
 			url: "https://www.zhihu.com/sc-profiler",
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Content-Type": "application/json",
 				"Accept-Language":
@@ -263,6 +267,7 @@ async function scProfiler(vault: Vault) {
 async function getLoginLink(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -272,7 +277,7 @@ async function getLoginLink(vault: Vault) {
 		const response = await requestUrl({
 			url: "https://www.zhihu.com/api/v3/account/api/login/qrcode",
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -300,6 +305,7 @@ async function getLoginLink(vault: Vault) {
 async function captchaSignIn(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -309,7 +315,7 @@ async function captchaSignIn(vault: Vault) {
 		const response = await requestUrl({
 			url: "https://www.zhihu.com/api/v3/oauth/captcha/v2?type=captcha_sign_in",
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -338,6 +344,7 @@ async function captchaSignIn(vault: Vault) {
 async function fetchQRcodeStatus(vault: Vault, token: string) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -349,7 +356,7 @@ async function fetchQRcodeStatus(vault: Vault, token: string) {
 		const response = await requestUrl({
 			url: url,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"Accept-Language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -377,6 +384,7 @@ async function fetchQRcodeStatus(vault: Vault, token: string) {
 async function signInZhihu(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -388,7 +396,7 @@ async function signInZhihu(vault: Vault) {
 		const response = await requestUrl({
 			url: `https://www.zhihu.com`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
@@ -420,6 +428,7 @@ async function signInZhihu(vault: Vault) {
 async function prodTokenRefresh(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -432,7 +441,7 @@ async function prodTokenRefresh(vault: Vault) {
 		await requestUrl({
 			url: `https://www.zhihu.com/api/account/prod/token/refresh`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
@@ -464,6 +473,7 @@ async function prodTokenRefresh(vault: Vault) {
 async function getUserInfo(vault: Vault) {
 	try {
 		const data = await dataUtil.loadData(vault);
+		const settings = await loadSettings(vault);
 		const cookiesHeader = cookieUtil.cookiesHeaderBuilder(data, [
 			"_zap",
 			"_xsrf",
@@ -476,7 +486,7 @@ async function getUserInfo(vault: Vault) {
 		const response = await requestUrl({
 			url: `https://www.zhihu.com/api/v4/me?include=is_realname`,
 			headers: {
-				"User-Agent": data.settings.user_agent,
+				"User-Agent": settings.user_agent,
 				"Accept-Encoding": "gzip, deflate, br, zstd",
 				"accept-language":
 					"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",

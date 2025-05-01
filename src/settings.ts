@@ -5,6 +5,8 @@ import { loadData, updateData } from "./data";
 interface ZhihuSettings {
 	user_agent: string;
 	restrictToZhihuTag: boolean;
+	sendReadToZhihu: boolean;
+	recommendCount: number;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -12,6 +14,8 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
 	user_agent:
 		"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36",
 	restrictToZhihuTag: false,
+	sendReadToZhihu: true,
+	recommendCount: 7,
 };
 
 /**
