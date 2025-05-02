@@ -42,7 +42,6 @@ export async function getFollows(vault: Vault, url: string) {
 		});
 		return response.json;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取关注失败: ${error}`);
 	}
 }

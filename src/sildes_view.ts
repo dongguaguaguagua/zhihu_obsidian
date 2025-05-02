@@ -33,7 +33,7 @@ export class ZhihuSlidesView extends View {
 	}
 
 	getDisplayText(): string {
-		return "Zhihu Slides";
+		return "Zhihu slides";
 	}
 
 	getIcon(): string {
@@ -150,7 +150,6 @@ export class ZhihuSlidesView extends View {
 		const settings = await loadSettings(this.vault);
 		list.empty();
 		const response = await getRecommend(this.vault, url);
-		console.log(response);
 		this.recommendations = loadRecommendations(response);
 		this.nextRecommendUrl = response.paging.next;
 		this.prevRecommendUrl = response.paging.previous;
@@ -194,7 +193,6 @@ export class ZhihuSlidesView extends View {
 		const settings = await loadSettings(this.vault);
 		list.empty();
 		const response = await getFollows(this.vault, url);
-		console.log(response);
 		this.follows = loadFollows(response);
 		this.nextFollowUrl = response.paging.next;
 		this.prevFollowUrl = response.paging.previous;

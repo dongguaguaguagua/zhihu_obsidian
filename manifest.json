@@ -1,12 +1,12 @@
 {
-	"id": "zhihu-on-obsidian",
+	"id": "zhihu-obsidian",
 	"name": "Zhihu Obsidian",
-	"version": "0.2.0",
+	"version": "0.2.1",
 	"minAppVersion": "0.15.0",
 	"description": "Enable you to publish your articles and answers to Zhihu",
 	"author": "dgg",
 	"authorUrl": "https://github.com/dongguaguaguagua",
-	"fundingUrl": "https://github.com/dongguaguaguagua",
+	"fundingUrl": "",
 	"css": "styles.css",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }

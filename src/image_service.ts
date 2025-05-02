@@ -1,4 +1,4 @@
-import { FileSystemAdapter, Vault, Notice, requestUrl } from "obsidian";
+import { Vault, Notice, requestUrl } from "obsidian";
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
@@ -44,13 +44,11 @@ async function getImgIdFromHash(vault: Vault, imgHash: string) {
 		new Notice(`获取图片id成功`);
 		return response.json;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取图片id失败: ${error}`);
 	}
 }
 
 export async function uploadCover(vault: Vault, cover: string) {
-	console.log(cover);
 	const match = cover.match(/\[\[(.*?)\]\]/);
 	if (!match) {
 		new Notice("封面图片格式错误");
@@ -169,7 +167,6 @@ async function fetchImgStatus(vault: Vault, id: string, imgId: string) {
 		new Notice(`获取图片status成功`);
 		return response.json;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取图片status失败: ${error}`);
 	}
 }
@@ -179,10 +176,6 @@ export async function transImgToZhihuLink(
 	id: string,
 	md: string,
 ): Promise<string> {
-	const adapter = vault.adapter;
-	if (!(adapter instanceof FileSystemAdapter)) {
-		throw new Error("Vault is not using a local file system adapter.");
-	}
 	const matches = [...md.matchAll(/!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
 	for (const match of matches) {
 		const data = await dataUtil.loadData(vault);
@@ -203,8 +196,6 @@ export async function transImgToZhihuLink(
 			// const imgId = getImgIdRes.upload_file.image_id;
 			const imgState = getImgIdRes.upload_file.state;
 			const uploadToken = getImgIdRes.upload_token;
-			console.log("img state:", imgState);
-			console.log("img hash:", hash);
 
 			if (imgState === 2) {
 				await uploadImg(vault, hash, imgLink, uploadToken);
@@ -221,7 +212,6 @@ export async function transImgToZhihuLink(
 		//   const interval = setInterval(async () => {
 		//     try {
 		//       const status = await fetchImgStatus(id, imgId);
-		//       console.log("轮询中:", status);
 		//       if (status.status === "success") {
 		//         clearInterval(interval);
 		//         resolve(status);
@@ -243,7 +233,6 @@ data-watermark-src="" \
 data-private-watermark-src=""/>`;
 		md = md.replace(fullMatch, zhihuImgStr);
 	}
-	console.log(md);
 	return md;
 }
 

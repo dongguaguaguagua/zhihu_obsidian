@@ -42,7 +42,6 @@ export async function getRecommend(vault: Vault, url: string) {
 		});
 		return response.json;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取推荐失败: ${error}`);
 	}
 }

@@ -41,14 +41,8 @@ export async function touchToRead(vault: Vault, type: string, id: string) {
 				items: [[type, id, "read"]],
 			}),
 		});
-		console.log(
-			JSON.stringify({
-				items: [[type, id, "read"]],
-			}),
-		);
 		return response.json;
 	} catch (error) {
-		console.log(error);
 		new Notice(`文章或回答已读失败: ${error}`);
 	}
 }

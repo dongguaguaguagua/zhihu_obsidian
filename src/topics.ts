@@ -47,7 +47,6 @@ export async function autoCompleteTopic(
 		new Notice(`获取话题成功`);
 		return response.json;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取话题失败: ${error}`);
 	}
 }
@@ -89,11 +88,9 @@ export async function topics2Draft(vault: Vault, id: string, topics: any) {
 			method: "POST",
 			body: JSON.stringify(topics),
 		});
-		console.log(response);
 		new Notice(`给文章赋予话题成功`);
 		// return response.json
 	} catch (error) {
-		console.log(error);
 		new Notice(`给文章赋予话题失败: ${error}`);
 	}
 }

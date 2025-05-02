@@ -19,24 +19,17 @@ export default class ZhihuObPlugin extends Plugin {
 		await login.checkIsUserLogin(this.app.vault);
 
 		loadIcons();
-		const zhihuIconEL = this.addRibbonIcon(
-			"zhihu-icon",
-			"Open Zhihu Sildes",
-			() => {
-				this.activateView();
-			},
-		);
+		this.addRibbonIcon("zhihu-icon", "Open Zhihu sildes", () => {
+			this.activateView();
+		});
 		this.registerView(
 			SLIDES_VIEW_TYPE,
 			(leaf) => new ZhihuSlidesView(leaf, this.app.vault),
 		);
 
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText("Status Bar Text");
-
 		this.addCommand({
 			id: "zhihu-qrcode-login",
-			name: "Zhihu QRCode Login",
+			name: "Zhihu QRCode login",
 			callback: async () => {
 				await login.zhihuQRcodeLogin(this.app);
 			},
@@ -44,7 +37,7 @@ export default class ZhihuObPlugin extends Plugin {
 
 		this.addCommand({
 			id: "zhihu-publish-current-file",
-			name: "Zhihu Publish Current FIle",
+			name: "Zhihu publish current file",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				await publish.publishCurrentFile(this.app);
 			},
@@ -52,7 +45,7 @@ export default class ZhihuObPlugin extends Plugin {
 
 		this.addCommand({
 			id: "create-new-zhihu-article",
-			name: "Create New Zhihu Article",
+			name: "Create new Zhihu article",
 			callback: async () => {
 				await publish.createNewZhihuArticle(this.app);
 			},
@@ -60,7 +53,7 @@ export default class ZhihuObPlugin extends Plugin {
 
 		this.addCommand({
 			id: "create-new-zhihu-answer",
-			name: "Create New Zhihu Answer",
+			name: "Create new Zhihu answer",
 			callback: () => {
 				new answer.ZhihuQuestionLinkModal(
 					this.app,
@@ -76,7 +69,7 @@ export default class ZhihuObPlugin extends Plugin {
 
 		this.addCommand({
 			id: "zhihu-publish-current-answer",
-			name: "Zhihu Publish Current Answer",
+			name: "Zhihu publish current answer",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				await answer.publishCurrentAnswer(this.app);
 			},
@@ -103,13 +96,15 @@ export default class ZhihuObPlugin extends Plugin {
 			workspace.revealLeaf(leaf);
 		} else {
 			new Notice(
-				"Failed to open Zhihu Sildes: Unable to create a sidebar leaf.",
+				"Failed to open Zhihu sildes: unable to create a sidebar leaf.",
 			);
-			console.error("No leaf available for Zhihu Sildes view");
+			console.error("No leaf available for Zhihu sildes view");
 		}
 	}
 
 	onunload() {
-		this.app.workspace.detachLeavesOfType(SLIDES_VIEW_TYPE);
+		// Avoid detaching leaves in onunload
+		// https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines#Don't+detach+leaves+in+%60onunload%60
+		// this.app.workspace.detachLeavesOfType(SLIDES_VIEW_TYPE);
 	}
 }

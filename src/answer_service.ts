@@ -1,4 +1,12 @@
-import { App, TextComponent, Vault, Modal, Notice, requestUrl } from "obsidian";
+import {
+	App,
+	TextComponent,
+	Vault,
+	Modal,
+	Notice,
+	requestUrl,
+	MarkdownView,
+} from "obsidian";
 import * as dataUtil from "./data";
 import * as fm from "./frontmatter";
 import * as render from "./custom_render";
@@ -52,7 +60,7 @@ export class ZhihuQuestionLinkModal extends Modal {
 
 export async function publishCurrentAnswer(app: App) {
 	const activeFile = app.workspace.getActiveFile();
-	const vault = app.vault;
+
 	if (!activeFile) {
 		console.warn("No active file found");
 		return;
@@ -75,39 +83,38 @@ export async function publishCurrentAnswer(app: App) {
 		return;
 	}
 	const questionId = extractQuestionId(questionLink);
-	// 这里链接属性缺失或者为空，都表明未发表回答
 	const status = publishStatus(frontmatter.link);
 	const toc = false;
-	let rawContent = await app.vault.read(activeFile);
-	// 加上推广文字
-	rawContent = addPopularizeStr(rawContent);
+
+	const rawContent = await app.vault.read(activeFile);
 	const rmFmContent = fm.removeFrontmatter(rawContent);
-	// 获取回答的ID
+
 	let answerId = "";
 	switch (status) {
-		case 0: // 未发表，此时不需要新建ID，ID会在发布的结果中获取
+		case 0:
 			break;
-		case 1: // 已发表
+		case 1:
 			answerId = frontmatter.link.replace(
 				`https://www.zhihu.com/question/${questionId}/answer/`,
 				"",
 			);
 			break;
-		case 3: // 无效链接
+		case 3:
 			new Notice("无效链接！");
 			return;
 		default:
 			new Notice("未知错误");
-			break;
+			return;
 	}
+
 	const transedImgContent = await imageService.transImgToZhihuLink(
-		vault,
+		app.vault,
 		answerId,
 		rmFmContent,
 	);
 	let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
-	zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
-	console.log(zhihuHTML);
+	zhihuHTML = addPopularizeStr(zhihuHTML);
+
 	const patchBody = {
 		content: zhihuHTML,
 		draft_type: "normal",
@@ -128,26 +135,24 @@ export async function publishCurrentAnswer(app: App) {
 			thank_inviter: "",
 		},
 	};
-	await patchDraft(vault, questionId!, answerId, patchBody);
-	console.log("patchDraft success");
+
+	await patchDraft(app.vault, questionId!, answerId, patchBody);
+
 	const publishResult = await publishAnswerDraft(
-		vault,
+		app.vault,
 		questionId!,
 		answerId,
 		toc,
 		zhihuHTML,
 		status === 1,
 	);
-	console.log(publishResult);
 	answerId = publishResult.publish.id;
-	console.log(answerId);
+
 	switch (status) {
 		case 0:
-			rawContent = fm.addFrontmatter(
-				rawContent,
-				"link",
-				`https://www.zhihu.com/question/${questionId}/answer/${answerId}`,
-			);
+			await app.fileManager.processFrontMatter(activeFile, (fm) => {
+				fm.link = `https://www.zhihu.com/question/${questionId}/answer/${answerId}`;
+			});
 			new Notice("发布回答成功！");
 			break;
 		case 1:
@@ -155,9 +160,8 @@ export async function publishCurrentAnswer(app: App) {
 			break;
 		default:
 			new Notice("未知错误");
-			break;
+			return;
 	}
-	await app.vault.modify(activeFile, rawContent);
 }
 
 async function patchDraft(
@@ -179,34 +183,6 @@ async function patchDraft(
 		]);
 		const xsrftoken = data.cookies._xsrf;
 		const url = `https://www.zhihu.com/api/v4/questions/${questionId}/draft`;
-		// console.log(
-		// 	utils.toCurl({
-		// 		url: url,
-		// 		headers: {
-		// 			"User-Agent":
-		// 				settings.user_agent,
-		// 			"Accept-Encoding": "gzip, deflate, br, zstd",
-		// 			"Content-Type": "application/json",
-		// 			"accept-language":
-		// 				"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
-		// 			referer: `https://www.zhihu.com/question/${questionId}/answer/${answerId}`,
-		// 			"x-requested-with": "fetch",
-		// 			"x-xsrftoken": xsrftoken,
-		// 			// 'x-zst-81': '3_2.0aR_sn77yn6O92wOB8hPZniUZo02x-7om0CNMDrxTrR2xQRY01T2Z-we8gGHPDRFZG0Y0jQgM7A2pr6P0mRPO7HoY70SfquPmz93mhDQyiqV9ebO1hwOYiiR0ELYuUrxmtDomqU7ynXtOnAoTh_PhRDSTFRC_EqXMywpykbOfrJHMoC2B8XxMSeVO6LosB9OGYUXYJUHq3UwprcxL7UeTvTrf9CCBicS8hggKgCeY68XsagpMBXLKwhO1xJO96LpGADwmDJSfVgcYbLeVmU3MJbO03qtLPD3M2CtKb4omVBS8ave87ggfu9eq1wtVpCYytCL_8vxmCqkw3BYL6gpKJULLhgpK2cfyJhXC6CHMogp1oH39RJSMSqH_QJN_CBFCQqHYwrrCih3__rx1K0tKbCLYIg3XhgcCZuFKzUH9hgHKarLO8MF0ST9ZQXLKeXYC',
-		// 			origin: "https://www.zhihu.com",
-		// 			// 'dnt': '1',
-		// 			// 'sec-gpc': '1',
-		// 			// 'sec-fetch-dest': 'empty',
-		// 			// 'sec-fetch-mode': 'cors',
-		// 			// 'sec-fetch-site': 'same-origin',
-		// 			// 'priority': 'u=4',
-		// 			// 'te': 'trailers',
-		// 			Cookie: cookiesHeader,
-		// 		},
-		// 		method: "PATCH",
-		// 		body: JSON.stringify(patchBody),
-		// 	}),
-		// );
 		await requestUrl({
 			url: url,
 			headers: {
@@ -234,7 +210,6 @@ async function patchDraft(
 		});
 		new Notice(`patch回答成功`);
 	} catch (error) {
-		console.log(error);
 		new Notice(`patch回答失败: ${error}`);
 	}
 }
@@ -343,8 +318,6 @@ async function publishAnswerDraft(
 				},
 			}),
 		});
-		console.log(response.json);
-		console.log(response.json.message);
 		if (response.json.message === "success") {
 			const result = JSON.parse(response.json.data.result);
 			return result;
@@ -353,7 +326,6 @@ async function publishAnswerDraft(
 			new Notice(response.json.message);
 		}
 	} catch (error) {
-		console.log(error);
 		new Notice(`发布回答失败: ${error}`);
 	}
 }
@@ -374,11 +346,10 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
 
 	try {
 		const newFile = await vault.create(filePath, "");
-		console.log(`Created new file: ${filePath}`);
-		let content = "";
-		content = fm.addFrontmatter(content, "tags", "zhihu");
-		content = fm.addFrontmatter(content, "question", questionLink);
-		await vault.modify(newFile, content);
+		await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
+			frontmatter.tags = "zhihu";
+			frontmatter.question = questionLink;
+		});
 		const leaf = workspace.getLeaf(false);
 		await leaf.openFile(newFile);
 		return filePath;

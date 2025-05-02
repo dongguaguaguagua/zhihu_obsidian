@@ -37,7 +37,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
 		// User login status and info
 		new Setting(containerEl)
-			.setName("My Account")
+			.setName("My account")
 			.setDesc("Manage your Zhihu login status")
 			.then((setting) => {
 				if (this.isLoggedIn && this.userInfo) {
@@ -130,11 +130,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
 		// User Agent setting
 		const settings = await loadSettings(this.app.vault);
 		new Setting(containerEl)
-			.setName("User Agent")
-			.setDesc("Custom User Agent for Zhihu API requests")
+			.setName("User agent")
+			.setDesc("Custom user agent for Zhihu API requests")
 			.addText((text) =>
 				text
-					.setPlaceholder("Enter User Agent")
+					.setPlaceholder("Enter user agent")
 					.setValue(settings.user_agent)
 					.onChange(async (value) => {
 						try {
@@ -142,7 +142,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
 								user_agent: value,
 							});
 						} catch (e) {
-							console.error("Failed to save User Agent:", e);
+							console.error("Failed to save user agent:", e);
 						}
 					}),
 			);
@@ -172,7 +172,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
 		// Clear Image Cahce in `data.cache`
 		new Setting(containerEl)
-			.setName("Clear Image Cache")
+			.setName("Clear image cache")
 			.setDesc(
 				"With image cache, you can reduce access requency to the Zhihu API",
 			)
@@ -182,9 +182,9 @@ export class ZhihuSettingTab extends PluginSettingTab {
 					button.setButtonText("Clear").onClick(async () => {
 						try {
 							await deleteData(this.app.vault, "cache");
-							new Notice("Image Cache Cleared!");
+							new Notice("Image cache cleared!");
 						} catch (e) {
-							console.error("Failed to Clear Image Cache", e);
+							console.error("Failed to clear image cache", e);
 						}
 					}),
 				);
@@ -192,7 +192,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
 		// If send read to Zhihu
 		new Setting(containerEl)
-			.setName("Send Read to Zhihu")
+			.setName("Send read to Zhihu")
 			.setDesc(
 				"Send read information to Zhihu when you click the slide view articles or answers",
 			)

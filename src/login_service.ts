@@ -91,7 +91,6 @@ export async function zhihuQRcodeLogin(app: App) {
 			const zc0_cookie = cookieUtil.getCookiesFromHeader(response);
 			await dataUtil.updateData(vault, { cookies: zc0_cookie });
 			await dataUtil.updateData(vault, { bearer: res });
-			new Notice("获取z_c0 cookie成功");
 			await signInZhihu(vault);
 			await prodTokenRefresh(vault);
 			await getUserInfo(vault);
@@ -175,7 +174,6 @@ async function signInNext(vault: Vault) {
 			},
 			method: "GET",
 		});
-		new Notice("重定向至sign in界面成功");
 	} catch (error) {
 		new Notice(`重定向至sign in界面失败：${error}`);
 	}
@@ -215,7 +213,6 @@ async function initUdidCookies(vault: Vault) {
 			method: "POST",
 		});
 		const udid_cookies = cookieUtil.getCookiesFromHeader(response);
-		new Notice("获取UDID成功");
 		await dataUtil.updateData(vault, { cookies: udid_cookies });
 	} catch (error) {
 		new Notice(`获取UDID失败：${error}`);
@@ -258,7 +255,6 @@ async function scProfiler(vault: Vault) {
 			]),
 			method: "POST",
 		});
-		new Notice("sc-profiler成功");
 	} catch (error) {
 		new Notice(`sc-profiler失败：${error}`);
 	}
@@ -331,9 +327,7 @@ async function captchaSignIn(vault: Vault) {
 			},
 			method: "GET",
 		});
-		console.log(response);
 		const cap_cookies = cookieUtil.getCookiesFromHeader(response);
-		new Notice("获取captcha_session_v2成功");
 		await dataUtil.updateData(vault, { cookies: cap_cookies });
 	} catch (error) {
 		new Notice(`获取captcha_session_v2失败:${error}`);
@@ -374,7 +368,6 @@ async function fetchQRcodeStatus(vault: Vault, token: string) {
 		new Notice(`扫描状态: ${response.json.status}`);
 		return response;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取扫描状态失败: ${error}`);
 	}
 }
@@ -415,11 +408,9 @@ async function signInZhihu(vault: Vault) {
 			method: "GET",
 		});
 		const new_cookies = cookieUtil.getCookiesFromHeader(response);
-		new Notice(`获取q_c1 cookie成功`);
 		await dataUtil.updateData(vault, { cookies: new_cookies });
 		return response;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取q_c1 cookie失败: ${error}`);
 	}
 }
@@ -459,12 +450,7 @@ async function prodTokenRefresh(vault: Vault) {
 			},
 			method: "POST",
 		});
-		// const new_cookies = cookieUtil.getCookiesFromHeader(response)
-		// console.log("new cookies:", new_cookies)
-		new Notice(`访问prod/token/refresh成功`);
-		// await dataUtil.updateData(vault, { cookies: new_cookies});
 	} catch (error) {
-		console.log(error);
 		new Notice(`访问prod/token/refresh失败: ${error}`);
 	}
 }
@@ -507,13 +493,10 @@ async function getUserInfo(vault: Vault) {
 		});
 		const new_BEC = cookieUtil.getCookiesFromHeader(response);
 		const userInfo = response.json;
-		console.log("new BEC:", new_BEC);
-		// new Notice(`获取用户信息成功成功`)
 		new Notice(`欢迎！${userInfo.name}`);
 		await dataUtil.updateData(vault, { cookies: new_BEC });
 		await dataUtil.updateData(vault, { userInfo: userInfo });
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取用户信息失败: ${error}`);
 	}
 }

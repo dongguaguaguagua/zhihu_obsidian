@@ -67,7 +67,6 @@ export async function autoCompletePeople(
 			empty: entry[7],
 		}));
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取知友失败: ${error}`);
 		return [];
 	}

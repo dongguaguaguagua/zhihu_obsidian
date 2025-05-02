@@ -38,7 +38,7 @@ export async function publishCurrentFile(app: App) {
 	const status = publishStatus(frontmatter.link);
 	const title = frontmatter.title || "untitled";
 	const toc = false;
-	let rawContent = await app.vault.read(activeFile);
+	const rawContent = await app.vault.read(activeFile);
 	const rmFmContent = fm.removeFrontmatter(rawContent);
 	// 获取文章的ID，如果未发表则新建一个。
 	let articleId = "";
@@ -83,7 +83,6 @@ export async function publishCurrentFile(app: App) {
 	);
 	let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
 	zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
-	console.log(zhihuHTML);
 	const patchBody = {
 		title: title,
 		content: zhihuHTML,
@@ -127,21 +126,22 @@ export async function publishCurrentFile(app: App) {
 	const url = publishResult.publish.url;
 	switch (status) {
 		case 0:
-			rawContent = fm.addFrontmatter(rawContent, "link", url);
+		case 2:
+			await app.fileManager.processFrontMatter(
+				activeFile,
+				(frontmatter) => {
+					frontmatter.link = url;
+				},
+			);
 			new Notice("发布文章成功！");
 			break;
 		case 1:
 			new Notice("更新文章成功！");
 			break;
-		case 2:
-			rawContent = fm.updateFrontmatter(rawContent, "link", url);
-			new Notice("发布文章成功！");
-			break;
 		default:
 			new Notice("未知错误");
 			break;
 	}
-	await app.vault.modify(activeFile, rawContent);
 }
 
 export async function createNewZhihuArticle(app: App) {
@@ -158,22 +158,16 @@ export async function createNewZhihuArticle(app: App) {
 		counter++;
 	}
 
-	// 创建新文件
 	try {
 		const newFile = await vault.create(filePath, "");
 		const defaultTitle = "untitled";
-		console.log(`Created new file: ${filePath}`);
-		let content = "";
-		content = fm.addFrontmatter(content, "tags", "zhihu");
-		content = fm.addFrontmatter(content, "title", defaultTitle);
-		content = fm.addFrontmatter(content, "topics", "");
 		const articleId = await newDraft(vault, defaultTitle);
-		content = fm.addFrontmatter(
-			content,
-			"link",
-			`https://zhuanlan.zhihu.com/p/${articleId}/edit`,
-		);
-		await vault.modify(newFile, content);
+		await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
+			frontmatter.tags = "zhihu";
+			frontmatter.title = defaultTitle;
+			frontmatter.topics = "";
+			frontmatter.link = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
+		});
 		const leaf = workspace.getLeaf(false);
 		await leaf.openFile(newFile);
 		return filePath;
@@ -227,10 +221,8 @@ async function newDraft(vault: Vault, title: string) {
 		});
 		const articleId = response.json.id;
 		new Notice(`获取文章ID成功`);
-		console.log("articleId: ", articleId);
 		return articleId;
 	} catch (error) {
-		console.log(error);
 		new Notice(`生成新的草稿失败: ${error}`);
 	}
 }
@@ -276,7 +268,6 @@ async function patchDraft(vault: Vault, id: string, patchBody: any) {
 		});
 		new Notice(`patch文章成功`);
 	} catch (error) {
-		console.log(error);
 		new Notice(`patch文章失败: ${error}`);
 	}
 }
@@ -365,7 +356,6 @@ async function publishDraft(
 			return result;
 		}
 	} catch (error) {
-		console.log(error);
 		new Notice(`发布文章失败: ${error}`);
 	}
 }
@@ -418,7 +408,6 @@ async function checkQuestion(
 		});
 		new Notice(`添加回答成功`);
 	} catch (error) {
-		console.log(error);
 		new Notice(`添加回答失败: ${error}`);
 	}
 }

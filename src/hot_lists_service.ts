@@ -40,7 +40,6 @@ async function getHotLists(vault: Vault) {
 		});
 		return response.json;
 	} catch (error) {
-		console.log(error);
 		new Notice(`获取热榜失败: ${error}`);
 	}
 }
