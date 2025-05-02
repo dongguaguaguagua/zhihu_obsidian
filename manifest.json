@@ -1,7 +1,7 @@
 {
 	"id": "zhihu-on-obsidian",
 	"name": "Zhihu Obsidian",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"minAppVersion": "0.15.0",
 	"description": "Enable you to publish your articles and answers to Zhihu",
 	"author": "dgg",
