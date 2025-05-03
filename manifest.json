@@ -1,6 +1,6 @@
 {
 	"id": "zhihu",
-	"name": "Zhihu Obsidian",
+	"name": "Zhihu",
 	"version": "0.2.1",
 	"minAppVersion": "0.15.0",
 	"description": "Enable you to publish your articles and answers to Zhihu",
