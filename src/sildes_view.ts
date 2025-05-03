@@ -163,7 +163,10 @@ export class ZhihuSlidesView extends View {
 
 			const excerpt = item.createEl("p");
 			excerpt.addClass("silde-excerpt");
-			excerpt.innerHTML = `<b>${recommendation.authorName}</b>: ${recommendation.excerpt}`;
+			excerpt.createEl("b", {
+				text: recommendation.authorName,
+			});
+			excerpt.appendText(": " + recommendation.excerpt);
 
 			item.onClickEvent(async () => {
 				if (settings.sendReadToZhihu !== false) {
@@ -206,7 +209,10 @@ export class ZhihuSlidesView extends View {
 
 			const excerpt = item.createEl("p");
 			excerpt.addClass("silde-excerpt");
-			excerpt.innerHTML = `<b>${follow.action_text}</b>: ${follow.excerpt}`;
+			excerpt.createEl("b", {
+				text: follow.action_text,
+			});
+			excerpt.appendText(": " + follow.excerpt);
 
 			item.onClickEvent(async () => {
 				if (settings.sendReadToZhihu !== false) {
@@ -240,7 +246,10 @@ export class ZhihuSlidesView extends View {
 
 			const excerpt = item.createEl("p");
 			excerpt.addClass("silde-excerpt");
-			excerpt.innerHTML = `<b>🔥${hot.detail_text}🔥: </b> ${hot.excerpt}`;
+			excerpt.createEl("b", {
+				text: `🔥${hot.detail_text}🔥`,
+			});
+			excerpt.appendText(": " + hot.excerpt);
 		});
 	}
 
