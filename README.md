@@ -1,63 +1,137 @@
 # Zhihu On Obsidian
 
+[中文 README](./README_CN.md)
 
+## Features
 
-## Milestone: 0.1.0
+This plugin allows you publish your markdown file directly to [Zhihu](https://www.zhihu.com), a Chinese question-answer platform. The feature includes:
 
-- [x] 添加：二维码登录
-- [x] 添加：将当前文章发表到知乎
-- [x] 添加：图片，图片备注
-- [x] 添加：新建知乎文章
-- [x] 添加：左侧栏推荐、热榜、关注
-- [x] 添加：左侧栏文章点击后在obsidian中查看
-- [x] 添加：推荐、热榜、关注刷新按钮
-- [x] 添加：将文章发布到回答
-- [x] 添加：发布回答
-- [x] 添加：@可以艾特其他知乎用户
-- [x] 添加：链接card模式
-- [x] 添加：文章封面
-- [x] 添加：CSS添加图片备注
-- [x] 重构：多文件重构
+* create and publish Zhihu articles
+* create and publish Zhihu answers
+* submit your article to Zhihu question.
+* browse customized Zhihu recommendations, followings and hot lists.
 
+## Usage
 
-## Milestone: 0.2.0
+### Login to Zhihu
 
-- [ ] 添加：创作声明
-- [x] 添加：图片缓存
-- [x] 添加：设置项
-	- [x] 设置：头像、昵称
-	- [x] 设置：登录登出
-	- [x] 设置：清除缓存
-	- [x] 设置：自定义 user agent
-	- [x] 设置：在 zhihu 标签外禁用插件的@功能
-	- [x] 设置：向知乎发送已读（默认为true）
-- [x] 添加：左侧栏图标
-- [x] 添加：文章由 `知乎 on obsidian` 创作并发布
-- [x] 美化：左侧栏的CSS以及黑暗和明亮模式的统一性
-- [x] 添加：图片路径错误也可以正常发布
-- [x] 添加：点击左侧栏的回答或文章后在知乎已读
+You can login to Zhihu by the command `Zhihu QRCode login`, then you will see a QRCode. Open Zhihu app and scan it, the plugin will fetch all cookies and user data automatically. (**The plugin will never, ever upload your information**)
+
+![image-20250503144240817](./imgs/QRCode.png)
 
 
 
-## Milestone: 0.3.0
+Open the `settings->Zhihu Obsidian`, an account and avatar indicates that the login is successful.
 
-- [ ] 添加：mermaid 支持
-- [ ] 添加：desmos-graph 支持
-- [ ] 添加：参考文献支持
-- [ ] 添加：附件支持
-- [ ] 添加：状态栏显示点赞数、收藏数
-- [ ] 添加：评论查看
-- [ ] 添加：图片不来自本地或知乎图床也可发布
-- [ ] 添加：文章发表到自己的专栏
 
-## Not Planed
 
-- [ ] 添加：定时发布
-- [ ] 添加：微信登录
+![settings](./imgs/settings.jpg)
 
-**需要逆向 `__zse_ck` cookie：**
 
-- [ ] 添加：文章预览
-- [ ] 添加：打开知乎文章或者回答URL
-- [ ] 添加：从问题中查看回答
-- [ ] 添加：搜索功能
+
+### Publish Articles
+
+After you login, you can publish answers and articles to Zhihu. Here is the process:
+
+Open command palette, type `Create new Zhihu article`, the plugin will automatically create a zhihu article draft and a markdown file.
+
+![new_draft](./imgs/new_draft.jpg)
+
+The created markdown file have four properties:
+
+* tags: **required** to have `Zhihu`, or you can't publish.
+* title: default `untitled`, you may change it before publish.
+* topics: default none, you should add some, it is also **required**.
+* link: URL to your draft or articles
+
+After you typed some markdown and ready to publish, you can run command `Zhihu publish current file`. After doing that, the plugin will translate your markdown to Zhihu featured HTML, and publish it to Zhihu. You may **wait a few seconds** before you can actually see the article on Zhihu.
+
+ 
+
+### Publish answers
+
+Open command palette, type `Create new Zhihu answer`, the plugin will ask you to enter the question link. For example, you would like to answer question `https://www.zhihu.com/question/1900539734356390396`. Type the link to the modal and press enter, a new answer draft will be created.
+
+![new_answer_draft](./imgs/new_answer_draft.jpg)
+
+There are no properties you should fulfill, just type your thoughts or experience and run command `Zhihu publish current answer`. That's it, the answer URL then appear in the `link` property. You can also edit your answers anytime with the same command.
+
+It is worth mentioning that **you can't create two answers in one question**, witch means that if you've created an answer (or answer draft) for a question, you can't create it again. In this situation, **you should manually edit properties: tags, questions and link**. Then run publish command will update your answer.
+
+
+
+### Browsing
+
+The plugin can also browse Zhihu recommendations, followings and hot lists. By clicking left side Zhihu icon (Chinese character `知`), you can directly view answers or articles in Obsidian. The markdown file will saved in `vault/zhihu/`
+
+![recommend](./imgs/recommend.jpg)
+
+The LaTeX syntax is shown natively.
+
+![follow](./imgs/follow.jpg)
+
+
+
+## Syntax
+
+### At Zhihu members
+
+Just type `@` and magic appears. You can select anyone by press enter or just click on it. Click the `@` link can bring you to the homepage of the zhihu member.
+
+![at_members](./imgs/at_members.jpg)
+
+
+
+The syntax of at link is `[@name](https://www.zhihu.com/member_id "member_mention + hash")`
+
+### Card links
+
+It also dead easy to change your link into card. For example, you can use that to change GitHub link into a card titled `Github`.
+
+```
+[Github](https://github.com/, "card")
+```
+
+The result:
+
+![github_card](./imgs/github_card.png)
+
+
+
+### Article cover
+
+The plugin also support adding your favorate cover to the article. Just add `cover` entry to properties and select pictures using `[[img]]` syntax. Like that
+
+![cover_example](./imgs/cover_example.jpg)
+
+
+
+## Contribution
+
+Any PRs are welcome.
+
+You can fork this repo to `vault/.obsidian/plugins`, make sure your NodeJS is at least v16
+
+* `npm i`  or `yarn` to install dependencies.
+* `npm run dev` to start compilation in watch mode.
+* `npm run build` to build a release.
+
+
+
+## TODO
+
+- [ ] add: mermaid support
+- [ ] add: desmos-graph support
+- [ ] add: reference syntax
+- [ ] add: upload attachments
+- [ ] add: view upvotes number in status bar
+- [ ] add: view comments
+- [ ] add: upload your images on cloud
+- [ ] add: publish articles to your column
+
+## Support
+
+You can support me by star⭐ the repo!
+
+https://github.com/dongguaguaguagua/zhihu_obsidian/stargazers
+

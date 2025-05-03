@@ -110,9 +110,9 @@ export async function publishCurrentFile(app: App) {
 		}
 	}
 	// 把文章投稿至问题
-	const toAnswer = frontmatter.answer;
-	if (toAnswer) {
-		const questionId = extractQuestionId(toAnswer);
+	const toQuestion = frontmatter.question;
+	if (toQuestion) {
+		const questionId = extractQuestionId(toQuestion);
 		if (questionId) {
 			await checkQuestion(vault, articleId, questionId);
 		}
