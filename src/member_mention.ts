@@ -10,6 +10,7 @@ import {
 	TFile,
 } from "obsidian";
 import { loadSettings } from "./settings";
+import { toCurl } from "./utilities";
 
 // 定义 autoCompletePeople 返回的数据结构
 interface PeopleEntry {
@@ -129,11 +130,6 @@ export class MentionSuggest extends EditorSuggest<MentionSuggestion> {
 		if (suggestion.avatarUrl) {
 			const img = container.createEl("img", { cls: "suggestion-avatar" });
 			img.src = suggestion.avatarUrl;
-			img.style.width = "24px";
-			img.style.height = "24px";
-			img.style.borderRadius = "50%";
-			img.style.marginRight = "8px";
-			img.style.verticalAlign = "middle";
 		}
 
 		container.createSpan({ text: suggestion.displayText });

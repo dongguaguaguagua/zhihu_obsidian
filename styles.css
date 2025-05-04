@@ -9,6 +9,7 @@
 	height: 24px;
 	border-radius: 50%;
 	margin-right: 8px;
+	vertical-align: middle;
 }
 
 .mention-suggestion .suggestion-content span {
@@ -148,4 +149,8 @@
 .zhihu-headline {
 	color: var(--text-muted);
 	font-size: 0.9em;
+}
+
+.zhihu-question-input {
+	width: 100%;
 }

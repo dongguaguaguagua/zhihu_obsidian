@@ -31,7 +31,7 @@ export class ZhihuQuestionLinkModal extends Modal {
 		contentEl.createEl("h2", { text: "请输入知乎问题链接" });
 
 		this.inputEl = new TextComponent(contentEl);
-		this.inputEl.inputEl.style.width = "100%";
+		this.inputEl.inputEl.addClass("zhihu-question-input");
 		this.inputEl.setPlaceholder(
 			"例如：https://www.zhihu.com/question/407774459",
 		);

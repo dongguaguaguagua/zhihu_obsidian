@@ -28,32 +28,32 @@ export default class ZhihuObPlugin extends Plugin {
 		);
 
 		this.addCommand({
-			id: "zhihu-qrcode-login",
-			name: "Zhihu QRCode login",
+			id: "qrcode-login",
+			name: "QRCode login",
 			callback: async () => {
 				await login.zhihuQRcodeLogin(this.app);
 			},
 		});
 
 		this.addCommand({
-			id: "zhihu-publish-current-file",
-			name: "Zhihu publish current file",
+			id: "publish-current-file",
+			name: "Publish current file",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				await publish.publishCurrentFile(this.app);
 			},
 		});
 
 		this.addCommand({
-			id: "create-new-zhihu-article",
-			name: "Create new Zhihu article",
+			id: "create-new-article",
+			name: "Create new article",
 			callback: async () => {
 				await publish.createNewZhihuArticle(this.app);
 			},
 		});
 
 		this.addCommand({
-			id: "create-new-zhihu-answer",
-			name: "Create new Zhihu answer",
+			id: "create-new-answer",
+			name: "Create new answer",
 			callback: () => {
 				new answer.ZhihuQuestionLinkModal(
 					this.app,
@@ -68,8 +68,8 @@ export default class ZhihuObPlugin extends Plugin {
 		});
 
 		this.addCommand({
-			id: "zhihu-publish-current-answer",
-			name: "Zhihu publish current answer",
+			id: "publish-current-answer",
+			name: "Publish current answer",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				await answer.publishCurrentAnswer(this.app);
 			},

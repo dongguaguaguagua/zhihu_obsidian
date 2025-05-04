@@ -1,4 +1,4 @@
-import { Vault, Notice, View, WorkspaceLeaf, setIcon } from "obsidian";
+import { Vault, Notice, View, WorkspaceLeaf, TFile, setIcon } from "obsidian";
 import {
 	Recommendation,
 	loadRecommendations,
@@ -278,10 +278,13 @@ export class ZhihuSlidesView extends View {
 		markdown = addFrontmatter(markdown, "link", url);
 		if (!file) {
 			file = await this.vault.create(filePath, markdown);
+		} else if (!(file instanceof TFile)) {
+			console.error(`Path ${filePath} is not a file`);
+			return;
 		}
 
 		const leaf = this.app.workspace.getLeaf();
-		await leaf.openFile(file as any);
+		await leaf.openFile(file as TFile);
 	}
 }
 
