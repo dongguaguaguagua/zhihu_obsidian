@@ -7,16 +7,16 @@ marked.setOptions({
 export async function mdToZhihuHTML(md: string): Promise<string> {
 	// 处理行间公式 $$...$$
 	md = md.replace(/\$\$([^$]+)\$\$/g, (_match, eq) => {
-		eq = eq.replace(/[\n\r]/g, "");
+		eq = eq.replace(/[\n\r]/g, "") + "\\\\"; // 知乎使用结尾 `\\` 表示行间公式
 		const encoded = encodeURI(eq);
 		return `<img eeimg="1" src="//www.zhihu.com/equation?tex=${encoded}" alt="${eq}"/>`;
 	});
 
-	// 处理行内公式 $...$
-	md = md.replace(/([^\\])\$([^$\n]+?)\$/g, (_match, prefix, eq) => {
+	// 处理行内公式 $...$, 使用负向前瞻(lookbehind)来排除 `\$` 情况
+	md = md.replace(/(?<!\\)\$([^$\n]+?)\$/g, (_match, eq) => {
 		eq = eq.replace(/[\n\r]/g, "");
 		const encoded = encodeURI(eq);
-		return `${prefix}<img eeimg="1" src="//www.zhihu.com/equation?tex=${encoded}" alt="${eq}"/>`;
+		return `<img eeimg="1" src="//www.zhihu.com/equation?tex=${encoded}" alt="${eq}"/>`;
 	});
 
 	const renderer: Partial<Renderer> = {
