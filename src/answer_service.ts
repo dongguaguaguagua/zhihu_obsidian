@@ -1,12 +1,4 @@
-import {
-	App,
-	TextComponent,
-	Vault,
-	Modal,
-	Notice,
-	requestUrl,
-	MarkdownView,
-} from "obsidian";
+import { App, TextComponent, Vault, Modal, Notice, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
 import * as fm from "./frontmatter";
 import * as render from "./custom_render";

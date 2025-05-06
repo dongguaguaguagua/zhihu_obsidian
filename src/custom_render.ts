@@ -1,4 +1,5 @@
 import { marked, Renderer, Tokens } from "marked";
+import markedFootnote from "./footnote";
 
 marked.setOptions({
 	breaks: true,
@@ -49,7 +50,6 @@ export async function mdToZhihuHTML(md: string): Promise<string> {
 		},
 		link(token: Tokens.Link) {
 			const { href, title, text } = token;
-			// 链接卡片语法：`[GitHub](https://www.github.com "card")` 可识别为卡片
 			if (title === "card") {
 				return `<a href="${href}" data-draft-node="block" data-draft-type="link-card">${text}</a>`;
 			} else if (title && title.includes("member_mention")) {
@@ -64,5 +64,6 @@ export async function mdToZhihuHTML(md: string): Promise<string> {
 		},
 	};
 	marked.use({ renderer });
+	marked.use(markedFootnote());
 	return await marked(md);
 }

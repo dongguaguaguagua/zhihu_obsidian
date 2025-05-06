@@ -10,7 +10,6 @@ import {
 	TFile,
 } from "obsidian";
 import { loadSettings } from "./settings";
-import { toCurl } from "./utilities";
 
 // 定义 autoCompletePeople 返回的数据结构
 interface PeopleEntry {

@@ -98,69 +98,6 @@ export function htmlToMd(html: string): string {
 			},
 		});
 
-		// 规则 6：将脚注转换为指定 HTML 格式
-		turndownService.addRule("footnoteToHtml", {
-			filter: function (node, options) {
-				// 匹配脚注引用（形如 <sup>1</sup>）
-				return (
-					node.nodeName === "SUP" &&
-					node.textContent?.match(/^\d+$/) !== null
-				);
-			},
-			replacement: function (content, node, options) {
-				const footnoteNumber = node.textContent || "";
-				// 查找对应的脚注定义（假设脚注定义在 HTML 中为 <p>[^1]: ... </p>）
-				const footnoteDefinition = Array.from(
-					document.querySelectorAll("p, div"),
-				).find((el) =>
-					el.textContent?.match(
-						new RegExp(`\\[^${footnoteNumber}\\]:`),
-					),
-				);
-
-				let footnoteText = "";
-				let footnoteUrl = "";
-
-				if (footnoteDefinition) {
-					const textContent = footnoteDefinition.textContent || "";
-					// 提取脚注内容和 URL
-					const match = textContent.match(
-						/\[\^(\d+)\]:\s*(.*?)(https?:\/\/[^\s]*)/,
-					);
-					if (match) {
-						footnoteText = match[2].trim();
-						footnoteUrl = match[3]
-							.trim()
-							.replace(/^https?:\/\/(www\.)?/, "");
-					} else {
-						// 如果没有 URL，仅提取文本
-						const textMatch =
-							textContent.match(/\[\^(\d+)\]:\s*(.*)/);
-						if (textMatch) {
-							footnoteText = textMatch[2].trim();
-						}
-					}
-				}
-
-				// 生成目标 HTML
-				return `<sup data-text="${footnoteText}" data-url="${footnoteUrl}" data-draft-node="inline" data-draft-type="reference" data-numero="${footnoteNumber}">[${footnoteNumber}]</sup>`;
-			},
-		});
-
-		// 规则 7：移除脚注定义
-		turndownService.addRule("removeFootnoteDefinition", {
-			filter: function (node, options) {
-				// 匹配脚注定义（形如 <p>[^1]: ... </p>）
-				return (
-					(node.nodeName === "P" || node.nodeName === "DIV") &&
-					node.textContent?.match(/^\[\^\d+\]:/) !== null
-				);
-			},
-			replacement: function () {
-				return "";
-			},
-		});
-
 		const markdown = turndownService.turndown(html);
 		return markdown;
 	} catch (error) {

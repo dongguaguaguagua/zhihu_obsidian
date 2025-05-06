@@ -64,7 +64,7 @@ export async function topics2Draft(vault: Vault, id: string, topics: any) {
 			"z_c0",
 		]);
 		const xsrftoken = data.cookies._xsrf;
-		const response = await requestUrl({
+		await requestUrl({
 			url: `https://zhuanlan.zhihu.com/api/articles/${id}/topics`,
 			headers: {
 				"User-Agent": settings.user_agent,
