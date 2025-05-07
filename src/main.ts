@@ -3,7 +3,7 @@ import { Editor, MarkdownView, Plugin, WorkspaceLeaf, Notice } from "obsidian";
 import { MentionSuggest } from "./member_mention";
 import * as login from "./login_service";
 import * as publish from "./publish_service";
-import { ZhihuSlidesView } from "./sildes_view";
+import { ZhihuSlidesView } from "./sides_view";
 import * as answer from "./answer_service";
 import { ZhihuSettingTab } from "./settings_tab";
 import { loadIcons } from "./icon";
@@ -19,7 +19,7 @@ export default class ZhihuObPlugin extends Plugin {
 		await login.checkIsUserLogin(this.app.vault);
 
 		loadIcons();
-		this.addRibbonIcon("zhihu-icon", "Open Zhihu sildes", () => {
+		this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", () => {
 			this.activateView();
 		});
 		this.registerView(
@@ -96,9 +96,9 @@ export default class ZhihuObPlugin extends Plugin {
 			workspace.revealLeaf(leaf);
 		} else {
 			new Notice(
-				"Failed to open Zhihu sildes: unable to create a sidebar leaf.",
+				"Failed to open Zhihu sides: unable to create a sidebar leaf.",
 			);
-			console.error("No leaf available for Zhihu sildes view");
+			console.error("No leaf available for Zhihu sides view");
 		}
 	}
 

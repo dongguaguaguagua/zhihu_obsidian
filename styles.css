@@ -22,11 +22,11 @@
 	background: var(--background-primary);
 }
 
-.silde-collapsible {
+.side-collapsible {
 	margin-bottom: 10px;
 }
 
-.silde-collapsible .silde-list-container {
+.side-collapsible .side-list-container {
 	max-height: 0;
 	opacity: 0;
 	overflow: hidden;
@@ -37,14 +37,14 @@
 		padding 0.3s ease-in-out;
 }
 
-.silde-collapsible[open] .silde-list-container {
+.side-collapsible[open] .side-list-container {
 	max-height: 80vh;
 	opacity: 1;
 	padding: 5px 0;
 	overflow-y: auto;
 }
 
-.silde-summary {
+.side-summary {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -55,11 +55,11 @@
 	color: var(--text-normal);
 }
 
-.silde-summary:hover {
+.side-summary:hover {
 	background: var(--background-modifier-hover);
 }
 
-.silde-icon {
+.side-icon {
 	cursor: pointer;
 	color: var(--icon-color);
 	display: inline-flex;
@@ -67,17 +67,17 @@
 	justify-content: center;
 }
 
-.silde-icons {
+.side-icons {
 	display: flex;
 	gap: 4px;
 	margin-left: auto;
 }
 
-.silde-icon:hover {
+.side-icon:hover {
 	color: var(--icon-color-hover);
 }
 
-.silde-item {
+.side-item {
 	margin-bottom: 15px;
 	cursor: pointer;
 	padding: 10px;
@@ -87,11 +87,11 @@
 	flex-direction: column;
 }
 
-.silde-item:hover {
+.side-item:hover {
 	background: var(--background-modifier-hover);
 }
 
-.silde-excerpt {
+.side-excerpt {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	display: -webkit-box;
@@ -99,13 +99,13 @@
 	-webkit-box-orient: vertical;
 }
 
-.silde-title {
+.side-title {
 	margin: 0 0 5px 0;
 	font-size: 16px;
 	color: var(--text-normal);
 }
 
-.silde-excerpt {
+.side-excerpt {
 	margin: 0;
 	font-size: 14px;
 	color: var(--text-muted);
