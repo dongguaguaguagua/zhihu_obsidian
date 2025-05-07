@@ -6,7 +6,6 @@
 	"description": "Enable you to publish your articles and answers to Zhihu",
 	"author": "dgg",
 	"authorUrl": "https://github.com/dongguaguaguagua",
-	"fundingUrl": "",
 	"css": "styles.css",
 	"isDesktopOnly": true
 }
