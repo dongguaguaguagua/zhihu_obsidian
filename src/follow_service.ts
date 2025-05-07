@@ -56,7 +56,6 @@ export function loadFollows(response: any) {
 		);
 		return filteredData.map((item: any) => ({
 			id: item.target.id,
-			action_text: item.action_text,
 			type: item.target.type,
 			title: fromItemGetTitle(item),
 			excerpt:
@@ -66,7 +65,8 @@ export function loadFollows(response: any) {
 			authorName: item.target.author.name,
 			url: fromItemGetUrl(item),
 			content: fromItemGetContent(item),
-		}));
+			action_text: item.action_text,
+		})) as [Follow];
 	} catch (error) {
 		console.error("Failed to load follows:", error);
 		return [];

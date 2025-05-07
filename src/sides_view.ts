@@ -198,10 +198,10 @@ export class ZhihuSlidesView extends View {
 				}
 				this.openContent(
 					recommendation.title,
-					recommendation.authorName,
 					recommendation.url,
 					recommendation.content,
 					recommendation.type,
+					recommendation.authorName,
 				);
 			});
 		});
@@ -244,10 +244,10 @@ export class ZhihuSlidesView extends View {
 				}
 				this.openContent(
 					follow.title,
-					follow.authorName,
 					follow.url,
 					follow.content,
 					follow.type,
+					follow.authorName,
 				);
 			});
 		});
@@ -264,7 +264,7 @@ export class ZhihuSlidesView extends View {
 		this.hotLists.forEach((hot) => {
 			const item = list.createEl("li");
 			item.addClass("side-item");
-			item.setAttr("aria-label", hot.title);
+			item.setAttr("aria-label", `${hot.title}\n${hot.detail_text}`);
 			item.setAttr("data-tooltip-position", "right");
 			const title = item.createEl("h4", { text: hot.title });
 			title.addClass("side-title");
@@ -275,15 +275,25 @@ export class ZhihuSlidesView extends View {
 				text: `🔥${hot.detail_text}🔥`,
 			});
 			excerpt.appendText(": " + hot.excerpt);
+
+			item.onClickEvent(async () => {
+				this.openContent(
+					hot.title,
+					hot.link,
+					hot.excerpt,
+					hot.type,
+					hot.author,
+				);
+			});
 		});
 	}
 
 	async openContent(
 		title: string,
-		authorName: string,
 		url: string,
 		content: string,
 		type: string,
+		authorName?: string,
 	) {
 		const typeStr = fromTypeGetStr(type);
 		const folderPath = "zhihu";

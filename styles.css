@@ -44,6 +44,11 @@
 	overflow-y: auto;
 }
 
+.side-list-container ul {
+	padding: 0;
+	margin: 0;
+}
+
 .side-summary {
 	display: flex;
 	justify-content: space-between;

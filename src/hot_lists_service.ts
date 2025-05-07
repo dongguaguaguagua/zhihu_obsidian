@@ -4,11 +4,15 @@ import { Vault, Notice, requestUrl } from "obsidian";
 import { loadSettings } from "./settings";
 
 export interface HotList {
+	id: string;
 	link: string;
 	title: string;
 	detail_text: string;
 	excerpt: string;
 	answer_count: number;
+	follower_count: number;
+	type: string;
+	author: string;
 }
 
 async function getHotLists(vault: Vault) {
@@ -59,8 +63,15 @@ export async function loadHotList(vault: Vault) {
 			title: item.target.title,
 			excerpt: item.target.excerpt,
 			detail_text: item.detail_text,
-			link: item.target.url,
-		}));
+			link: item.target.url.replace(
+				"https://api.zhihu.com/questions/",
+				"https://www.zhihu.com/question/",
+			),
+			answer_count: item.target.answer_count,
+			follower_count: item.target.follower_count,
+			type: item.target.type,
+			author: item.target.author.name,
+		})) as [HotList];
 	} catch (error) {
 		console.error("Failed to load hot lists:", error);
 		return [];

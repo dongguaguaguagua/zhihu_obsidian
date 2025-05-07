@@ -68,7 +68,7 @@ export function loadRecommendations(response: any) {
 					? `https://zhuanlan.zhihu.com/p/${item.target.id}`
 					: `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`,
 			content: item.target.content,
-		}));
+		})) as [Recommendation];
 	} catch (error) {
 		console.error("Failed to load recommendations:", error);
 		return [];
