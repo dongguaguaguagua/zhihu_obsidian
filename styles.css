@@ -31,10 +31,6 @@
 	opacity: 0;
 	overflow: hidden;
 	padding: 0;
-	transition:
-		max-height 0.3s ease-in-out,
-		opacity 0.3s ease-in-out,
-		padding 0.3s ease-in-out;
 }
 
 .side-collapsible[open] .side-list-container {
