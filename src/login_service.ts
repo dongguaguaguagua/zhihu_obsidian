@@ -110,7 +110,6 @@ export async function checkIsUserLogin(vault: Vault) {
 		new Notice(`欢迎! 知乎用户 ${data.userInfo.name}`);
 		return true;
 	} else {
-		new Notice("您还未登录知乎，请先登录");
 		return false;
 	}
 }

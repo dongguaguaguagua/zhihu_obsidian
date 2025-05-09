@@ -16,11 +16,14 @@ export default class ZhihuObPlugin extends Plugin {
 		this.registerEditorSuggest(
 			new MentionSuggest(this.app, settings.restrictToZhihuTag),
 		);
-		await login.checkIsUserLogin(this.app.vault);
 
 		loadIcons();
-		this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", () => {
-			this.activateView();
+		this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
+			if (await login.checkIsUserLogin(this.app.vault)) {
+				this.activateView();
+			} else {
+				new Notice("您还未登录知乎，请先登录");
+			}
 		});
 		this.registerView(
 			SLIDES_VIEW_TYPE,
@@ -39,7 +42,11 @@ export default class ZhihuObPlugin extends Plugin {
 			id: "publish-current-file",
 			name: "Publish current file",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				await publish.publishCurrentFile(this.app);
+				if (await login.checkIsUserLogin(this.app.vault)) {
+					await publish.publishCurrentFile(this.app);
+				} else {
+					new Notice("您还未登录知乎，请先登录");
+				}
 			},
 		});
 
@@ -47,23 +54,31 @@ export default class ZhihuObPlugin extends Plugin {
 			id: "create-new-article",
 			name: "Create new article",
 			callback: async () => {
-				await publish.createNewZhihuArticle(this.app);
+				if (await login.checkIsUserLogin(this.app.vault)) {
+					await publish.createNewZhihuArticle(this.app);
+				} else {
+					new Notice("您还未登录知乎，请先登录");
+				}
 			},
 		});
 
 		this.addCommand({
 			id: "create-new-answer",
 			name: "Create new answer",
-			callback: () => {
-				new answer.ZhihuQuestionLinkModal(
-					this.app,
-					async (questionLink) => {
-						await answer.createNewZhihuAnswer(
-							this.app,
-							questionLink,
-						);
-					},
-				).open();
+			callback: async () => {
+				if (await login.checkIsUserLogin(this.app.vault)) {
+					new answer.ZhihuQuestionLinkModal(
+						this.app,
+						async (questionLink) => {
+							await answer.createNewZhihuAnswer(
+								this.app,
+								questionLink,
+							);
+						},
+					).open();
+				} else {
+					new Notice("您还未登录知乎，请先登录");
+				}
 			},
 		});
 
@@ -71,7 +86,11 @@ export default class ZhihuObPlugin extends Plugin {
 			id: "publish-current-answer",
 			name: "Publish current answer",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				await answer.publishCurrentAnswer(this.app);
+				if (await login.checkIsUserLogin(this.app.vault)) {
+					await answer.publishCurrentAnswer(this.app);
+				} else {
+					new Notice("您还未登录知乎，请先登录");
+				}
 			},
 		});
 
