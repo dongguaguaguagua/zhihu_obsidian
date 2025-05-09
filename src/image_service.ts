@@ -57,29 +57,18 @@ export async function uploadCover(vault: Vault, cover: string) {
 		const imgName = match[1];
 		const imgLink = await file.getFilePathFromName(vault, imgName);
 		const imgBuffer = fs.readFileSync(imgLink);
-		const fileType = await fileTypeFromBuffer(imgBuffer);
-		if (!fileType) throw new Error("无法识别文件类型");
-		const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
-		const getImgIdRes = await getImgIdFromHash(vault, hash);
-		const imgState = getImgIdRes.upload_file.state;
-		const uploadToken = getImgIdRes.upload_token;
-		if (imgState === 2) {
-			await uploadImg(vault, hash, imgLink, uploadToken);
-		}
-		const imgOriginalPath = imgOriginalPathBuilder(hash, fileType.ext);
+		const imgOriginalPath = await getZhihuImgLink(vault, imgBuffer);
 		return imgOriginalPath;
 	}
 }
 
-async function uploadImg(
-	vault: Vault,
-	imgHash: string,
-	imgLink: string,
-	uploadToken: any,
-) {
+async function uploadImg(vault: Vault, imgBuffer: Buffer, uploadToken: any) {
 	try {
 		const settings = await loadSettings(vault);
-		const imgBuffer = fs.readFileSync(imgLink);
+		const imgHash = crypto
+			.createHash("md5")
+			.update(imgBuffer)
+			.digest("hex");
 		const arrayBuffer = imgBuffer.buffer.slice(
 			imgBuffer.byteOffset,
 			imgBuffer.byteOffset + imgBuffer.byteLength,
@@ -171,67 +160,114 @@ async function fetchImgStatus(vault: Vault, id: string, imgId: string) {
 	}
 }
 
-export async function transImgToZhihuLink(
+export async function getZhihuImgLink(vault: Vault, imgBuffer: Buffer) {
+	const data = await dataUtil.loadData(vault);
+	const fileType = await fileTypeFromBuffer(imgBuffer);
+	if (!fileType) throw new Error("无法识别文件类型");
+	const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
+
+	if (
+		!data.cache ||
+		Object.keys(data.cache).length === 0 ||
+		!data.cache.includes(hash) // hash 不在data里面
+	) {
+		const getImgIdRes = await getImgIdFromHash(vault, hash);
+		// const imgId = getImgIdRes.upload_file.image_id;
+		const imgState = getImgIdRes.upload_file.state;
+		const uploadToken = getImgIdRes.upload_token;
+
+		if (imgState === 2) {
+			await uploadImg(vault, imgBuffer, uploadToken);
+		}
+		if (typeof data.cache !== "object" || data.cache === null) {
+			await dataUtil.updateData(vault, { cache: [hash] });
+		} else {
+			await dataUtil.updateData(vault, {
+				cache: [...data.cache, hash],
+			});
+		}
+	}
+	// const imgStatus = await new Promise<any>((resolve, reject) => {
+	//   const interval = setInterval(async () => {
+	//     try {
+	//       const status = await fetchImgStatus(id, imgId);
+	//       if (status.status === "success") {
+	//         clearInterval(interval);
+	//         resolve(status);
+	//       }
+	//     } catch (err) {
+	//       clearInterval(interval);
+	//       reject(err);
+	//     }
+	//   }, 1000);
+	// });
+	const imgOriginalPath = imgOriginalPathBuilder(hash, fileType.ext);
+	return imgOriginalPath;
+}
+
+export async function processLocalImgs(
 	vault: Vault,
-	id: string,
 	md: string,
 ): Promise<string> {
 	const matches = [...md.matchAll(/!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
 	for (const match of matches) {
-		const data = await dataUtil.loadData(vault);
 		const [fullMatch, imgName, caption] = match;
 		const imgLink = await file.getFilePathFromName(vault, imgName);
-
-		const imgBuffer = fs.readFileSync(imgLink);
-		const fileType = await fileTypeFromBuffer(imgBuffer);
-		if (!fileType) throw new Error("无法识别文件类型");
-		const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
 		const alt = caption || path.basename(imgName);
-		if (
-			!data.cache ||
-			Object.keys(data.cache).length === 0 ||
-			!data.cache.includes(hash) // hash 不在data里面
-		) {
-			const getImgIdRes = await getImgIdFromHash(vault, hash);
-			// const imgId = getImgIdRes.upload_file.image_id;
-			const imgState = getImgIdRes.upload_file.state;
-			const uploadToken = getImgIdRes.upload_token;
-
-			if (imgState === 2) {
-				await uploadImg(vault, hash, imgLink, uploadToken);
-			}
-			if (typeof data.cache !== "object" || data.cache === null) {
-				await dataUtil.updateData(vault, { cache: [hash] });
-			} else {
-				await dataUtil.updateData(vault, {
-					cache: [...data.cache, hash],
-				});
-			}
-		}
-		// const imgStatus = await new Promise<any>((resolve, reject) => {
-		//   const interval = setInterval(async () => {
-		//     try {
-		//       const status = await fetchImgStatus(id, imgId);
-		//       if (status.status === "success") {
-		//         clearInterval(interval);
-		//         resolve(status);
-		//       }
-		//     } catch (err) {
-		//       clearInterval(interval);
-		//       reject(err);
-		//     }
-		//   }, 1000);
-		// });
-		const imgOriginalPath = imgOriginalPathBuilder(hash, fileType.ext);
-		const zhihuImgStr = `\
-<img src=${imgOriginalPath} \
-data-caption="${alt}" \
-data-size="normal" \
-data-watermark="watermark" \
-data-original-src=${imgOriginalPath} \
-data-watermark-src="" \
-data-private-watermark-src=""/>`;
+		const imgBuffer = fs.readFileSync(imgLink);
+		const imgOriginalPath = await getZhihuImgLink(vault, imgBuffer);
+		const zhihuImgStr = zhihuImgStringBuilder(imgOriginalPath, alt);
 		md = md.replace(fullMatch, zhihuImgStr);
+	}
+	return md;
+}
+
+export async function processOnlineImgs(
+	vault: Vault,
+	md: string,
+): Promise<string> {
+	const settings = await loadSettings(vault);
+	const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
+	const matches = Array.from(md.matchAll(imageRegex));
+
+	const replacements = await Promise.all(
+		matches.map(async (match) => {
+			const fullMatch = match[0];
+			const alt = match[1];
+			const url = match[2];
+
+			try {
+				const response = requestUrl({
+					url: url,
+					headers: {
+						"User-Agent": settings.user_agent,
+						"Accept-Encoding": "gzip, deflate, br, zstd",
+						Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+						"accept-language":
+							"zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+					},
+					method: "GET",
+					contentType: undefined,
+				});
+				const arrayBuffer = await response.arrayBuffer;
+				const imgBuffer = Buffer.from(arrayBuffer);
+
+				const zhihuImgLink = await getZhihuImgLink(vault, imgBuffer);
+				const htmlString = zhihuImgStringBuilder(
+					zhihuImgLink,
+					alt || "Untitled Image",
+				);
+
+				return { original: fullMatch, replacement: htmlString };
+			} catch (err) {
+				console.error(`Error processing image ${url}:`, err);
+				const fallback = `<span>Image failed to load: ${alt || url}</span>`;
+				return { original: fullMatch, replacement: fallback };
+			}
+		}),
+	);
+	for (const { original, replacement } of replacements) {
+		md = md.replace(original, replacement);
 	}
 	return md;
 }
@@ -259,4 +295,15 @@ async function calculateSignature(
 
 function imgOriginalPathBuilder(hash: string, ext: string) {
 	return `https://picx.zhimg.com/v2-${hash}.${ext}`;
+}
+
+export function zhihuImgStringBuilder(path: string, alt: string) {
+	return `\
+<img src=${path} \
+data-caption="${alt}" \
+data-size="normal" \
+data-watermark="watermark" \
+data-original-src=${path} \
+data-watermark-src="" \
+data-private-watermark-src=""/>`;
 }

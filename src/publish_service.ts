@@ -76,11 +76,16 @@ export async function publishCurrentFile(app: App) {
 		await patchDraft(vault, articleId, patchBody);
 		new Notice("封面上传成功！");
 	}
-	const transedImgContent = await imageService.transImgToZhihuLink(
+	let transedImgContent = await imageService.processLocalImgs(
 		vault,
-		articleId,
 		rmFmContent,
 	);
+	console.log(transedImgContent);
+	transedImgContent = await imageService.processOnlineImgs(
+		vault,
+		transedImgContent,
+	);
+	console.log(transedImgContent);
 	let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
 	zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
 	const patchBody = {

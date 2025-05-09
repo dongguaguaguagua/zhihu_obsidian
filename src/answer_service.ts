@@ -99,10 +99,13 @@ export async function publishCurrentAnswer(app: App) {
 			return;
 	}
 
-	const transedImgContent = await imageService.transImgToZhihuLink(
+	let transedImgContent = await imageService.processLocalImgs(
 		app.vault,
-		answerId,
 		rmFmContent,
+	);
+	transedImgContent = await imageService.processOnlineImgs(
+		app.vault,
+		transedImgContent,
 	);
 	let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
 	zhihuHTML = addPopularizeStr(zhihuHTML);
