@@ -16,6 +16,25 @@
 	line-height: 24px;
 }
 
+/* QR code modal */
+.zhihu-qrcode-modal {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.zhihu-qrcode-modal h2 {
+	text-align: center;
+}
+
+.zhihu-qrcode-modal div {
+	text-align: center;
+	font-size: 1.1em;
+	color: green;
+	margin-top: 1em;
+}
+
 /* slide view */
 .zhihu-slides-view {
 	padding: 10px;

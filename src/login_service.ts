@@ -16,7 +16,7 @@ export class QRCodeModal extends Modal {
 	async onOpen() {
 		const { contentEl } = this;
 		contentEl.createEl("h2", { text: "知乎登录二维码" });
-
+		contentEl.classList.add("zhihu-qrcode-modal");
 		this.canvas = contentEl.createEl("canvas");
 		await this.renderQRCode(this.link);
 	}
@@ -27,6 +27,10 @@ export class QRCodeModal extends Modal {
 			await QRCode.toCanvas(this.canvas, link, {
 				width: 256,
 				margin: 2,
+				color: {
+					dark: "#3274ee",
+					light: "#00000000",
+				},
 			});
 		} catch (err) {
 			const { contentEl } = this;
