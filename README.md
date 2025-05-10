@@ -82,6 +82,12 @@ The result:
 
 ![github_card](./imgs/github_card.png)
 
+### Images
+
+Just insert your images with markdown synatx, and the plugin will do the rest. If the images are local, use the Obsidian flavored ![[image|caption]] synatx. If the images are online, use GFM synatx: ![caption](https://img.link). The plugin will automatically download the URL and upload to Zhihu.
+
+Please DO NOT use the ![caption](...) syntax for local images, or the they may not be uploaded properly.
+
 ### Article cover
 
 The plugin also support adding your favorate cover to the article. Just add `cover` entry to properties and select pictures using `[[img]]` syntax. Like that
@@ -102,11 +108,10 @@ You can fork this repo to `vault/.obsidian/plugins`, make sure your NodeJS is at
 
 - [ ] add: mermaid support
 - [ ] add: desmos-graph support
-- [ ] add: reference syntax
-- [ ] add: upload attachments
+- [x] add: reference syntax
 - [ ] add: view upvotes number in status bar
 - [ ] add: view comments
-- [ ] add: upload your images on cloud
+- [x] add: upload your images on cloud
 - [ ] add: publish articles to your column
 
 ## Support

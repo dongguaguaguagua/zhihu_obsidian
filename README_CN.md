@@ -2,7 +2,7 @@
 
 [EN README](./README.md)
 
-## Features
+## 核心功能
 
 Zhihu on Obsidian允许你在obsidian内将markdown文件直接发布到知乎（中文问答平台）。这个插件包含一下几点核心功能：
 
@@ -11,7 +11,7 @@ Zhihu on Obsidian允许你在obsidian内将markdown文件直接发布到知乎�
 - 将知乎文章投稿至问题
 - 浏览首页推荐、关注、热榜，并直接在Obsidian内查看。
 
-## Usage
+## 使用方法
 
 ### 登录知乎
 
@@ -88,9 +88,15 @@ LaTeX公式也可以正常显示
 
 ![cover_example](./imgs/cover_example.jpg)
 
-## Contribution
+### 图片
 
-欢迎PR
+你只需要使用markdown语法插入图片，插件就会帮你完成剩下的工作。对于本地图片，请使用Obsidian推荐的语法：![[image|caption]]。而对于网络图片，请使用![caption](https://img.link)语法，插件会自动下载网络图片并上传到知乎。
+
+注意，请不要使用![caption](...)语法上传本地图片，否则图片可能无法完成上传。
+
+## 贡献
+
+欢迎任何PR
 
 你可以fork这个仓库到 `vault/.obsidian/plugins` 下面，并确保NodeJS版本至少 v16
 
@@ -102,14 +108,13 @@ LaTeX公式也可以正常显示
 
 - [ ] 添加：mermaid 支持
 - [ ] 添加：desmos-graph 支持
-- [ ] 添加：参考文献支持
-- [ ] 添加：附件支持
+- [x] 添加：参考文献支持
 - [ ] 添加：状态栏显示点赞数、收藏数
 - [ ] 添加：评论查看
-- [ ] 添加：图片不来自本地或知乎图床也可发布
+- [x] 添加：图片不来自本地或知乎图床也可发布
 - [ ] 添加：文章发表到自己的专栏
 
-## Support
+## 支持我的开发
 
 点个星星⭐来支持我！
 
