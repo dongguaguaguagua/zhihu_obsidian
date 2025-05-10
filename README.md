@@ -1,6 +1,12 @@
-# Zhihu On Obsidian
+<div align="center">
+<picture>
+<img alt="logo" src="./imgs/logo.svg" height="150">
+</picture>
+<h1>Zhihu On Obsidian</h1>
 
 [中文 README](./README_CN.md)
+
+</div>
 
 ## Features
 
@@ -84,9 +90,9 @@ The result:
 
 ### Images
 
-Just insert your images with markdown synatx, and the plugin will do the rest. If the images are local, use the Obsidian flavored ![[image|caption]] synatx. If the images are online, use GFM synatx: ![caption](https://img.link). The plugin will automatically download the URL and upload to Zhihu.
+Just insert your images with markdown synatx, and the plugin will do the rest. If the images are local, use the Obsidian flavored `![[image|caption]]` synatx. If the images are online, use GFM synatx: `![caption](https://img.link)`. The plugin will automatically download the URL and upload to Zhihu.
 
-Please DO NOT use the ![caption](...) syntax for local images, or the they may not be uploaded properly.
+Please **DO NOT** use the `![caption](...)` syntax for local images, or they may not be uploaded properly.
 
 ### Article cover
 

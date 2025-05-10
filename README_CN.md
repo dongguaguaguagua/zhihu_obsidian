@@ -1,6 +1,12 @@
-# Zhihu On Obsidian
+<div align="center">
+<picture>
+<img alt="logo" src="./imgs/logo.svg" height="150">
+</picture>
+<h1>Zhihu On Obsidian</h1>
 
-[EN README](./README.md)
+[中文 README](./README_CN.md)
+
+</div>
 
 ## 核心功能
 
@@ -90,9 +96,9 @@ LaTeX公式也可以正常显示
 
 ### 图片
 
-你只需要使用markdown语法插入图片，插件就会帮你完成剩下的工作。对于本地图片，请使用Obsidian推荐的语法：![[image|caption]]。而对于网络图片，请使用![caption](https://img.link)语法，插件会自动下载网络图片并上传到知乎。
+你只需要使用markdown语法插入图片，插件就会帮你完成剩下的工作。对于本地图片，请使用Obsidian推荐的语法：`![[image|caption]]`。而对于网络图片，请使用`![caption](https://img.link)`语法，插件会自动下载网络图片并上传到知乎。
 
-注意，请不要使用![caption](...)语法上传本地图片，否则图片可能无法完成上传。
+注意，请**不要**使用`![caption](...)`语法上传本地图片，否则图片可能无法完成上传。
 
 ## 贡献
 
