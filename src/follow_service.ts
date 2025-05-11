@@ -8,7 +8,9 @@ export interface Follow {
 	type: string;
 	title: string;
 	excerpt: string;
-	authorName: string;
+	author_name: string;
+	updated_time: number;
+	created_time: number;
 	url: string;
 	content: string;
 	action_text: string;
@@ -54,67 +56,65 @@ export function loadFollows(response: any) {
 				item.target &&
 				Object.keys(item.target).length > 0,
 		);
-		return filteredData.map((item: any) => ({
-			id: item.target.id,
-			type: item.target.type,
-			title: fromItemGetTitle(item),
-			excerpt:
-				item.target.excerpt_new ||
-				item.target.excerpt ||
-				item.target.excerpt_title,
-			authorName: item.target.author.name,
-			url: fromItemGetUrl(item),
-			content: fromItemGetContent(item),
-			action_text: item.action_text,
-		})) as [Follow];
+		console.log(filteredData);
+		return filteredData.map((item: any) => fromTypeGetProperty(item)) as [
+			Follow,
+		];
 	} catch (error) {
 		console.error("Failed to load follows:", error);
 		return [];
 	}
 }
 
-function fromItemGetTitle(item: any) {
+function fromTypeGetProperty(item: any) {
 	switch (item.target.type) {
 		case "article":
-			return item.target.title;
+			return {
+				id: item.target.id,
+				type: item.target.type,
+				title: item.target.title,
+				excerpt: item.target.excerpt,
+				author_name: item.target.author.name,
+				url: `https://zhuanlan.zhihu.com/p/${item.target.id}`,
+				content: item.target.content,
+				action_text: item.action_text,
+			};
 		case "question":
-			return item.target.title;
+			return {
+				id: item.target.id,
+				type: item.target.type,
+				title: item.target.title,
+				excerpt: item.target.excerpt,
+				author_name: item.target.author.name,
+				created_time: item.target.create
+				url: `https://www.zhihu.com/question/${item.target.id}`,
+				content: item.target.detail,
+				action_text: item.action_text,
+			};
 		case "answer":
-			return item.target.question.title;
+			return {
+				id: item.target.id,
+				type: item.target.type,
+				title: item.target.question.title,
+				excerpt: item.target.excerpt,
+				author_name: item.target.author.name,
+				url: `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`,
+				content: item.target.content,
+				action_text: item.action_text,
+			};
 		case "pin":
-			return truncateString(
-				stripHtmlTags(item.target.content[0].content),
-			);
-		default:
-			return "Unknown Item Type";
-	}
-}
-
-function fromItemGetUrl(item: any) {
-	switch (item.target.type) {
-		case "article":
-			return `https://zhuanlan.zhihu.com/p/${item.target.id}`;
-		case "question":
-			return `https://www.zhihu.com/question/${item.target.id}`;
-		case "answer":
-			return `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`;
-		case "pin":
-			return `https://www.zhihu.com/pin/${item.target.id}`;
-		default:
-			return "Unknown Item Type";
-	}
-}
-
-function fromItemGetContent(item: any) {
-	switch (item.target.type) {
-		case "article":
-			return item.target.content;
-		case "question":
-			return item.target.detail;
-		case "answer":
-			return item.target.content;
-		case "pin":
-			return item.target.content_html;
+			return {
+				id: item.target.id,
+				type: item.target.type,
+				title: truncateString(
+					stripHtmlTags(item.target.content[0].content),
+				),
+				excerpt: item.target.excerpt_title,
+				author_name: item.target.author.name,
+				url: `https://www.zhihu.com/pin/${item.target.id}`,
+				content: item.target.content_html,
+				action_text: item.action_text,
+			};
 		default:
 			return "Unknown Item Type";
 	}

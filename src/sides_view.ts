@@ -175,7 +175,7 @@ export class ZhihuSlidesView extends View {
 			item.addClass("side-item");
 			item.setAttr(
 				"aria-label",
-				`${recommendation.title}\n${recommendation.authorName}`,
+				`${recommendation.title}\n${recommendation.author_name}`,
 			);
 			item.setAttr("data-tooltip-position", "right");
 			const title = item.createEl("h4", { text: recommendation.title });
@@ -184,7 +184,7 @@ export class ZhihuSlidesView extends View {
 			const excerpt = item.createEl("p");
 			excerpt.addClass("side-excerpt");
 			excerpt.createEl("b", {
-				text: recommendation.authorName,
+				text: recommendation.author_name,
 			});
 			excerpt.appendText(": " + recommendation.excerpt);
 
@@ -201,7 +201,7 @@ export class ZhihuSlidesView extends View {
 					recommendation.url,
 					recommendation.content,
 					recommendation.type,
-					recommendation.authorName,
+					recommendation.author_name,
 				);
 			});
 		});
@@ -247,7 +247,7 @@ export class ZhihuSlidesView extends View {
 					follow.url,
 					follow.content,
 					follow.type,
-					follow.authorName,
+					follow.author_name,
 				);
 			});
 		});

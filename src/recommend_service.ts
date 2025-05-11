@@ -8,9 +8,15 @@ export interface Recommendation {
 	type: string;
 	title: string;
 	excerpt: string;
-	authorName: string;
+	author_name: string;
 	url: string;
 	content: string;
+	updated_time: number;
+	created_time: number;
+	visited_count: number;
+	voteup_count: number;
+	thanks_count: number;
+	favorite_count: number;
 }
 
 export async function getRecommend(vault: Vault, url: string) {
@@ -54,6 +60,7 @@ export function loadRecommendations(response: any) {
 				item.target &&
 				Object.keys(item.target).length > 0,
 		);
+		console.log(filteredData);
 		return filteredData.map((item: any) => ({
 			id: item.target.id,
 			type: item.target.type,
@@ -62,12 +69,24 @@ export function loadRecommendations(response: any) {
 					? item.target.title
 					: item.target.question.title,
 			excerpt: item.target.excerpt_new || item.target.excerpt,
-			authorName: item.target.author.name,
+			author_name: item.target.author.name,
 			url:
 				item.target.type === "article"
 					? `https://zhuanlan.zhihu.com/p/${item.target.id}`
 					: `https://www.zhihu.com/question/${item.target.question.id}/answer/${item.target.id}`,
 			content: item.target.content,
+			updated_time:
+				item.target.type === "article"
+					? item.target.update
+					: item.target.updated_time,
+			created_time:
+				item.target.type === "article"
+					? item.target.created
+					: item.target.created_time,
+			visited_count: item.target.visited_count,
+			voteup_count: item.target.voteup_count,
+			thanks_count: item.target.thanks_count,
+			favorite_count: item.target.favorite_count,
 		})) as [Recommendation];
 	} catch (error) {
 		console.error("Failed to load recommendations:", error);

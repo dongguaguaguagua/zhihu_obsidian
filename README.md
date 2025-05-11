@@ -90,7 +90,7 @@ The result:
 
 ### Images
 
-Just insert your images with markdown synatx, and the plugin will do the rest. If the images are local, use the Obsidian flavored `![[image|caption]]` synatx. If the images are online, use GFM synatx: `![caption](https://img.link)`. The plugin will automatically download the URL and upload to Zhihu.
+Just insert your images with markdown syntax, and the plugin will do the rest. If the images are local, use the Obsidian flavored `![[image|caption]]` syntax. If the images are online, use GFM syntax: `![caption](https://img.link)`. The plugin will automatically download the URL and upload to Zhihu.
 
 Please **DO NOT** use the `![caption](...)` syntax for local images, or they may not be uploaded properly.
 
