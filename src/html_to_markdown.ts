@@ -98,7 +98,40 @@ export function htmlToMd(html: string): string {
 			},
 		});
 
-		const markdown = turndownService.turndown(html);
+		const footnotes: Record<string, string> = {};
+
+		// 规则 5：将<sup data-*="...">[1]</sup>转换为脚注
+		turndownService.addRule("footnote", {
+			filter: (node) => {
+				return (
+					node.nodeName === "SUP" &&
+					node instanceof HTMLElement &&
+					typeof node.dataset.text === "string" &&
+					typeof node.dataset.url === "string" &&
+					/^\[\d+\]$/.test(node.textContent || "")
+				);
+			},
+			replacement: function (content, node) {
+				const el = node as HTMLElement;
+				const numero = el.dataset.numero ?? "1";
+				const label = `[^${numero}]`;
+				const footnoteText = `${el.dataset.text} ${el.dataset.url}`;
+				footnotes[numero] = footnoteText;
+				return label;
+			},
+		});
+
+		let markdown = turndownService.turndown(html);
+
+		// 如果有脚注内容，追加到文末
+		const footnoteEntries = Object.entries(footnotes)
+			.map(([num, text]) => `[^${num}]: ${text}`)
+			.join("\n");
+
+		if (footnoteEntries) {
+			markdown += `\n\n${footnoteEntries}`;
+		}
+
 		return markdown;
 	} catch (error) {
 		console.error("HTML to Markdown conversion failed:", error);
