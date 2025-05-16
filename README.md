@@ -10,7 +10,7 @@
 
 ## Features
 
-This plugin allows you publish your markdown file directly to [Zhihu](https://www.zhihu.com), a Chinese question-answer platform. The feature includes:
+This plugin allows you publish your markdown file directly to [Zhihu](https://www.zhihu.com), a Chinese question-answer platform. The main features include:
 
 - create and publish Zhihu articles
 - create and publish Zhihu answers

@@ -10,7 +10,7 @@
 
 ## 核心功能
 
-Zhihu on Obsidian允许你在obsidian内将markdown文件直接发布到知乎（中文问答平台）。这个插件包含一下几点核心功能：
+Zhihu on Obsidian允许你在Obsidian内将markdown内容直接发布到知乎（中文问答平台）。该插件包含以下几点核心功能：
 
 - 创建并发布知乎文章
 - 创建并发布知乎回答
