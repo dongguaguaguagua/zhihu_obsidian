@@ -127,7 +127,7 @@ function stripHtmlTags(input: string): string {
 	return input.replace(/<[^>]*>/g, "");
 }
 
-function truncateString(str: string, maxLength = 200): string {
+function truncateString(str: string, maxLength = 100): string {
 	if (str.length <= maxLength) {
 		return str;
 	}

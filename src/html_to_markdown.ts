@@ -121,9 +121,31 @@ export function htmlToMd(html: string): string {
 			},
 		});
 
+		// 规则6：转义文本和链接文本中的`#`号，否则会干扰 Obsidian 内部的标签系统。
+		turndownService.addRule("escapeHashInPlainText", {
+			filter: (node) => {
+				if (node.nodeType !== 3) return false;
+				const value = node.nodeValue;
+				return typeof value === "string" && value.includes("#");
+			},
+			replacement: (content) => {
+				return content.replace(/#/g, "\\#");
+			},
+		});
+
+		turndownService.addRule("escapeHashInLinkText", {
+			filter: "a",
+			replacement: function (_content, node) {
+				const el = node as HTMLAnchorElement;
+				const text = (el.textContent || "").replace(/#/g, "\\#");
+				const href = el.getAttribute("href") || "";
+				return `[${text}](${href})`;
+			},
+		});
+
 		let markdown = turndownService.turndown(html);
 
-		// 如果有脚注内容，追加到文末
+		// 将脚注内容追加到文末
 		const footnoteEntries = Object.entries(footnotes)
 			.map(([num, text]) => `[^${num}]: ${text}`)
 			.join("\n");

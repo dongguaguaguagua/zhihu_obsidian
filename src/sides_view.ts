@@ -310,7 +310,7 @@ export class ZhihuSlidesView extends View {
 
 		let file = this.vault.getAbstractFileByPath(filePath);
 		let markdown = htmlToMd(content);
-		markdown = addFrontmatter(markdown, "tag", `zhihu-${type}`);
+		markdown = addFrontmatter(markdown, "tags", `zhihu-${type}`);
 		markdown = addFrontmatter(markdown, "link", url);
 		if (!file) {
 			file = await this.vault.create(filePath, markdown);
