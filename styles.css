@@ -1,176 +1,184 @@
 /* member mention */
 .mention-suggestion .suggestion-content {
-	display: flex;
-	align-items: center;
+    display: flex;
+    align-items: center;
 }
 
 .mention-suggestion .suggestion-avatar {
-	width: 24px;
-	height: 24px;
-	border-radius: 50%;
-	margin-right: 8px;
-	vertical-align: middle;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
 }
 
 .mention-suggestion .suggestion-content span {
-	line-height: 24px;
+    line-height: 24px;
 }
 
 /* QR code modal */
 .zhihu-qrcode-modal {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .zhihu-qrcode-modal h2 {
-	text-align: center;
+    text-align: center;
 }
 
+<<<<<<< HEAD
 .zhihu-qrcode-modal .qrcode-title {
     color: dodgerblue;
     font-size: 1.6em;
 	text-align: center;
     margin-bottom: 0.5em;
+=======
+.zhihu-qrcode-modal div {
+    text-align: center;
+    font-size: 1.1em;
+    color: green;
+    margin-top: 1em;
+>>>>>>> cf49e3689f8f440e2a4a2236a09f0d207f906712
 }
 
 /* slide view */
 .zhihu-slides-view {
-	padding: 10px;
-	background: var(--background-primary);
+    padding: 10px;
+    background: var(--background-primary);
 }
 
 .side-collapsible {
-	margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .side-collapsible .side-list-container {
-	max-height: 0;
-	opacity: 0;
-	overflow: hidden;
-	padding: 0;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    padding: 0;
 }
 
 .side-collapsible[open] .side-list-container {
-	max-height: 80vh;
-	opacity: 1;
-	padding: 5px 0;
-	overflow-y: auto;
+    max-height: 80vh;
+    opacity: 1;
+    padding: 5px 0;
+    overflow-y: auto;
 }
 
 .side-list-container ul {
-	padding: 0;
-	margin: 0;
+    padding: 0;
+    margin: 0;
 }
 
 .side-summary {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	font-size: 16px;
-	font-weight: bold;
-	cursor: pointer;
-	padding: 5px;
-	color: var(--text-normal);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 5px;
+    color: var(--text-normal);
 }
 
 .side-summary:hover {
-	background: var(--background-modifier-hover);
+    background: var(--background-modifier-hover);
 }
 
 .side-icon {
-	cursor: pointer;
-	color: var(--icon-color);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+    cursor: pointer;
+    color: var(--icon-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .side-icons {
-	display: flex;
-	gap: 4px;
-	margin-left: auto;
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
 }
 
 .side-icon:hover {
-	color: var(--icon-color-hover);
+    color: var(--icon-color-hover);
 }
 
 .side-item {
-	margin-bottom: 15px;
-	cursor: pointer;
-	padding: 10px;
-	border: 1px solid var(--background-modifier-border);
-	border-radius: 4px;
-	display: flex;
-	flex-direction: column;
+    margin-bottom: 15px;
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
 }
 
 .side-item:hover {
-	background: var(--background-modifier-hover);
+    background: var(--background-modifier-hover);
 }
 
 .side-excerpt {
-	overflow: hidden;
-	text-overflow: ellipsis;
-	display: -webkit-box;
-	-webkit-line-clamp: 3;
-	-webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .side-title {
-	margin: 0 0 5px 0;
-	font-size: 16px;
-	color: var(--text-normal);
+    margin: 0 0 5px 0;
+    font-size: 16px;
+    color: var(--text-normal);
 }
 
 .side-excerpt {
-	margin: 0;
-	font-size: 14px;
-	color: var(--text-muted);
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-muted);
 }
 
 /* image caption */
 .image-embed[alt]:after {
-	content: attr(alt);
-	display: block;
-	margin: 0.2rem 1rem 1rem 1rem;
-	font-size: 90%;
-	line-height: 1.4;
-	color: var(--text-faint);
-	text-align: center;
+    content: attr(alt);
+    display: block;
+    margin: 0.2rem 1rem 1rem 1rem;
+    font-size: 90%;
+    line-height: 1.4;
+    color: var(--text-faint);
+    text-align: center;
 }
 
 /* settings */
 .zhihu-user-info {
-	display: flex;
-	align-items: center;
-	gap: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .zhihu-avatar {
-	border-radius: 50%;
-	width: 40px;
-	height: 40px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
 }
 
 .zhihu-text-container {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .zhihu-username {
-	font-weight: bold;
-	font-size: 1.2em;
+    font-weight: bold;
+    font-size: 1.2em;
 }
 
 .zhihu-headline {
-	color: var(--text-muted);
-	font-size: 0.9em;
+    color: var(--text-muted);
+    font-size: 0.9em;
 }
 
 .zhihu-question-input {
-	width: 100%;
+    width: 100%;
 }
