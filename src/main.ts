@@ -38,6 +38,14 @@ export default class ZhihuObPlugin extends Plugin {
 			},
 		});
 
+        this.addCommand({
+            id: "web-login",
+            name: "Web login",
+            callback: async () => {
+                await login.zhihuWebLogin(this.app);
+            },
+        });
+
 		this.addCommand({
 			id: "publish-current-file",
 			name: "Publish current file",

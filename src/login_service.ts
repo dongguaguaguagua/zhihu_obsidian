@@ -108,6 +108,97 @@ export async function zhihuQRcodeLogin(app: App) {
 	});
 }
 
+export async function zhihuWebLogin(app: App) {
+    const vault = app.vault;
+    const remote = window.require('@electron/remote');
+    const { BrowserWindow, session } = remote;
+
+    // 清理环境：cookie、缓存、storage
+    await session.defaultSession.clearStorageData();
+    await session.defaultSession.clearCache();
+    const oldCookies = await session.defaultSession.cookies.get({ url: 'https://www.zhihu.com' });
+    await Promise.all(oldCookies.map((c: { name: any; }) => session.defaultSession.cookies.remove('https://www.zhihu.com', c.name)));
+
+    // 标记 zse-ck 脚本加载
+    let loadedZse = false;
+    session.defaultSession.webRequest.onCompleted(
+        { urls: ['https://static.zhihu.com/zse-ck/v4/*'] },
+        () => { loadedZse = true; }
+    );
+
+    // 模拟浏览器请求头
+    session.defaultSession.webRequest.onBeforeSendHeaders(
+        { urls: ['https://*.zhihu.com/*'] },
+        (details: any, callback: any) => {
+            const h = details.requestHeaders;
+            h['Referer'] = h['Referer'] || 'https://www.zhihu.com/';
+            h['Upgrade-Insecure-Requests'] = '1';
+            h['Accept-Language'] = 'zh-CN,zh;q=0.9';
+            callback({ cancel: false, requestHeaders: h });
+        }
+    );
+
+    // 创建窗口并设置 UA
+    const win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        webPreferences: { nodeIntegration: false, contextIsolation: true }
+    });
+    win.webContents.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+    );
+
+    const loginUrl = 'https://www.zhihu.com/signin';
+    const exampleQuestionUrl = 'https://www.zhihu.com/question/11474985081';
+    await win.loadURL(loginUrl);
+
+    win.webContents.on('did-finish-load', async () => {
+        const url = win.webContents.getURL();
+        new Notice('加载完成：' + url);
+        // 登录页面完成，用户输入完毕后可能跳转到首页
+        if (url === 'https://www.zhihu.com/') {
+            // 转到具体问题页面，触发 zse-ck 脚本加载
+            await win.loadURL(exampleQuestionUrl);
+            return;
+        }
+
+        // 问题页面加载完成
+        if (url.startsWith(exampleQuestionUrl)) {
+            // 检查 zse-ck 脚本是否加载
+            if (!loadedZse) {
+                new Notice('登录失败：未能加载 zse-ck 脚本，请检查网络或尝试重试');
+                return;
+            }
+
+            // 获取 cookies
+            const cookies = await session.defaultSession.cookies.get({ url: 'https://www.zhihu.com' });
+            const zse = cookies.find((c: { name: string; }) => c.name === '__zse_ck');
+            if (!zse) {
+                new Notice('登录失败：未获取到 __zse_ck，请检查网络或环境');
+                return;
+            }
+            new Notice('登录成功');
+
+            // convert cookies to {string: string} format
+            const cookieObj: { [key: string]: string } = {};
+            cookies.forEach((c: { name: string; value: string; }) => {
+                cookieObj[c.name] = c.value;
+            });
+            // save cookies to vault
+            console.log('Zhihu 登录 Cookies:', cookieObj);
+            await dataUtil.updateData(vault, { cookies: cookieObj });
+            await getUserInfo(vault);
+
+            win.close();
+        }
+    });
+
+    win.on('closed', () => {
+        session.defaultSession.webRequest.onCompleted(null as any);
+        session.defaultSession.webRequest.onBeforeSendHeaders(null as any);
+    });
+}
+
 export async function checkIsUserLogin(vault: Vault) {
 	const data = await dataUtil.loadData(vault);
 	if (data && "userInfo" in data && data.userInfo) {
