@@ -11,7 +11,32 @@ import { addFrontmatter } from "./frontmatter";
 import { touchToRead } from "./read_service";
 import { loadSettings } from "./settings";
 
-export class ZhihuSlidesView extends View {
+export const SIDES_VIEW_TYPE = "zhihu-sides-view";
+
+export async function activateSideView() {
+	const { workspace } = this.app;
+	workspace.detachLeavesOfType(SIDES_VIEW_TYPE);
+	let leaf: WorkspaceLeaf | null = workspace.getLeftLeaf(false);
+
+	if (!leaf) {
+		leaf = workspace.getLeaf(true);
+	}
+
+	if (leaf) {
+		await leaf.setViewState({
+			type: SIDES_VIEW_TYPE,
+			active: true,
+		});
+		workspace.revealLeaf(leaf);
+	} else {
+		new Notice(
+			"Failed to open Zhihu sides: unable to create a sidebar leaf.",
+		);
+		console.error("No leaf available for Zhihu sides view");
+	}
+}
+
+export class ZhihuSideView extends View {
 	private recommendations: Recommendation[] = [];
 	private follows: Follow[] = [];
 	private hotLists: HotList[] = [];
