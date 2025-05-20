@@ -16,12 +16,13 @@ export default class ZhihuObPlugin extends Plugin {
 			new MentionSuggest(this.app, settings.restrictToZhihuTag),
 		);
 
+        const loginNotice = new Notice("您还未登录知乎，请先登录");
 		loadIcons();
 		this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
 			if (await login.checkIsUserLogin(this.app.vault)) {
 				side.activateSideView();
 			} else {
-				new Notice("您还未登录知乎，请先登录");
+				loginNotice;
 			}
 		});
 		this.registerView(
@@ -52,7 +53,7 @@ export default class ZhihuObPlugin extends Plugin {
 				if (await login.checkIsUserLogin(this.app.vault)) {
 					await publish.publishCurrentFile(this.app);
 				} else {
-					new Notice("您还未登录知乎，请先登录");
+					loginNotice;
 				}
 			},
 		});
@@ -64,7 +65,7 @@ export default class ZhihuObPlugin extends Plugin {
 				if (await login.checkIsUserLogin(this.app.vault)) {
 					await publish.createNewZhihuArticle(this.app);
 				} else {
-					new Notice("您还未登录知乎，请先登录");
+					loginNotice;
 				}
 			},
 		});
@@ -84,7 +85,7 @@ export default class ZhihuObPlugin extends Plugin {
 						},
 					).open();
 				} else {
-					new Notice("您还未登录知乎，请先登录");
+					loginNotice;
 				}
 			},
 		});
@@ -96,7 +97,7 @@ export default class ZhihuObPlugin extends Plugin {
 				if (await login.checkIsUserLogin(this.app.vault)) {
 					await answer.publishCurrentAnswer(this.app);
 				} else {
-					new Notice("您还未登录知乎，请先登录");
+					loginNotice;
 				}
 			},
 		});
