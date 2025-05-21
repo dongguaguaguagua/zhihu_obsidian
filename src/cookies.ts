@@ -25,10 +25,15 @@ export function getCookiesFromHeader(response: any): { [key: string]: string } {
 }
 
 export function cookiesHeaderBuilder(data: any, keys: string[]): string {
-    // const data = await data.loadData(vault);
-    const cookiesHeader = Object.entries(data.cookies)
+    // if key is empty: return all cookies
+    if (keys.length === 0) {
+        return Object.entries(data.cookies)
+            .map(([key, value]) => `${key}=${value}`)
+            .join("; ");
+    }
+    // else: return only the specified cookies
+    return Object.entries(data.cookies)
         .filter(([key]) => keys.includes(key))
         .map(([key, value]) => `${key}=${value}`)
         .join("; ");
-    return cookiesHeader;
 }

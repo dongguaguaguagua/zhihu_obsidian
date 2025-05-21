@@ -8,21 +8,23 @@ import * as answer from "./answer_service";
 import { ZhihuSettingTab } from "./settings_tab";
 import { loadIcons } from "./icon";
 import { loadSettings } from "./settings";
+import { handleAnswerClick } from "./view_answer";
 
 export default class ZhihuObPlugin extends Plugin {
     async onload() {
         const settings = await loadSettings(this.app.vault);
+        this.registerDomEvent(document, 'click', handleAnswerClick.bind(this, this.app.vault));
         this.registerEditorSuggest(
             new MentionSuggest(this.app, settings.restrictToZhihuTag),
         );
 
-        const loginNotice = new Notice("您还未登录知乎，请先登录");
+        const loginNoticeStr = "您还未登录知乎，请先登录";
 		loadIcons();
 		this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
 			if (await login.checkIsUserLogin(this.app.vault)) {
 				side.activateSideView();
 			} else {
-				loginNotice;
+				new Notice(loginNoticeStr);
 			}
 		});
 		this.registerView(
@@ -53,7 +55,7 @@ export default class ZhihuObPlugin extends Plugin {
 				if (await login.checkIsUserLogin(this.app.vault)) {
 					await publish.publishCurrentFile(this.app);
 				} else {
-					loginNotice;
+					new Notice(loginNoticeStr);
 				}
 			},
 		});
@@ -65,7 +67,7 @@ export default class ZhihuObPlugin extends Plugin {
 				if (await login.checkIsUserLogin(this.app.vault)) {
 					await publish.createNewZhihuArticle(this.app);
 				} else {
-					loginNotice;
+					new Notice(loginNoticeStr);
 				}
 			},
 		});
@@ -85,7 +87,7 @@ export default class ZhihuObPlugin extends Plugin {
 						},
 					).open();
 				} else {
-					loginNotice;
+					new Notice(loginNoticeStr);
 				}
 			},
 		});
@@ -97,7 +99,7 @@ export default class ZhihuObPlugin extends Plugin {
 				if (await login.checkIsUserLogin(this.app.vault)) {
 					await answer.publishCurrentAnswer(this.app);
 				} else {
-					loginNotice;
+					new Notice(loginNoticeStr);
 				}
 			},
 		});
