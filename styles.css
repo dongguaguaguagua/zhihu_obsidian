@@ -28,11 +28,11 @@
     text-align: center;
 }
 
-.zhihu-qrcode-modal div {
-    text-align: center;
-    font-size: 1.1em;
-    color: green;
-    margin-top: 1em;
+.zhihu-qrcode-modal .qrcode-title {
+    color: dodgerblue;
+    font-size: 1.6em;
+	text-align: center;
+    margin-bottom: 0.5em;
 }
 
 /* slide view */
