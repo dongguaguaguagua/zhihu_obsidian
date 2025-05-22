@@ -1,4 +1,12 @@
-import { Vault, Notice, View, WorkspaceLeaf, TFile, setIcon } from "obsidian";
+import {
+    App,
+    Vault,
+    Notice,
+    View,
+    WorkspaceLeaf,
+    TFile,
+    setIcon,
+} from "obsidian";
 import {
     Recommendation,
     loadRecommendations,
@@ -221,7 +229,8 @@ export class ZhihuSideView extends View {
                         recommendation.id,
                     );
                 }
-                this.openContent(
+                openContent(
+                    this.app,
                     recommendation.title,
                     recommendation.url,
                     recommendation.content,
@@ -267,7 +276,8 @@ export class ZhihuSideView extends View {
                 if (settings.sendReadToZhihu !== false) {
                     await touchToRead(this.vault, follow.type, follow.id);
                 }
-                this.openContent(
+                openContent(
+                    this.app,
                     follow.title,
                     follow.url,
                     follow.content,
@@ -302,7 +312,8 @@ export class ZhihuSideView extends View {
             excerpt.appendText(": " + hot.excerpt);
 
             item.onClickEvent(async () => {
-                this.openContent(
+                openContent(
+                    this.app,
                     hot.title,
                     hot.link,
                     hot.excerpt,
@@ -312,41 +323,41 @@ export class ZhihuSideView extends View {
             });
         });
     }
+}
+export async function openContent(
+    app: App,
+    title: string,
+    url: string,
+    content: string,
+    type: string,
+    authorName?: string,
+) {
+    const typeStr = fromTypeGetStr(type);
+    const folderPath = "zhihu";
+    title = stripHtmlTags(title);
+    const fileName = removeSpecialChars(
+        `${title}-${authorName}的${typeStr}.md`,
+    );
+    const filePath = `${folderPath}/${fileName}`;
 
-    async openContent(
-        title: string,
-        url: string,
-        content: string,
-        type: string,
-        authorName?: string,
-    ) {
-        const typeStr = fromTypeGetStr(type);
-        const folderPath = "zhihu";
-        title = stripHtmlTags(title);
-        const fileName = removeSpecialChars(
-            `${title}-${authorName}的${typeStr}.md`,
-        );
-        const filePath = `${folderPath}/${fileName}`;
-
-        const folder = this.vault.getAbstractFileByPath(folderPath);
-        if (!folder) {
-            await this.vault.createFolder(folderPath);
-        }
-
-        let file = this.vault.getAbstractFileByPath(filePath);
-        let markdown = htmlToMd(content);
-        markdown = addFrontmatter(markdown, "tags", `zhihu-${type}`);
-        markdown = addFrontmatter(markdown, "link", url);
-        if (!file) {
-            file = await this.vault.create(filePath, markdown);
-        } else if (!(file instanceof TFile)) {
-            console.error(`Path ${filePath} is not a file`);
-            return;
-        }
-
-        const leaf = this.app.workspace.getLeaf();
-        await leaf.openFile(file as TFile);
+    const folder = app.vault.getAbstractFileByPath(folderPath);
+    if (!folder) {
+        await app.vault.createFolder(folderPath);
     }
+
+    let file = app.vault.getAbstractFileByPath(filePath);
+    let markdown = htmlToMd(content);
+    markdown = addFrontmatter(markdown, "tags", `zhihu-${type}`);
+    markdown = addFrontmatter(markdown, "link", url);
+    if (!file) {
+        file = await app.vault.create(filePath, markdown);
+    } else if (!(file instanceof TFile)) {
+        console.error(`Path ${filePath} is not a file`);
+        return;
+    }
+
+    const leaf = this.app.workspace.getLeaf();
+    await leaf.openFile(file as TFile);
 }
 
 function changePageNumber(url: string, pageNumber: number): string {

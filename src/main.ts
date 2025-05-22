@@ -8,29 +8,37 @@ import * as answer from "./answer_service";
 import { ZhihuSettingTab } from "./settings_tab";
 import { loadIcons } from "./icon";
 import { loadSettings } from "./settings";
-import { handleAnswerClick } from "./view_answer";
+import * as open from "./open_service";
 
 export default class ZhihuObPlugin extends Plugin {
     async onload() {
         const settings = await loadSettings(this.app.vault);
-        this.registerDomEvent(document, 'click', handleAnswerClick.bind(this, this.app.vault));
+        this.registerDomEvent(
+            document,
+            "click",
+            (e) => {
+                open.handleAnswerClickReadMode(this.app, e);
+                open.handleAnswerClickLivePreview(this.app, e);
+            },
+            true,
+        );
         this.registerEditorSuggest(
             new MentionSuggest(this.app, settings.restrictToZhihuTag),
         );
 
         const loginNoticeStr = "您还未登录知乎，请先登录";
-		loadIcons();
-		this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
-			if (await login.checkIsUserLogin(this.app.vault)) {
-				side.activateSideView();
-			} else {
-				new Notice(loginNoticeStr);
-			}
-		});
-		this.registerView(
-			side.SIDES_VIEW_TYPE,
-			(leaf) => new side.ZhihuSideView(leaf, this.app.vault),
-		);
+        loadIcons();
+        this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
+            if (await login.checkIsUserLogin(this.app.vault)) {
+                side.activateSideView();
+            } else {
+                new Notice(loginNoticeStr);
+            }
+        });
+        this.registerView(
+            side.SIDES_VIEW_TYPE,
+            (leaf) => new side.ZhihuSideView(leaf, this.app.vault),
+        );
 
         this.addCommand({
             id: "qrcode-login",
@@ -48,61 +56,61 @@ export default class ZhihuObPlugin extends Plugin {
             },
         });
 
-		this.addCommand({
-			id: "publish-current-file",
-			name: "Publish current file",
-			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				if (await login.checkIsUserLogin(this.app.vault)) {
-					await publish.publishCurrentFile(this.app);
-				} else {
-					new Notice(loginNoticeStr);
-				}
-			},
-		});
+        this.addCommand({
+            id: "publish-current-file",
+            name: "Publish current file",
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    await publish.publishCurrentFile(this.app);
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
 
-		this.addCommand({
-			id: "create-new-article",
-			name: "Create new article",
-			callback: async () => {
-				if (await login.checkIsUserLogin(this.app.vault)) {
-					await publish.createNewZhihuArticle(this.app);
-				} else {
-					new Notice(loginNoticeStr);
-				}
-			},
-		});
+        this.addCommand({
+            id: "create-new-article",
+            name: "Create new article",
+            callback: async () => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    await publish.createNewZhihuArticle(this.app);
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
 
-		this.addCommand({
-			id: "create-new-answer",
-			name: "Create new answer",
-			callback: async () => {
-				if (await login.checkIsUserLogin(this.app.vault)) {
-					new answer.ZhihuQuestionLinkModal(
-						this.app,
-						async (questionLink) => {
-							await answer.createNewZhihuAnswer(
-								this.app,
-								questionLink,
-							);
-						},
-					).open();
-				} else {
-					new Notice(loginNoticeStr);
-				}
-			},
-		});
+        this.addCommand({
+            id: "create-new-answer",
+            name: "Create new answer",
+            callback: async () => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    new answer.ZhihuQuestionLinkModal(
+                        this.app,
+                        async (questionLink) => {
+                            await answer.createNewZhihuAnswer(
+                                this.app,
+                                questionLink,
+                            );
+                        },
+                    ).open();
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
 
-		this.addCommand({
-			id: "publish-current-answer",
-			name: "Publish current answer",
-			editorCallback: async (editor: Editor, view: MarkdownView) => {
-				if (await login.checkIsUserLogin(this.app.vault)) {
-					await answer.publishCurrentAnswer(this.app);
-				} else {
-					new Notice(loginNoticeStr);
-				}
-			},
-		});
+        this.addCommand({
+            id: "publish-current-answer",
+            name: "Publish current answer",
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    await answer.publishCurrentAnswer(this.app);
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
 
         // Register the settings tab
         this.addSettingTab(new ZhihuSettingTab(this.app, this));
