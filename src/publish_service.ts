@@ -37,7 +37,7 @@ export async function publishCurrentFile(app: App) {
     // 这里链接属性缺失或者为空，都表明未发表文章
     const status = publishStatus(frontmatter.link);
     const title = frontmatter.title || "untitled";
-    const toc = false;
+    const toc = !!frontmatter.toc;
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
     // 获取文章的ID，如果未发表则新建一个。
@@ -80,12 +80,10 @@ export async function publishCurrentFile(app: App) {
         vault,
         rmFmContent,
     );
-    console.log(transedImgContent);
     transedImgContent = await imageService.processOnlineImgs(
         vault,
         transedImgContent,
     );
-    console.log(transedImgContent);
     let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
     zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
     const patchBody = {

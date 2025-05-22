@@ -76,7 +76,7 @@ export async function publishCurrentAnswer(app: App) {
     }
     const questionId = extractQuestionId(questionLink);
     const status = publishStatus(frontmatter.link);
-    const toc = false;
+    const toc = !!frontmatter.toc;
 
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);

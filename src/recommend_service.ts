@@ -60,7 +60,6 @@ export function loadRecommendations(response: any) {
                 item.target &&
                 Object.keys(item.target).length > 0,
         );
-        console.log(filteredData);
         return filteredData.map((item: any) => ({
             id: item.target.id,
             type: item.target.type,

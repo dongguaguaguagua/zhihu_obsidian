@@ -17,7 +17,9 @@ export class QRCodeModal extends Modal {
         this.modalEl.style.width = "320px";
         this.modalEl.style.height = "360px";
         const { contentEl } = this;
-        const titleContainer = contentEl.createEl("div", { cls: "qrcode-title" });
+        const titleContainer = contentEl.createEl("div", {
+            cls: "qrcode-title",
+        });
         titleContainer.createEl("span", { text: "请扫码登录知乎" });
         contentEl.classList.add("zhihu-qrcode-modal");
         this.canvas = contentEl.createEl("canvas");
@@ -162,8 +164,8 @@ export async function zhihuWebLogin(app: App) {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",
     );
 
-    const loginUrl = 'https://www.zhihu.com/signin';
-    const exampleQuestionUrl = 'https://www.zhihu.com/question/19550225';
+    const loginUrl = "https://www.zhihu.com/signin";
+    const exampleQuestionUrl = "https://www.zhihu.com/question/19550225";
     await win.loadURL(loginUrl);
 
     win.webContents.on("did-finish-load", async () => {
@@ -205,7 +207,6 @@ export async function zhihuWebLogin(app: App) {
                 cookieObj[c.name] = c.value;
             });
             // save cookies to vault
-            // console.log('Zhihu 登录 Cookies:', cookieObj);
             await dataUtil.updateData(vault, { cookies: cookieObj });
             await getUserInfo(vault);
 

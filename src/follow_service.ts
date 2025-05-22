@@ -56,7 +56,6 @@ export function loadFollows(response: any) {
                 item.target &&
                 Object.keys(item.target).length > 0,
         );
-        console.log(filteredData);
         return filteredData.map((item: any) => fromTypeGetProperty(item)) as [
             Follow,
         ];
