@@ -30,13 +30,10 @@ export async function handleAnswerClickReadMode(app: App, evt: MouseEvent) {
     const targetLink = target.href;
     // const targetLink = (target as HTMLAnchorElement).getAttribute("href");
     const targetConetent = target.textContent;
-    console.log(targetLink, targetConetent);
     if (!targetConetent) return;
-    console.log(isZhihuAnswerLink(targetLink));
     if (!isZhihuAnswerLink(targetLink)) return;
     evt.preventDefault();
     evt.stopPropagation();
-    console.log("链接点击已被拦截");
     openZhihuLinkInVault(app, targetLink);
 }
 
@@ -57,7 +54,7 @@ export async function handleAnswerClickLivePreview(app: App, evt: MouseEvent) {
     const text = line.text;
 
     // 正则匹配 Markdown 链接 [title](url)
-    const match = /\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g;
+    const match = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
     let found: RegExpExecArray | null;
     while ((found = match.exec(text))) {
         const linkStart = line.from + found.index;
@@ -71,7 +68,6 @@ export async function handleAnswerClickLivePreview(app: App, evt: MouseEvent) {
             evt.preventDefault();
             evt.stopPropagation();
 
-            console.log("Live Preview 模式下点击了知乎链接：", linkHref);
             openZhihuLinkInVault(app, linkHref);
             return;
         }
@@ -123,7 +119,7 @@ async function openZhihuLinkInVault(app: App, zhihuLink: string) {
                 writerName,
             );
         } else {
-            console.log("未找到回答内容");
+            new Notice(`未找到回答内容`);
         }
     } catch (error) {
         console.error("回答请求失败", error);
