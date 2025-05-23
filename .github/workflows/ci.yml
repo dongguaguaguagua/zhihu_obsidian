@@ -1,0 +1,32 @@
+name: CI (Build)
+
+on:
+    push:
+        branches:
+            - main
+    pull_request:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: 18
+
+            - name: Install dependencies
+              run: npm install
+
+            # - name: Lint (可选)
+            #   run: npm run lint
+
+            - name: Build Plugin
+              run: npm run build
+
+            # - name: Test (可选)
+            #   run: npm test
