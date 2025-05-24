@@ -2,9 +2,9 @@
 <picture>
 <img alt="logo" src="./imgs/logo.svg" height="150">
 </picture>
-<h1>Zhihu On Obsidian</h1>
+<h1>Zhihu on Obsidian</h1>
 
-[中文 README](./README_CN.md)
+[EN README](./README.md)
 
 </div>
 
@@ -88,17 +88,25 @@ LaTeX公式也可以正常显示
 
 ![github_card](./imgs/github_card.png)
 
+### 图片
+
+你只需要使用markdown语法插入图片，插件就会帮你完成剩下的工作。对于本地图片，请使用Obsidian推荐的语法：`![[image|caption]]`。而对于网络图片，请使用`![caption](https://img.link)`语法，插件会自动下载网络图片并上传到知乎。
+
+注意，请**不要**使用`![caption](...)`语法上传本地图片，否则图片可能无法完成上传。
+
 ### 文章封面
 
 插件也可以让你一键上传你最爱的封面图片。只要在属性(property)中添加`cover`条目，然后键入`[[img]]`选择图片。就像这样
 
 ![cover_example](./imgs/cover_example.jpg)
 
-### 图片
+### 目录
 
-你只需要使用markdown语法插入图片，插件就会帮你完成剩下的工作。对于本地图片，请使用Obsidian推荐的语法：`![[image|caption]]`。而对于网络图片，请使用`![caption](https://img.link)`语法，插件会自动下载网络图片并上传到知乎。
+在属性中添加 `toc` 条目，确保它不为空，那么发布回答或文章时就会生成目录。
 
-注意，请**不要**使用`![caption](...)`语法上传本地图片，否则图片可能无法完成上传。
+比如`toc`可以是：`True` 或者 `1`。
+
+如果你不添加 `toc`, 那么就不会生成目录。
 
 ## 贡献
 
