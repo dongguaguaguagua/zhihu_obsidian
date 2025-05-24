@@ -17,7 +17,6 @@ export default {
     },
     get current() {
         const lang = window.localStorage.getItem("language") ?? "en";
-        console.log(lang);
         const key = langMap[lang as keyof typeof langMap] ?? "en";
         return this.i18n[key];
     },
