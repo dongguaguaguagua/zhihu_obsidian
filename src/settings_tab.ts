@@ -3,10 +3,12 @@ import ZhihuObPlugin from "./main";
 import { loadSettings, saveSettings } from "./settings";
 import * as login from "./login_service";
 import { loadData, deleteData } from "./data";
+import i18n, { type Lang } from "../locales";
 
 export class ZhihuSettingTab extends PluginSettingTab {
     plugin: ZhihuObPlugin;
     isLoggedIn = false;
+    i18n: Lang;
 
     userInfo: { avatar_url: string; name: string; headline?: string } | null =
         null;
@@ -14,6 +16,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
     constructor(app: App, plugin: ZhihuObPlugin) {
         super(app, plugin);
         this.plugin = plugin;
+        this.i18n = i18n.current;
     }
 
     async display(): Promise<void> {
@@ -37,8 +40,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         // User login status and info
         new Setting(containerEl)
-            .setName("My account")
-            .setDesc("Manage your Zhihu login status")
+            .setName(this.i18n.settings.accountTitle)
+            .setDesc(this.i18n.settings.accountTitleDesc)
             .then((setting) => {
                 if (this.isLoggedIn && this.userInfo) {
                     const userInfoContainer = setting.nameEl.createDiv({
@@ -73,7 +76,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                     // Log out button
                     setting.addButton((button) =>
                         button
-                            .setButtonText("Log out")
+                            .setButtonText(this.i18n.settings.logoutButtonText)
                             .setWarning()
                             .onClick(async () => {
                                 try {
@@ -86,7 +89,10 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                     this.userInfo = null;
                                     this.display();
                                 } catch (e) {
-                                    console.error("Failed to log out:", e);
+                                    console.error(
+                                        this.i18n.error.logoutFailed,
+                                        e,
+                                    );
                                 }
                             }),
                     );
@@ -94,7 +100,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                     // Log in button
                     setting.addButton((button) =>
                         button
-                            .setButtonText("Log in")
+                            .setButtonText(this.i18n.settings.loginButtonText)
                             .setCta()
                             .onClick(async () => {
                                 try {
@@ -119,7 +125,10 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                     }
                                     this.display();
                                 } catch (e) {
-                                    console.error("Failed to log in:", e);
+                                    console.error(
+                                        this.i18n.error.loginFailed,
+                                        e,
+                                    );
                                 }
                             }),
                     );
@@ -129,11 +138,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
         // User Agent setting
         const settings = await loadSettings(this.app.vault);
         new Setting(containerEl)
-            .setName("User agent")
-            .setDesc("Custom user agent for Zhihu API requests")
+            .setName(this.i18n.settings.userAgent)
+            .setDesc(this.i18n.settings.userAgentDesc)
             .addText((text) =>
                 text
-                    .setPlaceholder("Enter user agent")
+                    .setPlaceholder(this.i18n.settings.userAgentPlaceholder)
                     .setValue(settings.user_agent)
                     .onChange(async (value) => {
                         try {
@@ -141,17 +150,18 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 user_agent: value,
                             });
                         } catch (e) {
-                            console.error("Failed to save user agent:", e);
+                            console.error(
+                                this.i18n.error.saveUserAgentFailed,
+                                e,
+                            );
                         }
                     }),
             );
 
         // Restrict @知友 to notes with zhihu tag
         new Setting(containerEl)
-            .setName("Restrict @Zhihuers to Zhihu-tagged notes")
-            .setDesc(
-                "Enable @Zhihuers functionality only for notes with a 'zhihu' tag in frontmatter. (Need to reload plugin once changed)",
-            )
+            .setName(this.i18n.settings.restrictAt)
+            .setDesc(this.i18n.settings.restrictAtDesc)
             .addToggle((toggle) =>
                 toggle
                     .setValue(settings.restrictToZhihuTag)
@@ -162,7 +172,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             });
                         } catch (e) {
                             console.error(
-                                "Failed to save restrictToZhihuTag setting:",
+                                this.i18n.error.saveRestrictAtFailed,
                                 e,
                             );
                         }
@@ -171,30 +181,33 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         // Clear Image Cahce in `data.cache`
         new Setting(containerEl)
-            .setName("Clear image cache")
-            .setDesc(
-                "With image cache, you can reduce access requency to the Zhihu API",
-            )
+            .setName(this.i18n.settings.clearImageCache)
+            .setDesc(this.i18n.settings.clearImageCacheDesc)
             .then((setting) => {
                 // Log out button
                 setting.addButton((button) =>
-                    button.setButtonText("Clear").onClick(async () => {
-                        try {
-                            await deleteData(this.app.vault, "cache");
-                            new Notice("Image cache cleared!");
-                        } catch (e) {
-                            console.error("Failed to clear image cache", e);
-                        }
-                    }),
+                    button
+                        .setButtonText(
+                            this.i18n.settings.clearImageCacheButtonText,
+                        )
+                        .onClick(async () => {
+                            try {
+                                await deleteData(this.app.vault, "cache");
+                                new Notice(this.i18n.notice.imageCacheCleared);
+                            } catch (e) {
+                                console.error(
+                                    this.i18n.error.clearImageCacheFailed,
+                                    e,
+                                );
+                            }
+                        }),
                 );
             });
 
         // If send read to Zhihu
         new Setting(containerEl)
-            .setName("Send read to Zhihu")
-            .setDesc(
-                "Send read information to Zhihu when you click the slide view articles or answers",
-            )
+            .setName(this.i18n.settings.sendRead)
+            .setDesc(this.i18n.settings.sendReadDesc)
             .addToggle((toggle) =>
                 toggle
                     .setValue(settings.sendReadToZhihu)
@@ -205,7 +218,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             });
                         } catch (e) {
                             console.error(
-                                "Failed to save sendReadToZhihu setting:",
+                                this.i18n.error.saveSendZhihuFailed,
                                 e,
                             );
                         }

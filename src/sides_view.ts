@@ -18,7 +18,8 @@ import { htmlToMd } from "./html_to_markdown";
 import { addFrontmatter } from "./frontmatter";
 import { touchToRead } from "./read_service";
 import { loadSettings } from "./settings";
-
+import i18n, { type Lang } from "../locales";
+const locale = i18n.current;
 export const SIDES_VIEW_TYPE = "zhihu-sides-view";
 
 export async function activateSideView() {
@@ -37,10 +38,8 @@ export async function activateSideView() {
         });
         workspace.revealLeaf(leaf);
     } else {
-        new Notice(
-            "Failed to open Zhihu sides: unable to create a sidebar leaf.",
-        );
-        console.error("No leaf available for Zhihu sides view");
+        new Notice(`${locale.notice.openZhihuSideFailed}`);
+        console.error(locale.error.noLeafAvailable);
     }
 }
 
@@ -86,14 +85,14 @@ export class ZhihuSideView extends View {
         const recom_details = container.createEl("details");
         recom_details.addClass("side-collapsible");
         const recom_summary = recom_details.createEl("summary", {
-            text: "推荐",
+            text: locale.ui.recommendations,
         });
         recom_summary.addClass("side-summary");
         const recom_icon_container = recom_summary.createDiv();
         recom_icon_container.addClass("side-icons");
         const recom_prev_icon = recom_icon_container.createEl("span");
         recom_prev_icon.addClass("side-icon");
-        recom_prev_icon.setAttr("aria-label", "上一页");
+        recom_prev_icon.setAttr("aria-label", locale.ui.previousPage);
         setIcon(recom_prev_icon, "arrow-left");
         recom_prev_icon.onClickEvent((e) => {
             e.preventDefault();
@@ -101,7 +100,7 @@ export class ZhihuSideView extends View {
         });
         const recom_refresh_icon = recom_icon_container.createEl("span");
         recom_refresh_icon.addClass("side-icon");
-        recom_refresh_icon.setAttr("aria-label", "刷新推荐");
+        recom_refresh_icon.setAttr("aria-label", locale.ui.refreshRecommend);
         setIcon(recom_refresh_icon, "refresh-cw");
         recom_refresh_icon.onClickEvent((e) => {
             e.preventDefault();
@@ -109,7 +108,7 @@ export class ZhihuSideView extends View {
         });
         const recom_next_icon = recom_icon_container.createEl("span");
         recom_next_icon.addClass("side-icon");
-        recom_next_icon.setAttr("aria-label", "下一页");
+        recom_next_icon.setAttr("aria-label", locale.ui.nextPage);
         setIcon(recom_next_icon, "arrow-right");
         recom_next_icon.onClickEvent((e) => {
             e.preventDefault();
@@ -126,7 +125,7 @@ export class ZhihuSideView extends View {
         const follow_details = container.createEl("details");
         follow_details.addClass("side-collapsible");
         const follow_summary = follow_details.createEl("summary", {
-            text: "关注",
+            text: locale.ui.follows,
         });
         follow_summary.addClass("side-summary");
 
@@ -134,7 +133,7 @@ export class ZhihuSideView extends View {
         follow_icon_container.addClass("side-icons");
         const follow_prev_icon = follow_icon_container.createEl("span");
         follow_prev_icon.addClass("side-icon");
-        follow_prev_icon.setAttr("aria-label", "上一页");
+        follow_prev_icon.setAttr("aria-label", locale.ui.previousPage);
         setIcon(follow_prev_icon, "arrow-left");
         follow_prev_icon.onClickEvent((e) => {
             e.preventDefault();
@@ -142,7 +141,7 @@ export class ZhihuSideView extends View {
         });
         const follow_refresh_icon = follow_icon_container.createEl("span");
         follow_refresh_icon.addClass("side-icon");
-        follow_refresh_icon.setAttr("aria-label", "刷新关注");
+        follow_refresh_icon.setAttr("aria-label", locale.ui.refreshFollows);
         setIcon(follow_refresh_icon, "refresh-cw");
         follow_refresh_icon.onClickEvent((e) => {
             e.preventDefault();
@@ -150,7 +149,7 @@ export class ZhihuSideView extends View {
         });
         const follow_next_icon = follow_icon_container.createEl("span");
         follow_next_icon.addClass("side-icon");
-        follow_next_icon.setAttr("aria-label", "下一页");
+        follow_next_icon.setAttr("aria-label", locale.ui.nextPage);
         setIcon(follow_next_icon, "arrow-right");
         follow_next_icon.onClickEvent((e) => {
             e.preventDefault();
@@ -167,13 +166,13 @@ export class ZhihuSideView extends View {
         const hotlist_details = container.createEl("details");
         hotlist_details.addClass("side-collapsible");
         const hotlist_summary = hotlist_details.createEl("summary", {
-            text: "热榜",
+            text: locale.ui.hotlists,
         });
         hotlist_summary.addClass("side-summary");
 
         const hotlist_refresh_icon = hotlist_summary.createEl("span");
         hotlist_refresh_icon.addClass("side-icon");
-        hotlist_refresh_icon.setAttr("aria-label", "刷新热榜");
+        hotlist_refresh_icon.setAttr("aria-label", locale.ui.refreshHotlists);
         setIcon(hotlist_refresh_icon, "refresh-cw");
         hotlist_refresh_icon.onClickEvent((e) => {
             e.preventDefault();
@@ -366,7 +365,7 @@ function changePageNumber(url: string, pageNumber: number): string {
         parsedUrl.searchParams.set("page_number", pageNumber.toString());
         return parsedUrl.toString();
     } catch (error) {
-        console.error("Invalid URL:", error);
+        console.error(locale.notice.linkInvalid, error);
         return url;
     }
 }

@@ -2,6 +2,9 @@ import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 import { Vault, Notice, requestUrl } from "obsidian";
 import { loadSettings } from "./settings";
+import i18n, { type Lang } from "../locales";
+
+const locale = i18n.current;
 
 export interface Follow {
     id: string;
@@ -44,7 +47,7 @@ export async function getFollows(vault: Vault, url: string) {
         });
         return response.json;
     } catch (error) {
-        new Notice(`获取关注失败: ${error}`);
+        new Notice(`${locale.notice.fetchFollowsFailed},${error}`);
     }
 }
 
@@ -60,7 +63,7 @@ export function loadFollows(response: any) {
             Follow,
         ];
     } catch (error) {
-        console.error("Failed to load follows:", error);
+        console.error(locale.error.loadFollowsFailed, error);
         return [];
     }
 }

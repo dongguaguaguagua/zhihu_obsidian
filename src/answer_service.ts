@@ -8,6 +8,9 @@ import * as imageService from "./image_service";
 import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
+import i18n, { type Lang } from "../locales";
+
+const locale = i18n.current;
 
 export class ZhihuQuestionLinkModal extends Modal {
     inputEl: TextComponent;
@@ -20,12 +23,12 @@ export class ZhihuQuestionLinkModal extends Modal {
 
     onOpen() {
         const { contentEl } = this;
-        contentEl.createEl("h2", { text: "请输入知乎问题链接" });
+        contentEl.createEl("h2", { text: locale.ui.enterQuestionLink });
 
         this.inputEl = new TextComponent(contentEl);
         this.inputEl.inputEl.addClass("zhihu-question-input");
         this.inputEl.setPlaceholder(
-            "例如：https://www.zhihu.com/question/407774459",
+            locale.ui.forExample + "https://www.zhihu.com/question/407774459",
         );
 
         // 添加键盘事件监听
@@ -35,7 +38,7 @@ export class ZhihuQuestionLinkModal extends Modal {
                 if (event.key === "Enter") {
                     const value = this.inputEl.getValue().trim();
                     if (!isZhihuQuestionLink(value)) {
-                        new Notice("请输入有效的知乎问题链接！");
+                        new Notice(`${locale.notice.questionLinkInvalid}`);
                         return;
                     }
                     this.close();
@@ -52,26 +55,27 @@ export class ZhihuQuestionLinkModal extends Modal {
 
 export async function publishCurrentAnswer(app: App) {
     const activeFile = app.workspace.getActiveFile();
+    const locale = i18n.current;
 
     if (!activeFile) {
-        console.warn("No active file found");
+        console.error(locale.error.noActiveFileFound);
         return;
     }
     const fileCache = app.metadataCache.getFileCache(activeFile);
     const frontmatter = fileCache?.frontmatter;
     if (!frontmatter) {
-        new Notice("Zhihu on obsidian要求要添加回答属性");
+        new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
     const tags = normalizeStr(frontmatter.tags);
     const hasZhihuTag = tags.includes("zhihu");
     if (!hasZhihuTag) {
-        new Notice("Zhihu on obsidian要求标签包含zhihu");
+        new Notice(`${locale.notice.noZhihuTag}`);
         return;
     }
     const questionLink = frontmatter.question;
     if (!isZhihuQuestionLink(questionLink)) {
-        new Notice("问题链接无效！");
+        new Notice(`${locale.notice.questionLinkInvalid}`);
         return;
     }
     const questionId = extractQuestionId(questionLink);
@@ -92,10 +96,10 @@ export async function publishCurrentAnswer(app: App) {
             );
             break;
         case 3:
-            new Notice("无效链接！");
+            new Notice(`${locale.notice.linkInvalid}`);
             return;
         default:
-            new Notice("未知错误");
+            new Notice(`${locale.error.unknownError}`);
             return;
     }
 
@@ -148,13 +152,13 @@ export async function publishCurrentAnswer(app: App) {
             await app.fileManager.processFrontMatter(activeFile, (fm) => {
                 fm.link = `https://www.zhihu.com/question/${questionId}/answer/${answerId}`;
             });
-            new Notice("发布回答成功！");
+            new Notice(`${locale.notice.publishAnswerSuccess}`);
             break;
         case 1:
-            new Notice("更新回答成功！");
+            new Notice(`${locale.notice.updateAnswerSuccess}`);
             break;
         default:
-            new Notice("未知错误");
+            new Notice(`${locale.error.unknownError}`);
             return;
     }
 }
@@ -203,9 +207,9 @@ async function patchDraft(
             method: "POST",
             body: JSON.stringify(patchBody),
         });
-        new Notice(`patch回答成功`);
+        new Notice(`${locale.notice.patchAnswerSuccess}`);
     } catch (error) {
-        new Notice(`patch回答失败: ${error}`);
+        new Notice(`${locale.notice.patchAnswerFailed},${error}`);
     }
 }
 
@@ -321,7 +325,7 @@ async function publishAnswerDraft(
             new Notice(response.json.message);
         }
     } catch (error) {
-        new Notice(`发布回答失败: ${error}`);
+        new Notice(`${locale.notice.publishAnswerFailed},${error}`);
     }
 }
 
@@ -349,7 +353,7 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
         await leaf.openFile(newFile);
         return filePath;
     } catch (error) {
-        console.error(`Error creating or modifying file: ${error}`);
+        console.error(locale.error.createModifyFileFailed, error);
         throw error;
     }
 }

@@ -3,6 +3,9 @@ import QRCode from "qrcode";
 import * as dataUtil from "./data";
 import * as cookieUtil from "./cookies";
 import { loadSettings } from "./settings";
+import i18n, { type Lang } from "../locales";
+import en from "locales/en";
+const locale = i18n.current;
 
 export class QRCodeModal extends Modal {
     private link: string;
@@ -20,7 +23,7 @@ export class QRCodeModal extends Modal {
         const titleContainer = contentEl.createEl("div", {
             cls: "qrcode-title",
         });
-        titleContainer.createEl("span", { text: "请扫码登录知乎" });
+        titleContainer.createEl("span", { text: locale.ui.scanLoginToZhihu });
         contentEl.classList.add("zhihu-qrcode-modal");
         this.canvas = contentEl.createEl("canvas");
         await this.renderQRCode(this.link);
@@ -39,7 +42,9 @@ export class QRCodeModal extends Modal {
             });
         } catch (err) {
             const { contentEl } = this;
-            contentEl.createEl("p", { text: "生成二维码失败：" + err });
+            contentEl.createEl("p", {
+                text: locale.ui.generateQRCodeFailed + err,
+            });
         }
     }
 
@@ -53,7 +58,7 @@ export class QRCodeModal extends Modal {
         contentEl.empty();
 
         contentEl.createEl("div", {
-            text: "✅ 扫码成功！请在知乎app中点击确认以登录",
+            text: "✅" + locale.ui.scanSuccess,
         });
     }
 
@@ -93,7 +98,7 @@ export async function zhihuQRcodeLogin(app: App) {
                     const newLink = loginLinkBuilder(newToken);
                     modal.updateQRCode(newLink);
                     token = newToken;
-                    new Notice("二维码已更新");
+                    new Notice(`${locale.notice.QRCodeRefreshed}`);
                 }
             }
         } else {
@@ -170,7 +175,7 @@ export async function zhihuWebLogin(app: App) {
 
     win.webContents.on("did-finish-load", async () => {
         const url = win.webContents.getURL();
-        new Notice("加载完成：" + url);
+        new Notice(`${locale.notice.loadComplete + url}`);
         // 登录页面完成，用户输入完毕后可能跳转到首页
         if (url === "https://www.zhihu.com/") {
             // 转到具体问题页面，触发 zse-ck 脚本加载
@@ -182,9 +187,7 @@ export async function zhihuWebLogin(app: App) {
         if (url.startsWith(exampleQuestionUrl)) {
             // 检查 zse-ck 脚本是否加载
             if (!loadedZse) {
-                new Notice(
-                    "登录失败：未能加载 zse-ck 脚本，请检查网络或尝试重试",
-                );
+                new Notice(`${locale.notice.zseckLoadFailed}`);
                 return;
             }
 
@@ -196,10 +199,10 @@ export async function zhihuWebLogin(app: App) {
                 (c: { name: string }) => c.name === "__zse_ck",
             );
             if (!zse) {
-                new Notice("登录失败：未获取到 __zse_ck，请检查网络或环境");
+                new Notice(`${locale.notice.zseckFetchFailed}`);
                 return;
             }
-            new Notice("登录成功");
+            new Notice(`${locale.notice.loginSuccess}`);
 
             // convert cookies to {string: string} format
             const cookieObj: { [key: string]: string } = {};
@@ -223,7 +226,7 @@ export async function zhihuWebLogin(app: App) {
 export async function checkIsUserLogin(vault: Vault) {
     const data = await dataUtil.loadData(vault);
     if (data && "userInfo" in data && data.userInfo) {
-        new Notice(`欢迎! 知乎用户 ${data.userInfo.name}`);
+        new Notice(`${locale.notice.welcome},${data.userInfo.name}`);
         return true;
     } else {
         return false;
@@ -253,10 +256,10 @@ async function initCookies(vault: Vault) {
             method: "GET",
         });
         const cookies = cookieUtil.getCookiesFromHeader(response);
-        new Notice("获取初始cookies成功");
+        new Notice(`${locale.notice.fetchInitCookiesSuccess}`);
         await dataUtil.updateData(vault, { cookies: cookies });
     } catch (error) {
-        new Notice(`获取初始cookies失败：${error}`);
+        new Notice(`${locale.notice.fetchInitCookiesFailed},${error}`);
     }
 }
 
@@ -290,7 +293,7 @@ async function signInNext(vault: Vault) {
             method: "GET",
         });
     } catch (error) {
-        new Notice(`重定向至sign in界面失败：${error}`);
+        new Notice(`${locale.notice.redirectionToSigninFailed}`);
     }
 }
 
@@ -330,7 +333,7 @@ async function initUdidCookies(vault: Vault) {
         const udid_cookies = cookieUtil.getCookiesFromHeader(response);
         await dataUtil.updateData(vault, { cookies: udid_cookies });
     } catch (error) {
-        new Notice(`获取UDID失败：${error}`);
+        new Notice(`${locale.notice.fetchUDIDFailed},${error}`);
     }
 }
 
@@ -371,7 +374,7 @@ async function scProfiler(vault: Vault) {
             method: "POST",
         });
     } catch (error) {
-        new Notice(`sc-profiler失败：${error}`);
+        new Notice(`${locale.notice.requestSCprofilerFailed},${error}`);
     }
 }
 
@@ -404,11 +407,11 @@ async function getLoginLink(vault: Vault) {
             },
             method: "POST",
         });
-        new Notice("获取登录链接成功");
+        new Notice(`${locale.notice.getLoginLinkSuccess}`);
         await dataUtil.updateData(vault, { login: response.json });
         return response.json;
     } catch (error) {
-        new Notice(`获取登录链接失败：${error}`);
+        new Notice(`${locale.notice.getLoginLinkFailed},${error}`);
     }
 }
 
@@ -445,7 +448,7 @@ async function captchaSignIn(vault: Vault) {
         const cap_cookies = cookieUtil.getCookiesFromHeader(response);
         await dataUtil.updateData(vault, { cookies: cap_cookies });
     } catch (error) {
-        new Notice(`获取captcha_session_v2失败:${error}`);
+        new Notice(`${locale.notice.fetchCaptchaFailed},${error}`);
     }
 }
 
@@ -480,10 +483,10 @@ async function fetchQRcodeStatus(vault: Vault, token: string) {
             },
             method: "GET",
         });
-        new Notice(`扫描状态: ${response.json.status}`);
+        new Notice(`${locale.notice.scanStatus},${response.json.status}`);
         return response;
     } catch (error) {
-        new Notice(`获取扫描状态失败: ${error}`);
+        new Notice(`${locale.notice.getScanStatusFailed}`);
     }
 }
 
@@ -526,7 +529,7 @@ async function signInZhihu(vault: Vault) {
         await dataUtil.updateData(vault, { cookies: new_cookies });
         return response;
     } catch (error) {
-        new Notice(`获取q_c1 cookie失败: ${error}`);
+        new Notice(`${locale.notice.fetchQC1Failed},${error}`);
     }
 }
 
@@ -566,7 +569,7 @@ async function prodTokenRefresh(vault: Vault) {
             method: "POST",
         });
     } catch (error) {
-        new Notice(`访问prod/token/refresh失败: ${error}`);
+        new Notice(`${locale.notice.requestProdTokenRefreshFailed},${error}`);
     }
 }
 
@@ -608,11 +611,11 @@ async function getUserInfo(vault: Vault) {
         });
         const new_BEC = cookieUtil.getCookiesFromHeader(response);
         const userInfo = response.json;
-        new Notice(`欢迎！${userInfo.name}`);
+        new Notice(`${locale.notice.welcome},${userInfo.name}`);
         await dataUtil.updateData(vault, { cookies: new_BEC });
         await dataUtil.updateData(vault, { userInfo: userInfo });
     } catch (error) {
-        new Notice(`获取用户信息失败: ${error}`);
+        new Notice(`${locale.notice.getUserInfoFailed},${error}`);
     }
 }
 

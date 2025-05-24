@@ -2,7 +2,8 @@ import { App, Vault, MarkdownView, Notice, TFile, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
 import * as cookies from "./cookies";
 import { openContent } from "./sides_view";
-
+import i18n, { type Lang } from "../locales";
+const locale = i18n.current;
 function isZhihuAnswerLink(link: string): boolean {
     return /^https?:\/\/(www\.)?zhihu\.com\/question\/\d+\/answer\/\d+/.test(
         link,
@@ -119,10 +120,10 @@ async function openZhihuLinkInVault(app: App, zhihuLink: string) {
                 writerName,
             );
         } else {
-            new Notice(`未找到回答内容`);
+            new Notice(`${locale.notice.unableToFindAnswerContent}`);
         }
     } catch (error) {
-        console.error("回答请求失败", error);
-        new Notice(`回答请求失败: ${error.message}`);
+        console.error(locale.notice.requestAnswerFailed, error);
+        new Notice(`${locale.notice.requestAnswerFailed},${error.message}`);
     }
 }

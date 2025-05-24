@@ -2,7 +2,8 @@ import { Vault, Notice, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
 import * as cookies from "./cookies";
 import { loadSettings } from "./settings";
-
+import i18n, { type Lang } from "../locales";
+const locale = i18n.current;
 export async function autoCompleteTopic(
     vault: Vault,
     id: string,
@@ -44,10 +45,10 @@ export async function autoCompleteTopic(
             },
             method: "GET",
         });
-        new Notice(`获取话题成功`);
+        new Notice(`${locale.notice.fetchTopicsSuccess}`);
         return response.json;
     } catch (error) {
-        new Notice(`获取话题失败: ${error}`);
+        new Notice(`${locale.notice.fetchTopicsFailed},${error}`);
     }
 }
 
@@ -88,9 +89,9 @@ export async function topics2Draft(vault: Vault, id: string, topics: any) {
             method: "POST",
             body: JSON.stringify(topics),
         });
-        new Notice(`给文章赋予话题成功`);
+        new Notice(`${locale.notice.giveTopicSuccess}`);
         // return response.json
     } catch (error) {
-        new Notice(`给文章赋予话题失败: ${error}`);
+        new Notice(`${locale.notice.giveTopicFailed}`);
     }
 }
