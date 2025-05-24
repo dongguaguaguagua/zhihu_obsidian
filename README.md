@@ -2,7 +2,7 @@
 <picture>
 <img alt="logo" src="./imgs/logo.svg" height="150">
 </picture>
-<h1>Zhihu On Obsidian</h1>
+<h1>Zhihu on Obsidian</h1>
 
 [中文 README](./README_CN.md)
 
@@ -99,6 +99,14 @@ Please **DO NOT** use the `![caption](...)` syntax for local images, or they may
 The plugin also support adding your favorate cover to the article. Just add `cover` entry to properties and select pictures using `[[img]]` syntax. Like that
 
 ![cover_example](./imgs/cover_example.jpg)
+
+### Table of contents
+
+Add `toc` entry to frontmatter, and ensure it is not empty, then table of content will be generated.
+
+For example, `toc` can be `True` or `1`.
+
+If you don't add `toc`, then the table of content will not be generated.
 
 ## Contribution
 
