@@ -2,7 +2,8 @@ import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 import { Vault, Notice, requestUrl } from "obsidian";
 import { loadSettings } from "./settings";
-
+import i18n, { type Lang } from "../locales";
+const locale = i18n.current;
 export async function touchToRead(vault: Vault, type: string, id: string) {
     try {
         const data = await dataUtil.loadData(vault);
@@ -43,6 +44,6 @@ export async function touchToRead(vault: Vault, type: string, id: string) {
         });
         return response.json;
     } catch (error) {
-        new Notice(`文章或回答已读失败: ${error}`);
+        new Notice(`${locale.notice.touchToReadFailed}`);
     }
 }

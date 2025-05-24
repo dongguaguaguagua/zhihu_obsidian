@@ -2,7 +2,8 @@ import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 import { Vault, Notice, requestUrl } from "obsidian";
 import { loadSettings } from "./settings";
-
+import i18n, { type Lang } from "../locales";
+const locale = i18n.current;
 export interface HotList {
     id: string;
     link: string;
@@ -44,7 +45,7 @@ async function getHotLists(vault: Vault) {
         });
         return response.json;
     } catch (error) {
-        new Notice(`获取热榜失败: ${error}`);
+        new Notice(`${locale.notice.fetchHotlistFailed},${error}`);
     }
 }
 
@@ -73,7 +74,7 @@ export async function loadHotList(vault: Vault) {
             author: item.target.author.name,
         })) as [HotList];
     } catch (error) {
-        console.error("Failed to load hot lists:", error);
+        console.error(locale.error.loadHotlistFailed, error);
         return [];
     }
 }

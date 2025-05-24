@@ -1,4 +1,11 @@
-import { Editor, MarkdownView, Plugin, Notice } from "obsidian";
+import {
+    App,
+    Editor,
+    MarkdownView,
+    Plugin,
+    type PluginManifest,
+    Notice,
+} from "obsidian";
 
 import { MentionSuggest } from "./member_mention";
 import * as login from "./login_service";
@@ -9,8 +16,16 @@ import { ZhihuSettingTab } from "./settings_tab";
 import { loadIcons } from "./icon";
 import { loadSettings } from "./settings";
 import * as open from "./open_service";
+import i18n, { type Lang } from "../locales";
 
 export default class ZhihuObPlugin extends Plugin {
+    i18n: Lang;
+
+    constructor(app: App, manifest: PluginManifest) {
+        super(app, manifest);
+        this.i18n = i18n.current;
+    }
+
     async onload() {
         const settings = await loadSettings(this.app.vault);
         this.registerDomEvent(
@@ -26,7 +41,7 @@ export default class ZhihuObPlugin extends Plugin {
             new MentionSuggest(this.app, settings.restrictToZhihuTag),
         );
 
-        const loginNoticeStr = "您还未登录知乎，请先登录";
+        const loginNoticeStr = this.i18n.notice.notLogin;
         loadIcons();
         this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
             if (await login.checkIsUserLogin(this.app.vault)) {

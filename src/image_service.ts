@@ -7,6 +7,9 @@ import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 import * as file from "./files";
 import { loadSettings } from "./settings";
+import i18n, { type Lang } from "../locales";
+
+const locale = i18n.current;
 
 async function getImgIdFromHash(vault: Vault, imgHash: string) {
     try {
@@ -41,17 +44,17 @@ async function getImgIdFromHash(vault: Vault, imgHash: string) {
                 source: "article",
             }),
         });
-        new Notice(`获取图片id成功`);
+        new Notice(`${locale.notice.getImageIdSuccess}`);
         return response.json;
     } catch (error) {
-        new Notice(`获取图片id失败: ${error}`);
+        new Notice(`${locale.notice.getImageIdFailed},${error}`);
     }
 }
 
 export async function uploadCover(vault: Vault, cover: string) {
     const match = cover.match(/\[\[(.*?)\]\]/);
     if (!match) {
-        new Notice("封面图片格式错误");
+        new Notice(`${locale.notice.coverSyntaxInvalid}`);
         return;
     } else {
         const imgName = match[1];
@@ -74,7 +77,7 @@ async function uploadImg(vault: Vault, imgBuffer: Buffer, uploadToken: any) {
             imgBuffer.byteOffset + imgBuffer.byteLength,
         );
         const fileType = await fileTypeFromBuffer(imgBuffer);
-        if (!fileType) throw new Error("无法识别文件类型");
+        if (!fileType) throw new Error(locale.error.recognizeFileTypeFailed);
         const mimeType = fileType.mime;
         const requestTime = Date.now();
         const UTCDate = new Date(requestTime).toUTCString();
@@ -114,9 +117,9 @@ async function uploadImg(vault: Vault, imgBuffer: Buffer, uploadToken: any) {
             body: arrayBuffer,
         };
         await requestUrl(request);
-        new Notice("上传图片成功");
+        new Notice(`${locale.notice.imageUploadSuccess}`);
     } catch (error) {
-        new Notice(`上传图片失败:${error}`);
+        new Notice(`${locale.notice.imageUploadFailed},${error}`);
     }
 }
 
@@ -153,17 +156,17 @@ async function fetchImgStatus(vault: Vault, id: string, imgId: string) {
             },
             method: "GET",
         });
-        new Notice(`获取图片status成功`);
+        new Notice(`${locale.notice.getImageStatusSuccess}`);
         return response.json;
     } catch (error) {
-        new Notice(`获取图片status失败: ${error}`);
+        new Notice(`${locale.notice.getImageStatusFailed},${error}`);
     }
 }
 
 export async function getZhihuImgLink(vault: Vault, imgBuffer: Buffer) {
     const data = await dataUtil.loadData(vault);
     const fileType = await fileTypeFromBuffer(imgBuffer);
-    if (!fileType) throw new Error("无法识别文件类型");
+    if (!fileType) throw new Error(locale.error.recognizeFileTypeFailed);
     const hash = crypto.createHash("md5").update(imgBuffer).digest("hex");
 
     if (
@@ -260,7 +263,7 @@ export async function processOnlineImgs(
 
                 return { original: fullMatch, replacement: htmlString };
             } catch (err) {
-                console.error(`Error processing image ${url}:`, err);
+                console.error(locale.error.processImageFailed, url, err);
                 const fallback = `<span>Image failed to load: ${alt || url}</span>`;
                 return { original: fullMatch, replacement: fallback };
             }

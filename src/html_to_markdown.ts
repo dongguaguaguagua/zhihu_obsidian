@@ -1,5 +1,6 @@
 import TurndownService from "turndown";
-
+import i18n, { type Lang } from "../locales";
+const locale = i18n.current;
 export function htmlToMd(html: string): string {
     try {
         const turndownService = new TurndownService({
@@ -156,7 +157,7 @@ export function htmlToMd(html: string): string {
 
         return markdown;
     } catch (error) {
-        console.error("HTML to Markdown conversion failed:", error);
+        console.error(locale.error.htmlToMdConvertionFailed, error);
         return "";
     }
 }

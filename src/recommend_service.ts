@@ -2,7 +2,8 @@ import * as cookies from "./cookies";
 import * as dataUtil from "./data";
 import { Vault, Notice, requestUrl } from "obsidian";
 import { loadSettings } from "./settings";
-
+import i18n, { type Lang } from "../locales";
+const locale = i18n.current;
 export interface Recommendation {
     id: string;
     type: string;
@@ -48,7 +49,7 @@ export async function getRecommend(vault: Vault, url: string) {
         });
         return response.json;
     } catch (error) {
-        new Notice(`获取推荐失败: ${error}`);
+        new Notice(`${locale.notice.fetchRecommendFailed}`);
     }
 }
 
@@ -88,7 +89,7 @@ export function loadRecommendations(response: any) {
             favorite_count: item.target.favorite_count,
         })) as [Recommendation];
     } catch (error) {
-        console.error("Failed to load recommendations:", error);
+        console.error(locale.error.loadRecommendFailed, error);
         return [];
     }
 }
