@@ -65,5 +65,6 @@ export async function mdToZhihuHTML(md: string): Promise<string> {
     };
     marked.use({ renderer });
     marked.use(markedFootnote());
-    return await marked(md);
+    const rendMd = await marked(md);
+    return rendMd;
 }

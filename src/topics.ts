@@ -45,10 +45,10 @@ export async function autoCompleteTopic(
             },
             method: "GET",
         });
-        new Notice(`${locale.notice.fetchTopicsSuccess}`);
+        new Notice(`${locale.notice.fetchTopicSuccess}`);
         return response.json;
     } catch (error) {
-        new Notice(`${locale.notice.fetchTopicsFailed},${error}`);
+        new Notice(`${locale.notice.fetchTopicFailed},${error}`);
     }
 }
 
