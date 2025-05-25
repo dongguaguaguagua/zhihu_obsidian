@@ -26,6 +26,10 @@ jobs:
             - name: Build plugin
               run: npm run build
 
+            - name: Zip plugin files
+              run: |
+                  zip Zhihu-on-Obsidian-${{ github.ref_name }}.zip main.js manifest.json styles.css
+
             - name: Upload release assets
               uses: softprops/action-gh-release@v1
               with:
@@ -33,5 +37,6 @@ jobs:
                       main.js
                       manifest.json
                       styles.css
+                      Zhihu-on-Obsidian-${{ github.ref_name }}.zip
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
