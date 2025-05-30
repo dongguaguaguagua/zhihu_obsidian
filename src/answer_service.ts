@@ -56,7 +56,7 @@ export class ZhihuQuestionLinkModal extends Modal {
 export async function publishCurrentAnswer(app: App) {
     const activeFile = app.workspace.getActiveFile();
     const locale = i18n.current;
-
+    const settings = await loadSettings(app.vault);
     if (!activeFile) {
         console.error(locale.error.noActiveFileFound);
         return;
@@ -111,7 +111,10 @@ export async function publishCurrentAnswer(app: App) {
         app.vault,
         transedImgContent,
     );
-    let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
+    let zhihuHTML = await render.mdToZhihuHTML(
+        transedImgContent,
+        settings.useZhihuHeadings,
+    );
     zhihuHTML = addPopularizeStr(zhihuHTML);
 
     const patchBody = {
