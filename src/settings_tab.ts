@@ -224,7 +224,26 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         }
                     }),
             );
-
+        // Recommend Count setting
+        new Setting(containerEl)
+            .setName(this.i18n.settings.zhihuHeading)
+            .setDesc(this.i18n.settings.zhihuHeadingDesc)
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(settings.useZhihuHeadings)
+                    .onChange(async (value) => {
+                        try {
+                            await saveSettings(this.app.vault, {
+                                useZhihuHeadings: value,
+                            });
+                        } catch (e) {
+                            console.error(
+                                this.i18n.error.saveUseZhihuHeadingFailed,
+                                e,
+                            );
+                        }
+                    }),
+            );
         // // Recommend Count setting
         // new Setting(containerEl)
         // 	.setName("Recommendation Count")

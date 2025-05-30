@@ -17,6 +17,7 @@ const locale = i18n.current;
 export async function publishCurrentFile(app: App) {
     const activeFile = app.workspace.getActiveFile();
     const vault = app.vault;
+    const settings = await loadSettings(vault);
     if (!activeFile) {
         console.error(locale.error.noActiveFileFound);
         return;
@@ -88,7 +89,10 @@ export async function publishCurrentFile(app: App) {
         vault,
         transedImgContent,
     );
-    let zhihuHTML = await render.mdToZhihuHTML(transedImgContent);
+    let zhihuHTML = await render.mdToZhihuHTML(
+        transedImgContent,
+        settings.useZhihuHeadings,
+    );
     zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
     const patchBody = {
         title: title,

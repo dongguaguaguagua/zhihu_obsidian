@@ -1,11 +1,13 @@
 import { marked, Renderer, Tokens } from "marked";
 import markedFootnote from "./footnote";
-
 marked.setOptions({
     breaks: true,
 });
 
-export async function mdToZhihuHTML(md: string): Promise<string> {
+export async function mdToZhihuHTML(
+    md: string,
+    useZhihuHeadings: boolean,
+): Promise<string> {
     // 处理行间公式 $$...$$
     md = md.replace(/\$\$([^$]+)\$\$/g, (_match, eq) => {
         eq = eq.replace(/[\n\r]/g, "") + "\\\\"; // 知乎使用结尾 `\\` 表示行间公式
@@ -62,9 +64,22 @@ export async function mdToZhihuHTML(md: string): Promise<string> {
             }
             return `<a href="${href}">${text}</a>`;
         },
+        ...(useZhihuHeadings && {
+            heading(token: Tokens.Heading) {
+                const { depth, text } = token;
+                if (depth === 1) {
+                    return `<h2>${text}</h2>`;
+                } else if (depth === 2) {
+                    return `<h3>${text}</h3>`;
+                } else {
+                    return `<strong>${text}</strong><br>`;
+                }
+            },
+        }),
     };
     marked.use({ renderer });
     marked.use(markedFootnote());
     const rendMd = await marked(md);
+    console.log(rendMd);
     return rendMd;
 }
