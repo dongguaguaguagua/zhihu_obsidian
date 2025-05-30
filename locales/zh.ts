@@ -96,6 +96,7 @@ export default {
         noActiveFileFound: "未找到激活的文件",
         noLeafAvailable: "没有可用的面板用于显示知乎内容",
         htmlToMdConvertionFailed: "HTML 转 Markdown 失败：",
+        saveUseZhihuHeadingFailed: "保存 useZhihuHeading 设置失败：",
     },
     settings: {
         accountTitle: "我的账户",
@@ -113,5 +114,8 @@ export default {
         clearImageCacheButtonText: "清理",
         sendRead: "向知乎发送已读",
         sendReadDesc: "在您点击左侧栏的文章或回答后，向知乎发送已读请求",
+        zhihuHeading: "使用知乎特色的标题",
+        zhihuHeadingDesc:
+            "如果启用，那么markdown的标题层次会与知乎一致，且三级以上标题仅被加粗",
     },
 };

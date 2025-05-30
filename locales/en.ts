@@ -99,6 +99,7 @@ export default {
         noActiveFileFound: "No active file found",
         noLeafAvailable: "No leaf available for Zhihu sides view",
         htmlToMdConvertionFailed: "HTML to Markdown conversion failed:",
+        saveUseZhihuHeadingFailed: "Failed to save useZhihuHeading setting:",
     },
     settings: {
         accountTitle: "My account",
@@ -118,5 +119,8 @@ export default {
         sendRead: "Send read to Zhihu",
         sendReadDesc:
             "Send read information to Zhihu when you click the slide view articles or answers",
+        zhihuHeading: "Use Zhihu headings",
+        zhihuHeadingDesc:
+            "If this enabled, markdown heading level will be consistent with Zhihu, and leverl >= 3 will be stronged only.",
     },
 };
