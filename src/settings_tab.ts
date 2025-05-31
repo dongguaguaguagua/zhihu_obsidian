@@ -224,7 +224,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         }
                     }),
             );
-        // Recommend Count setting
+        // Setting to enable Zhihu level headings
         new Setting(containerEl)
             .setName(this.i18n.settings.zhihuHeading)
             .setDesc(this.i18n.settings.zhihuHeadingDesc)
