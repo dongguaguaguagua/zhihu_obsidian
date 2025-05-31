@@ -8,6 +8,7 @@ interface ZhihuSettings {
     sendReadToZhihu: boolean;
     recommendCount: number;
     useZhihuHeadings: boolean;
+    useImgNameDefault: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -18,6 +19,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     sendReadToZhihu: true,
     recommendCount: 7,
     useZhihuHeadings: true,
+    useImgNameDefault: false,
 };
 
 /**

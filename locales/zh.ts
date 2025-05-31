@@ -97,6 +97,7 @@ export default {
         noLeafAvailable: "没有可用的面板用于显示知乎内容",
         htmlToMdConvertionFailed: "HTML 转 Markdown 失败：",
         saveUseZhihuHeadingFailed: "保存 useZhihuHeading 设置失败：",
+        saveUseImgNameFailed: "Failed to save useImgNameDefault setting:",
     },
     settings: {
         accountTitle: "我的账户",
@@ -117,5 +118,8 @@ export default {
         zhihuHeading: "使用知乎特色的标题",
         zhihuHeadingDesc:
             "如果启用，那么markdown的标题层次会与知乎一致，且三级以上标题仅被加粗",
+        useImgNameDefault: "默认图片备注为图片名称",
+        useImgNameDefaultDesc:
+            "如果没有图片备注，那么默认图片备注就是图片文件名。关闭此项后默认图片备注为空。",
     },
 };

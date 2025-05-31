@@ -244,6 +244,27 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         }
                     }),
             );
+        // setting to control if set default img name as img base name
+        // if img caption is not provided
+        new Setting(containerEl)
+            .setName(this.i18n.settings.useImgNameDefault)
+            .setDesc(this.i18n.settings.useImgNameDefaultDesc)
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(settings.useImgNameDefault)
+                    .onChange(async (value) => {
+                        try {
+                            await saveSettings(this.app.vault, {
+                                useImgNameDefault: value,
+                            });
+                        } catch (e) {
+                            console.error(
+                                this.i18n.error.saveUseImgNameFailed,
+                                e,
+                            );
+                        }
+                    }),
+            );
         // // Recommend Count setting
         // new Setting(containerEl)
         // 	.setName("Recommendation Count")
