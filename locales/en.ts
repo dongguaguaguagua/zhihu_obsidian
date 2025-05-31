@@ -100,6 +100,7 @@ export default {
         noLeafAvailable: "No leaf available for Zhihu sides view",
         htmlToMdConvertionFailed: "HTML to Markdown conversion failed:",
         saveUseZhihuHeadingFailed: "Failed to save useZhihuHeading setting:",
+        saveUseImgNameFailed: "Failed to save useImgNameDefault setting:",
     },
     settings: {
         accountTitle: "My account",
@@ -122,5 +123,8 @@ export default {
         zhihuHeading: "Use Zhihu headings",
         zhihuHeadingDesc:
             "If this enabled, markdown heading level will be consistent with Zhihu, and leverl >= 3 will be stronged only.",
+        useImgNameDefault: "Default image name as caption",
+        useImgNameDefaultDesc:
+            "If image caption is not provided, use image file name as default. Disable it then default caption is empty.",
     },
 };

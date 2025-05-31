@@ -213,10 +213,18 @@ export async function processLocalImgs(
     md: string,
 ): Promise<string> {
     const matches = [...md.matchAll(/!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
+    const settings = await loadSettings(vault);
     for (const match of matches) {
         const [fullMatch, imgName, caption] = match;
         const imgLink = await file.getFilePathFromName(vault, imgName);
-        const alt = caption || path.basename(imgName);
+
+        let alt: string;
+        if (caption) {
+            alt = caption;
+        } else {
+            alt = settings.useImgNameDefault ? path.basename(imgName) : "";
+        }
+
         const imgBuffer = fs.readFileSync(imgLink);
         const imgOriginalPath = await getZhihuImgLink(vault, imgBuffer);
         const zhihuImgStr = zhihuImgStringBuilder(imgOriginalPath, alt);
