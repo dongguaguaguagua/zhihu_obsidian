@@ -2,10 +2,9 @@
     "id": "zhihu",
     "name": "Zhihu",
     "version": "0.2.4",
-    "minAppVersion": "0.15.0",
+    "minAppVersion": "1.6.7",
     "description": "Enable you to publish your articles and answers to Zhihu",
     "author": "dgg",
     "authorUrl": "https://github.com/dongguaguaguagua",
-    "css": "styles.css",
     "isDesktopOnly": true
 }

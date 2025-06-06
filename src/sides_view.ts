@@ -23,7 +23,11 @@ import { openContent } from "./open_service";
 
 export async function activateSideView() {
     const { workspace } = this.app;
-    workspace.detachLeavesOfType(SIDES_VIEW_TYPE);
+    const existingLeaf = workspace.getLeavesOfType(SIDES_VIEW_TYPE)[0];
+    if (existingLeaf) {
+        workspace.revealLeaf(existingLeaf);
+        return;
+    }
     let leaf: WorkspaceLeaf | null = workspace.getLeftLeaf(false);
 
     if (!leaf) {
