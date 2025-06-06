@@ -4,7 +4,6 @@ import * as cookies from "./cookies";
 import i18n, { type Lang } from "../locales";
 const locale = i18n.current;
 import { htmlToMd } from "./html_to_markdown";
-import { addFrontmatter } from "./frontmatter";
 
 export async function openZhihuLink(app: App, link: string) {
     const type = getZhihuContentType(link);
@@ -225,12 +224,18 @@ export async function openContent(
         await app.vault.createFolder(folderPath);
     }
 
-    let file = app.vault.getAbstractFileByPath(filePath);
-    let markdown = htmlToMd(content);
-    markdown = addFrontmatter(markdown, "tags", `zhihu-${type}`);
-    markdown = addFrontmatter(markdown, "link", url);
+    const file = app.vault.getAbstractFileByPath(filePath);
+
     if (!file) {
-        file = await app.vault.create(filePath, markdown);
+        const markdown = htmlToMd(content);
+        const newFile = await app.vault.create(filePath, markdown);
+        await app.fileManager.processFrontMatter(newFile, (fm) => {
+            fm.tags = `zhihu-${type}`;
+            fm.link = url;
+        });
+        const leaf = this.app.workspace.getLeaf();
+        await leaf.openFile(newFile as TFile);
+        return;
     } else if (!(file instanceof TFile)) {
         console.error(`Path ${filePath} is not a file`);
         return;
