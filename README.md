@@ -81,7 +81,7 @@ The syntax of at link is `[@name](https://www.zhihu.com/member_id "member_mentio
 It also dead easy to change your link into card. For example, you can use that to change GitHub link into a card titled `Github`.
 
 ```
-[Github](https://github.com/, "card")
+[Github](https://github.com/ "card")
 ```
 
 The result:

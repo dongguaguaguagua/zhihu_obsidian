@@ -81,7 +81,7 @@ LaTeX公式也可以正常显示
 将链接变成卡片也非常简单。比如将GitHub官网变成带有GitHub标题的卡片，可以这么写
 
 ```
-[Github](https://github.com/, "card")
+[Github](https://github.com/ "card")
 ```
 
 效果
