@@ -132,4 +132,12 @@ You can fork this repo to `vault/.obsidian/plugins`, make sure your NodeJS is at
 
 You can support me by star⭐ the repo!
 
-https://github.com/dongguaguaguagua/zhihu_obsidian/stargazers
+## Star History
+
+<a href="https://github.com/dongguaguaguagua/zhihu_obsidian/stargazers">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date" />
+ </picture>
+</a>
