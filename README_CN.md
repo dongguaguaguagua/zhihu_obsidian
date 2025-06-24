@@ -132,4 +132,10 @@ LaTeX公式也可以正常显示
 
 点个星星⭐来支持我！
 
-https://github.com/dongguaguaguagua/zhihu_obsidian/stargazers
+<a href="https://github.com/dongguaguaguagua/zhihu_obsidian/stargazers">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date" />
+ </picture>
+</a>
