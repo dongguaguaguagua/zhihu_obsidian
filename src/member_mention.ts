@@ -86,11 +86,14 @@ export class MentionSuggest extends EditorSuggest<MentionSuggestion> {
         editor: Editor,
         file: TFile | null,
     ): EditorSuggestTriggerInfo | null {
-        // Check if the note has a 'zhihu' tag in frontmatter when restrictToZhihuTag is enabled
+        // Check if note has 'zhihu_' str in frontmatter when restrictToZhihuFM is enabled
         if (this.shouldRestrict && file) {
             const metadata = this.app.metadataCache.getFileCache(file);
-            const tags = metadata?.frontmatter?.tags || [];
-            if (!tags.includes("zhihu")) {
+            const fm = metadata?.frontmatter || [];
+            const hasZhihuKey = Object.keys(fm).some((key) =>
+                key.startsWith("zhihu_"),
+            );
+            if (!hasZhihuKey) {
                 return null;
             }
         }
