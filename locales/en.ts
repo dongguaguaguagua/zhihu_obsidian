@@ -86,7 +86,7 @@ export default {
         logoutFailed: "Failed to log out:",
         loginFailed: "Failed to log in:",
         saveUserAgentFailed: "Failed to save user agent:",
-        saveRestrictAtFailed: "Failed to save restrictToZhihuTag setting:",
+        saveRestrictAtFailed: "Failed to save restrictToZhihuFM setting:",
         clearImageCacheFailed: "Failed to clear image cache:",
         saveSendZhihuFailed: "Failed to save sendReadToZhihu setting:",
         autoCompleteTopicFailed: "Error auto-completing topic for tag:",
@@ -110,9 +110,9 @@ export default {
         userAgent: "User agent",
         userAgentDesc: "Custom user agent for Zhihu API requests",
         userAgentPlaceholder: "Enter custom user agent",
-        restrictAt: "Restrict @Zhihuers to Zhihu-tagged notes",
+        restrictAt: "Restrict @Zhihuers to Zhihu frontmatter notes",
         restrictAtDesc:
-            "Enable @Zhihuers functionality only for notes with a 'zhihu' tag in frontmatter. (Need to reload plugin once changed)",
+            "Enable @Zhihuers functionality only for notes with 'zhihu_' frontmatter. (Need to reload plugin once changed)",
         clearImageCache: "Clear image cache",
         clearImageCacheDesc:
             "With image cache, you can reduce access requency to the Zhihu API",

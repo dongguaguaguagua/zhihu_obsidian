@@ -38,7 +38,7 @@ export default class ZhihuObPlugin extends Plugin {
             true,
         );
         this.registerEditorSuggest(
-            new MentionSuggest(this.app, settings.restrictToZhihuTag),
+            new MentionSuggest(this.app, settings.restrictToZhihuFM),
         );
 
         const loginNoticeStr = this.i18n.notice.notLogin;

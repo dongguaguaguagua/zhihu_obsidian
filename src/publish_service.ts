@@ -28,21 +28,15 @@ export async function publishCurrentFile(app: App) {
         new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
-    const tags = normalizeStr(frontmatter.tags);
-    const topics = normalizeStr(frontmatter.topics);
-    const hasZhihuTag = tags.includes("zhihu");
-    if (!hasZhihuTag) {
-        new Notice(`${locale.notice.noZhihuTag}`);
-        return;
-    }
+    const topics = normalizeStr(frontmatter.zhihu_topics);
     if (topics.length === 0) {
         new Notice(`${locale.notice.noTopics}`);
         return;
     }
     // 这里链接属性缺失或者为空，都表明未发表文章
-    const status = publishStatus(frontmatter.link);
-    const title = frontmatter.title || locale.untitled;
-    const toc = !!frontmatter.toc;
+    const status = publishStatus(frontmatter.zhihu_link);
+    const title = frontmatter.zhihu_title || locale.untitled;
+    const toc = !!frontmatter.zhihu_toc;
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
     // 获取文章的ID，如果未发表则新建一个。
@@ -52,13 +46,13 @@ export async function publishCurrentFile(app: App) {
             articleId = await newDraft(vault, title);
             break;
         case 1: // 已发表
-            articleId = frontmatter.link.replace(
+            articleId = frontmatter.zhihu_link.replace(
                 "https://zhuanlan.zhihu.com/p/",
                 "",
             );
             break;
         case 2: // 未发表但已生成草稿
-            articleId = frontmatter.link.match(
+            articleId = frontmatter.zhihu_link.match(
                 /^https:\/\/zhuanlan\.zhihu\.com\/p\/(\d+)(\/edit)?$/,
             )[1];
             break;
@@ -70,7 +64,7 @@ export async function publishCurrentFile(app: App) {
             break;
     }
     // 处理文章封面上传
-    const cover = frontmatter.cover;
+    const cover = frontmatter.zhihu_cover;
     if (!(typeof cover === "undefined" || cover === null)) {
         const coverURL = await imageService.uploadCover(vault, cover);
         const patchBody = {
@@ -118,7 +112,7 @@ export async function publishCurrentFile(app: App) {
         }
     }
     // 把文章投稿至问题
-    const toQuestion = frontmatter.question;
+    const toQuestion = frontmatter.zhihu_question;
     if (toQuestion) {
         const questionId = extractQuestionId(toQuestion);
         if (questionId) {
@@ -138,7 +132,7 @@ export async function publishCurrentFile(app: App) {
             await app.fileManager.processFrontMatter(
                 activeFile,
                 (frontmatter) => {
-                    frontmatter.link = url;
+                    frontmatter.zhihu_link = url;
                 },
             );
             new Notice(`${locale.notice.publishArticleSuccess}`);
@@ -172,10 +166,9 @@ export async function createNewZhihuArticle(app: App) {
         const defaultTitle = "untitled";
         const articleId = await newDraft(vault, defaultTitle);
         await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            frontmatter.tags = "zhihu";
-            frontmatter.title = defaultTitle;
-            frontmatter.topics = "";
-            frontmatter.link = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
+            frontmatter.zhihu_title = defaultTitle;
+            frontmatter.zhihu_topics = "";
+            frontmatter.zhihu_link = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
         });
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);
