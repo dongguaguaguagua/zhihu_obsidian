@@ -14,6 +14,8 @@ export default {
         refreshHotlists: "Refresh hot lists",
         nextPage: "Next page",
         previousPage: "Previous page",
+        publishCurrentAnswer: "publish current answer",
+        publishCurrentArticle: "publish current article",
     },
     notice: {
         notLogin: "You are logout, please login first.",

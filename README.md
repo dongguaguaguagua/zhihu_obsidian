@@ -43,7 +43,7 @@ The created markdown file have three frontmatters:
 - `zhihu_topics`: default none, you should add some, it is also **required**.
 - `zhihu_link`: URL to your draft or articles
 
-After you typed some markdown and ready to publish, you can run command `Zhihu: Publish current file`. After doing that, the plugin will translate your markdown to Zhihu featured HTML, and publish it to Zhihu. You may **wait a few seconds** before you can actually see the article on Zhihu.
+After you typed some markdown and ready to publish, you can run command `Zhihu: Publish current article`. After doing that, the plugin will translate your markdown to Zhihu featured HTML, and publish it to Zhihu. You may **wait a few seconds** before you can actually see the article on Zhihu.
 
 ### Publish answers
 
