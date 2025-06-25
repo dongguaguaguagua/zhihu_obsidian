@@ -17,6 +17,7 @@ import { loadIcons } from "./icon";
 import { loadSettings } from "./settings";
 import * as open from "./open_service";
 import i18n, { type Lang } from "../locales";
+import { registerMenuCommands } from "./menu";
 
 export default class ZhihuObPlugin extends Plugin {
     i18n: Lang;
@@ -40,7 +41,7 @@ export default class ZhihuObPlugin extends Plugin {
         this.registerEditorSuggest(
             new MentionSuggest(this.app, settings.restrictToZhihuFM),
         );
-
+        registerMenuCommands(this); // 监听右键菜单和文件菜单事件
         const loginNoticeStr = this.i18n.notice.notLogin;
         loadIcons();
         this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
@@ -72,11 +73,11 @@ export default class ZhihuObPlugin extends Plugin {
         });
 
         this.addCommand({
-            id: "publish-current-file",
-            name: "Publish current file",
+            id: "publish-current-article",
+            name: "Publish current article",
             editorCallback: async (editor: Editor, view: MarkdownView) => {
                 if (await login.checkIsUserLogin(this.app.vault)) {
-                    await publish.publishCurrentFile(this.app);
+                    await publish.publishCurrentArticle(this.app);
                 } else {
                     new Notice(loginNoticeStr);
                 }
