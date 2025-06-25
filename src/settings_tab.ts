@@ -164,11 +164,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
             .setDesc(this.i18n.settings.restrictAtDesc)
             .addToggle((toggle) =>
                 toggle
-                    .setValue(settings.restrictToZhihuTag)
+                    .setValue(settings.restrictToZhihuFM)
                     .onChange(async (value) => {
                         try {
                             await saveSettings(this.app.vault, {
-                                restrictToZhihuTag: value,
+                                restrictToZhihuFM: value,
                             });
                         } catch (e) {
                             console.error(
