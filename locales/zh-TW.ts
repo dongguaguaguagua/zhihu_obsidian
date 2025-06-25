@@ -13,6 +13,8 @@ export default {
         refreshHotlists: "刷新熱榜",
         nextPage: "下一頁",
         previousPage: "上一頁",
+        publishCurrentAnswer: "发布当前回答",
+        publishCurrentArticle: "发布当前文章",
     },
     notice: {
         notLogin: "你已登出，請先登入。",

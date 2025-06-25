@@ -43,7 +43,7 @@ Zhihu on Obsidian允许你在Obsidian内将markdown内容直接发布到知乎�
 - 话题(`zhihu_topics`): 默认为空，添加话题是**强制**的
 - 链接(`zhihu_link`): 你的文章的URL
 
-在写完文章准备发表的时候，运行命令 `Zhihu: Publish current file` 即可。插件会将markdown转换为知乎HTML。在真正看到知乎上的文章之前，你可能需要等上几秒（或几分钟）。
+在写完文章准备发表的时候，运行命令 `Zhihu: Publish current article` 即可。插件会将markdown转换为知乎HTML。在真正看到知乎上的文章之前，你可能需要等上几秒（或几分钟）。
 
 ### 发布回答
 

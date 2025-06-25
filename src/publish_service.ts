@@ -14,7 +14,7 @@ import en from "locales/en";
 
 const locale = i18n.current;
 
-export async function publishCurrentFile(app: App) {
+export async function publishCurrentArticle(app: App) {
     const activeFile = app.workspace.getActiveFile();
     const vault = app.vault;
     const settings = await loadSettings(vault);
@@ -125,7 +125,10 @@ export async function publishCurrentFile(app: App) {
         toc,
         status === 1,
     );
+    console.log("publish result:", publishResult);
+
     const url = publishResult.publish.url;
+    console.log("url:", url);
     switch (status) {
         case 0:
         case 2:
@@ -353,9 +356,12 @@ async function publishDraft(
                 },
             }),
         });
+        console.log("response:", response.json);
         if (response.json.message === "success") {
             const result = JSON.parse(response.json.data.result);
             return result;
+        } else {
+            new Notice(response.json.message);
         }
     } catch (error) {
         new Notice(`${locale.notice.publishArticleFailed},${error}`);
