@@ -37,7 +37,7 @@ Zhihu on Obsidian允许你在Obsidian内将markdown内容直接发布到知乎�
 
 ![new_draft](./imgs/new_draft.jpg)
 
-创建的markdown文件有四个属性（property）
+创建的markdown文件有三个属性（frontmatter）
 
 - 标题(`zhihu_title`): 默认为`untitled`, 你可以后续进行修改
 - 话题(`zhihu_topics`): 默认为空，添加话题是**强制**的
