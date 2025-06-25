@@ -67,12 +67,6 @@ export async function publishCurrentAnswer(app: App) {
         new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
-    // const tags = normalizeStr(frontmatter.zhihu_tags);
-    // const hasZhihuTag = tags.includes("zhihu");
-    // if (!hasZhihuTag) {
-    //     new Notice(`${locale.notice.noZhihuTag}`);
-    //     return;
-    // }
     const questionLink = frontmatter.zhihu_question;
     if (!isZhihuQuestionLink(questionLink)) {
         new Notice(`${locale.notice.questionLinkInvalid}`);
@@ -349,7 +343,6 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
     try {
         const newFile = await vault.create(filePath, "");
         await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            // frontmatter.zhihu_tags = "zhihu";
             frontmatter.zhihu_question = questionLink;
         });
         const leaf = workspace.getLeaf(false);

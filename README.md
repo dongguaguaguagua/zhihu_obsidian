@@ -37,7 +37,7 @@ Open command palette, type `Zhihu: Create new article`, the plugin will automati
 
 ![new_draft](./imgs/new_draft.jpg)
 
-The created markdown file have three properties:
+The created markdown file have three frontmatters:
 
 - `zhihu_title`: default `untitled`, you may change it before publish.
 - `zhihu_topics`: default none, you should add some, it is also **required**.

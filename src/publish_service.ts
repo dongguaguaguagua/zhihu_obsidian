@@ -28,13 +28,7 @@ export async function publishCurrentFile(app: App) {
         new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
-    // const tags = normalizeStr(frontmatter.tags);
     const topics = normalizeStr(frontmatter.zhihu_topics);
-    // const hasZhihuTag = tags.includes("zhihu");
-    // if (!hasZhihuTag) {
-    //     new Notice(`${locale.notice.noZhihuTag}`);
-    //     return;
-    // }
     if (topics.length === 0) {
         new Notice(`${locale.notice.noTopics}`);
         return;
@@ -172,7 +166,6 @@ export async function createNewZhihuArticle(app: App) {
         const defaultTitle = "untitled";
         const articleId = await newDraft(vault, defaultTitle);
         await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            // frontmatter.zhihu_tags = "zhihu";
             frontmatter.zhihu_title = defaultTitle;
             frontmatter.zhihu_topics = "";
             frontmatter.zhihu_link = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
