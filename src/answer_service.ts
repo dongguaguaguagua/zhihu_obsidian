@@ -67,20 +67,20 @@ export async function publishCurrentAnswer(app: App) {
         new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
-    const tags = normalizeStr(frontmatter.tags);
-    const hasZhihuTag = tags.includes("zhihu");
-    if (!hasZhihuTag) {
-        new Notice(`${locale.notice.noZhihuTag}`);
-        return;
-    }
-    const questionLink = frontmatter.question;
+    // const tags = normalizeStr(frontmatter.zhihu_tags);
+    // const hasZhihuTag = tags.includes("zhihu");
+    // if (!hasZhihuTag) {
+    //     new Notice(`${locale.notice.noZhihuTag}`);
+    //     return;
+    // }
+    const questionLink = frontmatter.zhihu_question;
     if (!isZhihuQuestionLink(questionLink)) {
         new Notice(`${locale.notice.questionLinkInvalid}`);
         return;
     }
     const questionId = extractQuestionId(questionLink);
-    const status = publishStatus(frontmatter.link);
-    const toc = !!frontmatter.toc;
+    const status = publishStatus(frontmatter.zhihu_link);
+    const toc = !!frontmatter.zhihu_toc;
 
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
@@ -90,7 +90,7 @@ export async function publishCurrentAnswer(app: App) {
         case 0:
             break;
         case 1:
-            answerId = frontmatter.link.replace(
+            answerId = frontmatter.zhihu_link.replace(
                 `https://www.zhihu.com/question/${questionId}/answer/`,
                 "",
             );
@@ -349,8 +349,8 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
     try {
         const newFile = await vault.create(filePath, "");
         await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            frontmatter.tags = "zhihu";
-            frontmatter.question = questionLink;
+            // frontmatter.zhihu_tags = "zhihu";
+            frontmatter.zhihu_question = questionLink;
         });
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);

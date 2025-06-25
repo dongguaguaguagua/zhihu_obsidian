@@ -37,12 +37,11 @@ Open command palette, type `Zhihu: Create new article`, the plugin will automati
 
 ![new_draft](./imgs/new_draft.jpg)
 
-The created markdown file have four properties:
+The created markdown file have three properties:
 
-- tags: **required** to have `Zhihu`, or you can't publish.
-- title: default `untitled`, you may change it before publish.
-- topics: default none, you should add some, it is also **required**.
-- link: URL to your draft or articles
+- `zhihu_title`: default `untitled`, you may change it before publish.
+- `zhihu_topics`: default none, you should add some, it is also **required**.
+- `zhihu_link`: URL to your draft or articles
 
 After you typed some markdown and ready to publish, you can run command `Zhihu: Publish current file`. After doing that, the plugin will translate your markdown to Zhihu featured HTML, and publish it to Zhihu. You may **wait a few seconds** before you can actually see the article on Zhihu.
 
@@ -52,9 +51,9 @@ Open command palette, type `Zhihu: Create new answer`, the plugin will ask you t
 
 ![new_answer_draft](./imgs/new_answer_draft.jpg)
 
-There are no properties you should fulfill, just type your thoughts or experience and run command `Zhihu: Publish current answer`. That's it, the answer URL then appear in the `link` property. You can also edit your answers anytime with the same command.
+There are no properties you should fulfill, just type your thoughts or experience and run command `Zhihu: Publish current answer`. That's it, the answer URL then appear in the `zhihu_link` property. You can also edit your answers anytime with the same command.
 
-It is worth mentioning that **you can't create two answers in one question**, witch means that if you've created an answer (or answer draft) for a question, you can't create it again. In this situation, **you should manually edit properties: tags, questions and link**. Then run publish command will update your answer.
+It is worth mentioning that **you can't create two answers in one question**, witch means that if you've created an answer (or answer draft) for a question, you can't create it again. In this situation, **you should manually edit properties: `zhihu_tags`, `zhihu_question` and `zhihu_link`**. Then run publish command will update your answer.
 
 ### Browsing
 
@@ -96,17 +95,17 @@ Please **DO NOT** use the `![caption](...)` syntax for local images, or they may
 
 ### Article cover
 
-The plugin also support adding your favorate cover to the article. Just add `cover` entry to properties and select pictures using `[[img]]` syntax. Like that
+The plugin also support adding your favorate cover to the article. Just add `zhihu_cover` entry to properties and select pictures using `[[img]]` syntax. Like that
 
 ![cover_example](./imgs/cover_example.jpg)
 
 ### Table of contents
 
-Add `toc` entry to frontmatter, and ensure it is not empty, then table of content will be generated.
+Add `zhihu_toc` entry to frontmatter, and ensure it is not empty, then table of content will be generated.
 
-For example, `toc` can be `True` or `1`.
+For example, `zhihu_toc` can be `True` or `1`.
 
-If you don't add `toc`, then the table of content will not be generated.
+If you don't add `zhihu_toc`, then the table of content will not be generated.
 
 ## Contribution
 
@@ -131,8 +130,6 @@ You can fork this repo to `vault/.obsidian/plugins`, make sure your NodeJS is at
 ## Support
 
 You can support me by star⭐ the repo!
-
-## Star History
 
 <a href="https://github.com/dongguaguaguagua/zhihu_obsidian/stargazers">
  <picture>
