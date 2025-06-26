@@ -31,7 +31,7 @@
 .zhihu-qrcode-modal .qrcode-title {
     color: dodgerblue;
     font-size: 1.6em;
-	text-align: center;
+    text-align: center;
     margin-bottom: 0.5em;
 }
 
@@ -173,4 +173,78 @@
 
 .zhihu-question-input {
     width: 100%;
+}
+
+/* cookies editor */
+.cookies-setting-area {
+    display: inline-block;
+}
+
+.cookies-setting-area .setting-item-control {
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.cookies-editor-wrapper {
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+.cookies-editor-wrapper .cm-editor {
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    font-size: var(--font-inputs);
+    height: 20em;
+    outline: none !important;
+    text-align: left;
+}
+
+.cookies-editor-wrapper .cm-line,
+.cookies-editor-wrapper .cm-lineNumbers {
+    font-family: var(--font-monospace);
+}
+
+.cookies-footer {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cookies-editor-validity {
+    display: flex;
+    align-items: center;
+}
+
+.cookies-editor-validity-indicator {
+    color: white;
+    display: inline-block;
+    border-radius: 1em;
+    margin-right: 10px;
+    cursor: default;
+    visibility: hidden;
+}
+
+.cookies-editor-validity-indicator svg {
+    width: 16px !important;
+    height: 16px !important;
+}
+
+.cookies-editor-validity-indicator:hover {
+    color: white;
+}
+
+.cookies-editor-validity-indicator.valid {
+    background-color: var(--color-green);
+    visibility: visible;
+}
+
+.cookies-editor-validity-indicator.invalid {
+    background-color: var(--color-red);
+    visibility: visible;
+}
+
+.cookies-editor-buttons {
+    display: flex;
+    flex-direction: row;
 }
