@@ -4,11 +4,21 @@ import { loadSettings, saveSettings } from "./settings";
 import * as login from "./login_service";
 import { loadData, deleteData } from "./data";
 import i18n, { type Lang } from "../locales";
+import { basicSetup } from "./ui/snippets_editor/extensions";
+import { EditorState, Extension } from "@codemirror/state";
+import { EditorView } from "@codemirror/view";
 
 export class ZhihuSettingTab extends PluginSettingTab {
     plugin: ZhihuObPlugin;
     isLoggedIn = false;
     i18n: Lang;
+    snippetsEditor: EditorView;
+    snippetsFileLocEl: HTMLElement;
+    snippetVariablesFileLocEl: HTMLElement;
+
+    hide() {
+        this.snippetsEditor?.destroy();
+    }
 
     userInfo: { avatar_url: string; name: string; headline?: string } | null =
         null;
@@ -289,5 +299,89 @@ export class ZhihuSettingTab extends PluginSettingTab {
         // 				}
         // 			}),
         // 	);
+
+        // 添加“手动编辑Cookies”开关
+        new Setting(containerEl)
+            .setName("手动编辑Cookies")
+            .setDesc("启用后可手动编辑zhihu-data.json中的cookies内容")
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(settings.manualCookieEdit)
+                    .onChange(async (value) => {
+                        try {
+                            await saveSettings(this.app.vault, {
+                                manualCookieEdit: value,
+                            });
+                            snippetsSetting.settingEl.toggleClass(
+                                "snippets-text-area",
+                                value === true,
+                            );
+                            snippetsSetting.settingEl.toggleClass(
+                                "hidden",
+                                value !== true,
+                            );
+                        } catch (e) {
+                            console.error("保存设置失败", e);
+                        }
+                    }),
+            );
+
+        const snippetsSetting = new Setting(containerEl)
+            .setName("Snippets")
+            .setDesc(
+                'Enter snippets here. Remember to add a comma after each snippet, and escape all backslashes with an extra \\. Lines starting with "//" will be treated as comments and ignored.',
+            )
+            .setClass("snippets-text-area");
+
+        const data = await loadData(this.app.vault);
+        this.createSnippetsEditor(snippetsSetting, data);
+    }
+
+    async createSnippetsEditor(snippetsSetting: Setting, data: any) {
+        const customCSSWrapper = snippetsSetting.controlEl.createDiv(
+            "snippets-editor-wrapper",
+        );
+
+        // const extensions = basicSetup;
+
+        // const change = EditorView.updateListener.of(async (v: ViewUpdate) => {
+        //     if (v.docChanged) {
+        //         const snippets = v.state.doc.toString();
+        //         let success = true;
+        //         console.log("doc changed");
+        //         // let snippetVariables;
+        //         // try {
+        //         //     snippetVariables = await parseSnippetVariables(
+        //         //         this.plugin.settings.snippetVariables,
+        //         //     );
+        //         //     await parseSnippets(snippets, snippetVariables);
+        //         // } catch (e) {
+        //         //     success = false;
+        //         // }
+
+        //         // updateValidityIndicator(success);
+
+        //         // if (!success) return;
+
+        //         // this.plugin.settings.snippets = snippets;
+        //         // await this.plugin.saveSettings();
+        //     }
+        // });
+
+        // extensions.push(change);
+        // const basicSetup: Extension[] = [
+        //     lineNumbers(),
+        //     highlightSpecialChars(),
+        //     json(),
+        // ];
+        const extensions = basicSetup;
+        this.snippetsEditor = new EditorView({
+            state: EditorState.create({
+                doc: `{}`,
+                extensions,
+            }),
+        });
+
+        customCSSWrapper.appendChild(this.snippetsEditor.dom);
     }
 }
