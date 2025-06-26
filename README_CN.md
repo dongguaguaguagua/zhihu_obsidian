@@ -39,9 +39,9 @@ Zhihu on Obsidian允许你在Obsidian内将markdown内容直接发布到知乎�
 
 创建的markdown文件有三个属性（frontmatter）
 
-- 标题(`zhihu_title`): 默认为`untitled`, 你可以后续进行修改
-- 话题(`zhihu_topics`): 默认为空，添加话题是**强制**的
-- 链接(`zhihu_link`): 你的文章的URL
+- 标题(`zhihu-title`): 默认为`untitled`, 你可以后续进行修改
+- 话题(`zhihu-topics`): 默认为空，添加话题是**强制**的
+- 链接(`zhihu-link`): 你的文章的URL
 
 在写完文章准备发表的时候，运行命令 `Zhihu: Publish current article` 即可。插件会将markdown转换为知乎HTML。在真正看到知乎上的文章之前，你可能需要等上几秒（或几分钟）。
 
@@ -51,9 +51,9 @@ Zhihu on Obsidian允许你在Obsidian内将markdown内容直接发布到知乎�
 
 ![new_answer_draft](./imgs/new_answer_draft.jpg)
 
-回答草稿中不需要填写任何属性，直接写完回答后运行命令 `Zhihu: Publish current answer`。然后回答链接就会出现在 `zhihu_link` 属性中。用同样的命令也可以更新回答。
+回答草稿中不需要填写任何属性，直接写完回答后运行命令 `Zhihu: Publish current answer`。然后回答链接就会出现在 `zhihu-link` 属性中。用同样的命令也可以更新回答。
 
-但需要注意，你**不能在同一个问题下创建两次回答**（包括回答草稿）。如果你已经回答过了这个问题，你应该**手动编辑属性：添加 `zhihu_tags`, `zhihu_question`, `zhihu_link`**。再运行发布命令就可以成功更新回答了。
+但需要注意，你**不能在同一个问题下创建两次回答**（包括回答草稿）。如果你已经回答过了这个问题，你应该**手动编辑属性：添加 `zhihu-tags`, `zhihu-question`, `zhihu-link`**。再运行发布命令就可以成功更新回答了。
 
 ### 浏览
 
@@ -95,17 +95,17 @@ LaTeX公式也可以正常显示
 
 ### 文章封面
 
-插件也可以让你一键上传你最爱的封面图片。只要在属性(property)中添加`zhihu_cover`条目，然后键入`[[img]]`选择图片。就像这样
+插件也可以让你一键上传你最爱的封面图片。只要在属性(property)中添加`zhihu-cover`条目，然后键入`[[img]]`选择图片。就像这样
 
 ![cover_example](./imgs/cover_example.jpg)
 
 ### 目录
 
-在属性中添加 `zhihu_toc` 条目，确保它不为空，那么发布回答或文章时就会生成目录。
+在属性中添加 `zhihu-toc` 条目，确保它不为空，那么发布回答或文章时就会生成目录。
 
-比如`zhihu_toc`可以是：`True` 或者 `1`。
+比如`zhihu-toc`可以是：`True` 或者 `1`。
 
-如果你不添加 `zhihu_toc`, 那么就不会生成目录。
+如果你不添加 `zhihu-toc`, 那么就不会生成目录。
 
 ## 贡献
 

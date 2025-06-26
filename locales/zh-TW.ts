@@ -112,7 +112,7 @@ export default {
         userAgentPlaceholder: "請輸入自訂使用者代理",
         restrictAt: "限制@知乎用戶僅在带有知乎属性的笔记中觸發",
         restrictAtDesc:
-            "只有屬性中有 zhihu_ 的筆記中才會觸發 @知乎用戶 功能（需要重新啟動外掛）",
+            "只有屬性中有 zhihu- 的筆記中才會觸發 @知乎用戶 功能（需要重新啟動外掛）",
         clearImageCache: "清除圖片快取",
         clearImageCacheDesc: "有了圖片快取，您可以減少對知乎 API 的請求次數",
         clearImageCacheButtonText: "清除",

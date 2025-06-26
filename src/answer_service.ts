@@ -67,14 +67,14 @@ export async function publishCurrentAnswer(app: App) {
         new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
-    const questionLink = frontmatter.zhihu_question;
+    const questionLink = frontmatter["zhihu-question"];
     if (!isZhihuQuestionLink(questionLink)) {
         new Notice(`${locale.notice.questionLinkInvalid}`);
         return;
     }
     const questionId = extractQuestionId(questionLink);
-    const status = publishStatus(frontmatter.zhihu_link);
-    const toc = !!frontmatter.zhihu_toc;
+    const status = publishStatus(frontmatter["zhihu-link"]);
+    const toc = !!frontmatter["zhihu-toc"];
 
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
@@ -84,7 +84,7 @@ export async function publishCurrentAnswer(app: App) {
         case 0:
             break;
         case 1:
-            answerId = frontmatter.zhihu_link.replace(
+            answerId = frontmatter["zhihu-link"].replace(
                 `https://www.zhihu.com/question/${questionId}/answer/`,
                 "",
             );
@@ -343,7 +343,7 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
     try {
         const newFile = await vault.create(filePath, "");
         await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            frontmatter.zhihu_question = questionLink;
+            frontmatter["zhihu-question"] = questionLink;
         });
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);
