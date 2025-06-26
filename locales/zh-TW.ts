@@ -15,6 +15,7 @@ export default {
         previousPage: "上一頁",
         publishCurrentAnswer: "发布当前回答",
         publishCurrentArticle: "发布当前文章",
+        cancel: "取消",
     },
     notice: {
         notLogin: "你已登出，請先登入。",
@@ -120,8 +121,17 @@ export default {
         zhihuHeading: "使用知乎特色的標題",
         zhihuHeadingDesc:
             "如果啟用，那麼 markdown 的標題層次會與知乎一致，且三級以上標題僅被加粗",
-        useImgNameDefault: "默认图片备注为图片名称",
+        useImgNameDefault: "預設圖片備註為圖片名稱",
         useImgNameDefaultDesc:
-            "如果没有图片备注，那么默认图片备注就是图片文件名。关闭此项后默认图片备注为空。",
+            "如果沒有圖片備註，則預設圖片備註為圖片檔案名稱。關閉此項後，預設圖片備註將為空。",
+        editCookies: "手動編輯 Cookies",
+        editCookiesDesc: "你可以編輯儲存在 zhihu-data.json 檔案中的 Cookies",
+        editorDesc:
+            '在此輸入 Cookies。記得在每個 Cookie 後加上逗號，並使用兩個反斜線（\\\\）轉義所有的反斜線。以 "//" 開頭的行將被視為註解並被忽略。',
+        editorResetTooltip: "重設為先前儲存的 Cookies",
+        editorResetWarning: "你確定嗎？這將刪除你所寫的所有自訂 Cookies。",
+        editorResetWarningButtonText: "重設為預設 Cookies",
+        editorSyntaxSaved: "已自動儲存",
+        editorSyntaxInvalid: "語法錯誤，未儲存變更",
     },
 };
