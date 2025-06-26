@@ -15,6 +15,7 @@ export default {
         previousPage: "上一页",
         publishCurrentAnswer: "发布当前回答",
         publishCurrentArticle: "发布当前文章",
+        cancel: "取消",
     },
     notice: {
         notLogin: "你已登出，请先登录。",
@@ -123,5 +124,14 @@ export default {
         useImgNameDefault: "默认图片备注为图片名称",
         useImgNameDefaultDesc:
             "如果没有图片备注，那么默认图片备注就是图片文件名。关闭此项后默认图片备注为空。",
+        editCookies: "手动编辑 Cookies",
+        editCookiesDesc: "你可以编辑储存在 zhihu-data.json 文件中的 Cookies",
+        editorDesc:
+            '在此输入 Cookies。记得在每个 Cookie 后加上逗号，并使用两个反斜杠（\\\\）转义所有的反斜杠。以 "//" 开头的行将被视为注释并被忽略。',
+        editorResetTooltip: "重置为之前保存的 Cookies",
+        editorResetWarning: "你确定吗？这将删除你所写的所有自定义 Cookies。",
+        editorResetWarningButtonText: "重置为默认 Cookies",
+        editorSyntaxSaved: "已自动保存",
+        editorSyntaxInvalid: "语法错误，未保存更改",
     },
 };

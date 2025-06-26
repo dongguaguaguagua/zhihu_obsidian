@@ -9,6 +9,7 @@ interface ZhihuSettings {
     recommendCount: number;
     useZhihuHeadings: boolean;
     useImgNameDefault: boolean;
+    manualCookieEdit: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -20,6 +21,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     recommendCount: 7,
     useZhihuHeadings: true,
     useImgNameDefault: false,
+    manualCookieEdit: false,
 };
 
 /**
