@@ -1,23 +1,28 @@
-import { App, PluginSettingTab, Setting, Notice } from "obsidian";
+import {
+    App,
+    PluginSettingTab,
+    Setting,
+    Notice,
+    ButtonComponent,
+    Modal,
+} from "obsidian";
 import ZhihuObPlugin from "./main";
 import { loadSettings, saveSettings } from "./settings";
 import * as login from "./login_service";
 import { loadData, deleteData } from "./data";
 import i18n, { type Lang } from "../locales";
-import { basicSetup } from "./ui/snippets_editor/extensions";
-import { EditorState, Extension } from "@codemirror/state";
 import { EditorView } from "@codemirror/view";
+import { createCookiesEditor } from "./ui/cookies_editor/editor";
+
+const locale = i18n.current;
 
 export class ZhihuSettingTab extends PluginSettingTab {
     plugin: ZhihuObPlugin;
     isLoggedIn = false;
-    i18n: Lang;
-    snippetsEditor: EditorView;
-    snippetsFileLocEl: HTMLElement;
-    snippetVariablesFileLocEl: HTMLElement;
+    cookiesEditor: EditorView;
 
     hide() {
-        this.snippetsEditor?.destroy();
+        this.cookiesEditor?.destroy();
     }
 
     userInfo: { avatar_url: string; name: string; headline?: string } | null =
@@ -26,7 +31,6 @@ export class ZhihuSettingTab extends PluginSettingTab {
     constructor(app: App, plugin: ZhihuObPlugin) {
         super(app, plugin);
         this.plugin = plugin;
-        this.i18n = i18n.current;
     }
 
     async display(): Promise<void> {
@@ -50,8 +54,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         // User login status and info
         new Setting(containerEl)
-            .setName(this.i18n.settings.accountTitle)
-            .setDesc(this.i18n.settings.accountTitleDesc)
+            .setName(locale.settings.accountTitle)
+            .setDesc(locale.settings.accountTitleDesc)
             .then((setting) => {
                 if (this.isLoggedIn && this.userInfo) {
                     const userInfoContainer = setting.nameEl.createDiv({
@@ -86,7 +90,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                     // Log out button
                     setting.addButton((button) =>
                         button
-                            .setButtonText(this.i18n.settings.logoutButtonText)
+                            .setButtonText(locale.settings.logoutButtonText)
                             .setWarning()
                             .onClick(async () => {
                                 try {
@@ -99,10 +103,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                     this.userInfo = null;
                                     this.display();
                                 } catch (e) {
-                                    console.error(
-                                        this.i18n.error.logoutFailed,
-                                        e,
-                                    );
+                                    console.error(locale.error.logoutFailed, e);
                                 }
                             }),
                     );
@@ -110,7 +111,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                     // Log in button
                     setting.addButton((button) =>
                         button
-                            .setButtonText(this.i18n.settings.loginButtonText)
+                            .setButtonText(locale.settings.loginButtonText)
                             .setCta()
                             .onClick(async () => {
                                 try {
@@ -135,10 +136,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                     }
                                     this.display();
                                 } catch (e) {
-                                    console.error(
-                                        this.i18n.error.loginFailed,
-                                        e,
-                                    );
+                                    console.error(locale.error.loginFailed, e);
                                 }
                             }),
                     );
@@ -148,11 +146,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
         // User Agent setting
         const settings = await loadSettings(this.app.vault);
         new Setting(containerEl)
-            .setName(this.i18n.settings.userAgent)
-            .setDesc(this.i18n.settings.userAgentDesc)
+            .setName(locale.settings.userAgent)
+            .setDesc(locale.settings.userAgentDesc)
             .addText((text) =>
                 text
-                    .setPlaceholder(this.i18n.settings.userAgentPlaceholder)
+                    .setPlaceholder(locale.settings.userAgentPlaceholder)
                     .setValue(settings.user_agent)
                     .onChange(async (value) => {
                         try {
@@ -160,18 +158,15 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 user_agent: value,
                             });
                         } catch (e) {
-                            console.error(
-                                this.i18n.error.saveUserAgentFailed,
-                                e,
-                            );
+                            console.error(locale.error.saveUserAgentFailed, e);
                         }
                     }),
             );
 
         // Restrict @知友 to notes with zhihu tag
         new Setting(containerEl)
-            .setName(this.i18n.settings.restrictAt)
-            .setDesc(this.i18n.settings.restrictAtDesc)
+            .setName(locale.settings.restrictAt)
+            .setDesc(locale.settings.restrictAtDesc)
             .addToggle((toggle) =>
                 toggle
                     .setValue(settings.restrictToZhihuFM)
@@ -181,32 +176,29 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 restrictToZhihuFM: value,
                             });
                         } catch (e) {
-                            console.error(
-                                this.i18n.error.saveRestrictAtFailed,
-                                e,
-                            );
+                            console.error(locale.error.saveRestrictAtFailed, e);
                         }
                     }),
             );
 
         // Clear Image Cahce in `data.cache`
         new Setting(containerEl)
-            .setName(this.i18n.settings.clearImageCache)
-            .setDesc(this.i18n.settings.clearImageCacheDesc)
+            .setName(locale.settings.clearImageCache)
+            .setDesc(locale.settings.clearImageCacheDesc)
             .then((setting) => {
                 // Log out button
                 setting.addButton((button) =>
                     button
                         .setButtonText(
-                            this.i18n.settings.clearImageCacheButtonText,
+                            locale.settings.clearImageCacheButtonText,
                         )
                         .onClick(async () => {
                             try {
                                 await deleteData(this.app.vault, "cache");
-                                new Notice(this.i18n.notice.imageCacheCleared);
+                                new Notice(locale.notice.imageCacheCleared);
                             } catch (e) {
                                 console.error(
-                                    this.i18n.error.clearImageCacheFailed,
+                                    locale.error.clearImageCacheFailed,
                                     e,
                                 );
                             }
@@ -216,8 +208,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         // If send read to Zhihu
         new Setting(containerEl)
-            .setName(this.i18n.settings.sendRead)
-            .setDesc(this.i18n.settings.sendReadDesc)
+            .setName(locale.settings.sendRead)
+            .setDesc(locale.settings.sendReadDesc)
             .addToggle((toggle) =>
                 toggle
                     .setValue(settings.sendReadToZhihu)
@@ -227,17 +219,14 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 sendReadToZhihu: value,
                             });
                         } catch (e) {
-                            console.error(
-                                this.i18n.error.saveSendZhihuFailed,
-                                e,
-                            );
+                            console.error(locale.error.saveSendZhihuFailed, e);
                         }
                     }),
             );
         // Setting to enable Zhihu level headings
         new Setting(containerEl)
-            .setName(this.i18n.settings.zhihuHeading)
-            .setDesc(this.i18n.settings.zhihuHeadingDesc)
+            .setName(locale.settings.zhihuHeading)
+            .setDesc(locale.settings.zhihuHeadingDesc)
             .addToggle((toggle) =>
                 toggle
                     .setValue(settings.useZhihuHeadings)
@@ -248,7 +237,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             });
                         } catch (e) {
                             console.error(
-                                this.i18n.error.saveUseZhihuHeadingFailed,
+                                locale.error.saveUseZhihuHeadingFailed,
                                 e,
                             );
                         }
@@ -257,8 +246,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
         // setting to control if set default img name as img base name
         // if img caption is not provided
         new Setting(containerEl)
-            .setName(this.i18n.settings.useImgNameDefault)
-            .setDesc(this.i18n.settings.useImgNameDefaultDesc)
+            .setName(locale.settings.useImgNameDefault)
+            .setDesc(locale.settings.useImgNameDefaultDesc)
             .addToggle((toggle) =>
                 toggle
                     .setValue(settings.useImgNameDefault)
@@ -268,42 +257,15 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 useImgNameDefault: value,
                             });
                         } catch (e) {
-                            console.error(
-                                this.i18n.error.saveUseImgNameFailed,
-                                e,
-                            );
+                            console.error(locale.error.saveUseImgNameFailed, e);
                         }
                     }),
             );
-        // // Recommend Count setting
-        // new Setting(containerEl)
-        // 	.setName("Recommendation Count")
-        // 	.setDesc(
-        // 		"Number of recommended items to fetch from Zhihu API (5-12)",
-        // 	)
-        // 	.addSlider((slider) =>
-        // 		slider
-        // 			.setLimits(5, 12, 1)
-        // 			.setValue(settings.recommendCount)
-        // 			.setDynamicTooltip()
-        // 			.onChange(async (value) => {
-        // 				try {
-        // 					await saveSettings(this.app.vault, {
-        // 						recommendCount: value,
-        // 					});
-        // 				} catch (e) {
-        // 					console.error(
-        // 						"Failed to save recommendCount setting:",
-        // 						e,
-        // 					);
-        // 				}
-        // 			}),
-        // 	);
 
         // 添加“手动编辑Cookies”开关
         new Setting(containerEl)
-            .setName("手动编辑Cookies")
-            .setDesc("启用后可手动编辑zhihu-data.json中的cookies内容")
+            .setName(locale.settings.editCookies)
+            .setDesc(locale.settings.editCookiesDesc)
             .addToggle((toggle) =>
                 toggle
                     .setValue(settings.manualCookieEdit)
@@ -312,11 +274,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             await saveSettings(this.app.vault, {
                                 manualCookieEdit: value,
                             });
-                            snippetsSetting.settingEl.toggleClass(
-                                "snippets-text-area",
+                            cookiesSetting.settingEl.toggleClass(
+                                "cookies-setting-area",
                                 value === true,
                             );
-                            snippetsSetting.settingEl.toggleClass(
+                            cookiesSetting.settingEl.toggleClass(
                                 "hidden",
                                 value !== true,
                             );
@@ -325,63 +287,41 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         }
                     }),
             );
-
-        const snippetsSetting = new Setting(containerEl)
-            .setName("Snippets")
-            .setDesc(
-                'Enter snippets here. Remember to add a comma after each snippet, and escape all backslashes with an extra \\. Lines starting with "//" will be treated as comments and ignored.',
-            )
-            .setClass("snippets-text-area");
+        // cookies编辑器
+        const cookiesSetting = new Setting(containerEl)
+            .setName("Cookies")
+            .setDesc(locale.settings.editorDesc)
+            .setClass("cookies-setting-area");
 
         const data = await loadData(this.app.vault);
-        this.createSnippetsEditor(snippetsSetting, data);
+        createCookiesEditor(this.app, cookiesSetting, data);
     }
+}
 
-    async createSnippetsEditor(snippetsSetting: Setting, data: any) {
-        const customCSSWrapper = snippetsSetting.controlEl.createDiv(
-            "snippets-editor-wrapper",
-        );
+export class ConfirmationModal extends Modal {
+    constructor(
+        app: App,
+        body: string,
+        buttonCallback: (button: ButtonComponent) => void,
+        clickCallback: () => Promise<void>,
+    ) {
+        super(app);
 
-        // const extensions = basicSetup;
+        this.contentEl.addClass("zhihu-obsidian-confirmation-modal");
+        this.contentEl.createEl("p", { text: body });
 
-        // const change = EditorView.updateListener.of(async (v: ViewUpdate) => {
-        //     if (v.docChanged) {
-        //         const snippets = v.state.doc.toString();
-        //         let success = true;
-        //         console.log("doc changed");
-        //         // let snippetVariables;
-        //         // try {
-        //         //     snippetVariables = await parseSnippetVariables(
-        //         //         this.plugin.settings.snippetVariables,
-        //         //     );
-        //         //     await parseSnippets(snippets, snippetVariables);
-        //         // } catch (e) {
-        //         //     success = false;
-        //         // }
-
-        //         // updateValidityIndicator(success);
-
-        //         // if (!success) return;
-
-        //         // this.plugin.settings.snippets = snippets;
-        //         // await this.plugin.saveSettings();
-        //     }
-        // });
-
-        // extensions.push(change);
-        // const basicSetup: Extension[] = [
-        //     lineNumbers(),
-        //     highlightSpecialChars(),
-        //     json(),
-        // ];
-        const extensions = basicSetup;
-        this.snippetsEditor = new EditorView({
-            state: EditorState.create({
-                doc: `{}`,
-                extensions,
-            }),
-        });
-
-        customCSSWrapper.appendChild(this.snippetsEditor.dom);
+        new Setting(this.contentEl)
+            .addButton((button) => {
+                buttonCallback(button);
+                button.onClick(async () => {
+                    await clickCallback();
+                    this.close();
+                });
+            })
+            .addButton((button) =>
+                button
+                    .setButtonText(locale.ui.cancel)
+                    .onClick(() => this.close()),
+            );
     }
 }

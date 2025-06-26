@@ -16,6 +16,7 @@ export default {
         previousPage: "Previous page",
         publishCurrentAnswer: "publish current answer",
         publishCurrentArticle: "publish current article",
+        cancel: "Cancel",
     },
     notice: {
         notLogin: "You are logout, please login first.",
@@ -128,5 +129,15 @@ export default {
         useImgNameDefault: "Default image name as caption",
         useImgNameDefaultDesc:
             "If image caption is not provided, use image file name as default. Disable it then default caption is empty.",
+        editCookies: "Enable editing cookies manually",
+        editCookiesDesc: "You can edit cookies settings in zhihu-data.json",
+        editorDesc:
+            'Enter cookies here. Remember to add a comma after each cookie, and escape all backslashes with an extra \\. Lines starting with "//" will be treated as comments and ignored.',
+        editorResetTooltip: "Reset to previous saved cookies",
+        editorResetWarning:
+            "Are you sure? This will delete any custom cookies you have written.",
+        editorResetWarningButtonText: "Reset to default cookies",
+        editorSyntaxSaved: "Saved automatically",
+        editorSyntaxInvalid: "Invalid syntax. Changes not saved",
     },
 };
