@@ -26,7 +26,6 @@ export async function createCookiesEditor(
 
     const validityText = validity.createDiv("cookies-editor-validity-text");
     validityText.addClass("setting-item-description");
-    validityText.style.padding = "0";
 
     const extensions = basicSetup;
 
