@@ -10,7 +10,7 @@ import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
-import en from "locales/en";
+import { fmtDate } from "./utilities";
 
 const locale = i18n.current;
 
@@ -125,22 +125,21 @@ export async function publishCurrentArticle(app: App) {
         toc,
         status === 1,
     );
-    console.log("publish result:", publishResult);
 
     const url = publishResult.publish.url;
-    console.log("url:", url);
     switch (status) {
-        case 0:
-        case 2:
-            await app.fileManager.processFrontMatter(
-                activeFile,
-                (frontmatter) => {
-                    frontmatter["zhihu-link"] = url;
-                },
-            );
+        case 0: // 未发表
+        case 2: // 未发表但已生成草稿
+            await app.fileManager.processFrontMatter(activeFile, (fm) => {
+                fm["zhihu-link"] = url;
+                fm["zhihu-created-at"] = fmtDate(new Date());
+            });
             new Notice(`${locale.notice.publishArticleSuccess}`);
             break;
-        case 1:
+        case 1: // 已发表
+            await app.fileManager.processFrontMatter(activeFile, (fm) => {
+                fm["zhihu-updated-at"] = fmtDate(new Date());
+            });
             new Notice(`${locale.notice.updateArticleSuccess}`);
             break;
         default:
@@ -168,11 +167,10 @@ export async function createNewZhihuArticle(app: App) {
         const newFile = await vault.create(filePath, "");
         const defaultTitle = "untitled";
         const articleId = await newDraft(vault, defaultTitle);
-        await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            frontmatter["zhihu-title"] = defaultTitle;
-            frontmatter["zhihu-topics"] = "";
-            frontmatter["zhihu-link"] =
-                `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
+        await app.fileManager.processFrontMatter(newFile, (fm) => {
+            fm["zhihu-title"] = defaultTitle;
+            fm["zhihu-topics"] = "";
+            fm["zhihu-link"] = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
         });
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);
