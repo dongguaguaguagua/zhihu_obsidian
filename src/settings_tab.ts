@@ -57,6 +57,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
             .setName(locale.settings.accountTitle)
             .setDesc(locale.settings.accountTitleDesc)
             .then((setting) => {
+                setting.nameEl.addClass("zhihu-flex-container");
                 if (this.isLoggedIn && this.userInfo) {
                     const userInfoContainer = setting.nameEl.createDiv({
                         cls: "zhihu-user-info",
@@ -291,7 +292,9 @@ export class ZhihuSettingTab extends PluginSettingTab {
         const cookiesSetting = new Setting(containerEl)
             .setName("Cookies")
             .setDesc(locale.settings.editorDesc)
-            .setClass("cookies-setting-area");
+            .setClass(
+                settings.manualCookieEdit ? "cookies-setting-area" : "hidden",
+            );
 
         const data = await loadData(this.app.vault);
         createCookiesEditor(this.app, cookiesSetting, data);
