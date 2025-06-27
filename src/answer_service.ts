@@ -8,6 +8,8 @@ import * as imageService from "./image_service";
 import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
+import { fmtDate } from "./utilities";
+
 import i18n, { type Lang } from "../locales";
 
 const locale = i18n.current;
@@ -67,14 +69,14 @@ export async function publishCurrentAnswer(app: App) {
         new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
-    const questionLink = frontmatter.zhihu_question;
+    const questionLink = frontmatter["zhihu-question"];
     if (!isZhihuQuestionLink(questionLink)) {
         new Notice(`${locale.notice.questionLinkInvalid}`);
         return;
     }
     const questionId = extractQuestionId(questionLink);
-    const status = publishStatus(frontmatter.zhihu_link);
-    const toc = !!frontmatter.zhihu_toc;
+    const status = publishStatus(frontmatter["zhihu-link"]);
+    const toc = !!frontmatter["zhihu-toc"];
 
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
@@ -84,7 +86,7 @@ export async function publishCurrentAnswer(app: App) {
         case 0:
             break;
         case 1:
-            answerId = frontmatter.zhihu_link.replace(
+            answerId = frontmatter["zhihu-link"].replace(
                 `https://www.zhihu.com/question/${questionId}/answer/`,
                 "",
             );
@@ -147,11 +149,16 @@ export async function publishCurrentAnswer(app: App) {
     switch (status) {
         case 0:
             await app.fileManager.processFrontMatter(activeFile, (fm) => {
-                fm.link = `https://www.zhihu.com/question/${questionId}/answer/${answerId}`;
+                fm["zhihu-link"] =
+                    `https://www.zhihu.com/question/${questionId}/answer/${answerId}`;
+                fm["zhihu-created-at"] = fmtDate(new Date());
             });
             new Notice(`${locale.notice.publishAnswerSuccess}`);
             break;
         case 1:
+            await app.fileManager.processFrontMatter(activeFile, (fm) => {
+                fm["zhihu-updated-at"] = fmtDate(new Date());
+            });
             new Notice(`${locale.notice.updateAnswerSuccess}`);
             break;
         default:
@@ -342,8 +349,8 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
 
     try {
         const newFile = await vault.create(filePath, "");
-        await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            frontmatter.zhihu_question = questionLink;
+        await app.fileManager.processFrontMatter(newFile, (fm) => {
+            fm["zhihu-question"] = questionLink;
         });
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);

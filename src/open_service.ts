@@ -231,7 +231,7 @@ export async function openContent(
         const newFile = await app.vault.create(filePath, markdown);
         await app.fileManager.processFrontMatter(newFile, (fm) => {
             fm.tags = `zhihu-${type}`;
-            fm.link = url;
+            fm["zhihu-link"] = url;
         });
         const leaf = this.app.workspace.getLeaf();
         await leaf.openFile(newFile as TFile);

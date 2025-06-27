@@ -10,7 +10,7 @@ import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
-import en from "locales/en";
+import { fmtDate } from "./utilities";
 
 const locale = i18n.current;
 
@@ -28,15 +28,15 @@ export async function publishCurrentArticle(app: App) {
         new Notice(`${locale.notice.noFrontmatter}`);
         return;
     }
-    const topics = normalizeStr(frontmatter.zhihu_topics);
+    const topics = normalizeStr(frontmatter["zhihu-topics"]);
     if (topics.length === 0) {
         new Notice(`${locale.notice.noTopics}`);
         return;
     }
     // 这里链接属性缺失或者为空，都表明未发表文章
-    const status = publishStatus(frontmatter.zhihu_link);
-    const title = frontmatter.zhihu_title || locale.untitled;
-    const toc = !!frontmatter.zhihu_toc;
+    const status = publishStatus(frontmatter["zhihu-link"]);
+    const title = frontmatter["zhihu-title"] || locale.untitled;
+    const toc = !!frontmatter["zhihu-toc"];
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
     // 获取文章的ID，如果未发表则新建一个。
@@ -46,13 +46,13 @@ export async function publishCurrentArticle(app: App) {
             articleId = await newDraft(vault, title);
             break;
         case 1: // 已发表
-            articleId = frontmatter.zhihu_link.replace(
+            articleId = frontmatter["zhihu-link"].replace(
                 "https://zhuanlan.zhihu.com/p/",
                 "",
             );
             break;
         case 2: // 未发表但已生成草稿
-            articleId = frontmatter.zhihu_link.match(
+            articleId = frontmatter["zhihu-link"].match(
                 /^https:\/\/zhuanlan\.zhihu\.com\/p\/(\d+)(\/edit)?$/,
             )[1];
             break;
@@ -64,7 +64,7 @@ export async function publishCurrentArticle(app: App) {
             break;
     }
     // 处理文章封面上传
-    const cover = frontmatter.zhihu_cover;
+    const cover = frontmatter["zhihu-cover"];
     if (!(typeof cover === "undefined" || cover === null)) {
         const coverURL = await imageService.uploadCover(vault, cover);
         const patchBody = {
@@ -112,7 +112,7 @@ export async function publishCurrentArticle(app: App) {
         }
     }
     // 把文章投稿至问题
-    const toQuestion = frontmatter.zhihu_question;
+    const toQuestion = frontmatter["zhihu-question"];
     if (toQuestion) {
         const questionId = extractQuestionId(toQuestion);
         if (questionId) {
@@ -125,22 +125,21 @@ export async function publishCurrentArticle(app: App) {
         toc,
         status === 1,
     );
-    console.log("publish result:", publishResult);
 
     const url = publishResult.publish.url;
-    console.log("url:", url);
     switch (status) {
-        case 0:
-        case 2:
-            await app.fileManager.processFrontMatter(
-                activeFile,
-                (frontmatter) => {
-                    frontmatter.zhihu_link = url;
-                },
-            );
+        case 0: // 未发表
+        case 2: // 未发表但已生成草稿
+            await app.fileManager.processFrontMatter(activeFile, (fm) => {
+                fm["zhihu-link"] = url;
+                fm["zhihu-created-at"] = fmtDate(new Date());
+            });
             new Notice(`${locale.notice.publishArticleSuccess}`);
             break;
-        case 1:
+        case 1: // 已发表
+            await app.fileManager.processFrontMatter(activeFile, (fm) => {
+                fm["zhihu-updated-at"] = fmtDate(new Date());
+            });
             new Notice(`${locale.notice.updateArticleSuccess}`);
             break;
         default:
@@ -168,10 +167,10 @@ export async function createNewZhihuArticle(app: App) {
         const newFile = await vault.create(filePath, "");
         const defaultTitle = "untitled";
         const articleId = await newDraft(vault, defaultTitle);
-        await app.fileManager.processFrontMatter(newFile, (frontmatter) => {
-            frontmatter.zhihu_title = defaultTitle;
-            frontmatter.zhihu_topics = "";
-            frontmatter.zhihu_link = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
+        await app.fileManager.processFrontMatter(newFile, (fm) => {
+            fm["zhihu-title"] = defaultTitle;
+            fm["zhihu-topics"] = "";
+            fm["zhihu-link"] = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
         });
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);

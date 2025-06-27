@@ -115,7 +115,7 @@ export default {
         userAgentPlaceholder: "Enter custom user agent",
         restrictAt: "Restrict @Zhihuers to Zhihu frontmatter notes",
         restrictAtDesc:
-            "Enable @Zhihuers functionality only for notes with 'zhihu_' frontmatter. (Need to reload plugin once changed)",
+            "Enable @Zhihuers functionality only for notes with 'zhihu-' frontmatter. (Need to reload plugin once changed)",
         clearImageCache: "Clear image cache",
         clearImageCacheDesc:
             "With image cache, you can reduce access requency to the Zhihu API",
