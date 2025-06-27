@@ -143,6 +143,12 @@
 }
 
 /* settings */
+.zhihu-flex-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .zhihu-user-info {
     display: flex;
     align-items: center;
