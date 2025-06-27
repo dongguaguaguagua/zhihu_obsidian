@@ -112,7 +112,7 @@ export default {
         userAgentPlaceholder: "请输入自定义用户代理",
         restrictAt: "限制@知乎用户只在带有知乎属性的笔记中触发",
         restrictAtDesc:
-            "只有属性中有 zhihu_ 的笔记才触发@知乎用户功能 (需要重启插件)",
+            "只有属性中有 zhihu- 的笔记才触发@知乎用户功能 (需要重启插件)",
         clearImageCache: "清理图片缓存",
         clearImageCacheDesc: "有了图片缓存，您可以减少请求知乎API的次数",
         clearImageCacheButtonText: "清理",
