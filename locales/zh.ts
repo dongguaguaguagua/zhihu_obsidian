@@ -133,5 +133,7 @@ export default {
         editorResetWarningButtonText: "重置为默认 Cookies",
         editorSyntaxSaved: "已自动保存",
         editorSyntaxInvalid: "语法错误，未保存更改",
+        editorRefreshTooltip: "刷新登录状态",
+        editorRefreshFailedNotice: "刷新登录状态失败！缺少必要的 Cookies",
     },
 };

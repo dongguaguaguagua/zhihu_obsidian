@@ -297,7 +297,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
             );
 
         const data = await loadData(this.app.vault);
-        createCookiesEditor(this.app, cookiesSetting, data);
+        createCookiesEditor(this, cookiesSetting, data);
     }
 }
 

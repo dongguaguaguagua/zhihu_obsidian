@@ -5,6 +5,7 @@ import * as cookieUtil from "./cookies";
 import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 import en from "locales/en";
+import { toCurl } from "./utilities";
 const locale = i18n.current;
 
 export class QRCodeModal extends Modal {
@@ -574,7 +575,7 @@ async function prodTokenRefresh(vault: Vault) {
 }
 
 // 这里得到的BEC才会被用于后续请求。
-async function getUserInfo(vault: Vault) {
+export async function getUserInfo(vault: Vault) {
     try {
         const data = await dataUtil.loadData(vault);
         const settings = await loadSettings(vault);
@@ -583,7 +584,6 @@ async function getUserInfo(vault: Vault) {
             "_xsrf",
             "BEC",
             "d_c0",
-            "captcha_session_v2",
             "z_c0",
             "q_c1",
         ]);

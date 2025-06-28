@@ -1,15 +1,22 @@
-import { App, ExtraButtonComponent, Setting, ButtonComponent } from "obsidian";
+import {
+    PluginSettingTab,
+    ExtraButtonComponent,
+    Setting,
+    ButtonComponent,
+    Notice,
+} from "obsidian";
 import { basicSetup } from "./extensions";
 import { EditorState, Extension } from "@codemirror/state";
 import { EditorView, ViewUpdate } from "@codemirror/view";
-import { saveData } from "../../data";
-import { ConfirmationModal } from "../../settings_tab";
-import i18n, { type Lang } from "../../../locales";
+import { saveData } from "src/data";
+import { ConfirmationModal } from "src/settings_tab";
+import i18n, { type Lang } from "locales";
+import { getUserInfo } from "src/login_service";
 
 const locale = i18n.current;
 
 export async function createCookiesEditor(
-    app: App,
+    st: PluginSettingTab,
     cookiesSetting: Setting,
     data: any,
 ) {
@@ -60,7 +67,7 @@ export async function createCookiesEditor(
 
             if (!success) return;
             data.cookies = parsedCookies;
-            await saveData(app.vault, data);
+            await saveData(st.app.vault, data);
         }
     });
 
@@ -77,11 +84,11 @@ export async function createCookiesEditor(
     const buttonsDiv = cookiesFooter.createDiv("cookies-editor-buttons");
     const reset = new ButtonComponent(buttonsDiv);
     reset
-        .setIcon("switch")
+        .setIcon("arrow-left-right")
         .setTooltip(locale.settings.editorResetTooltip)
         .onClick(async () => {
             new ConfirmationModal(
-                app,
+                st.app,
                 locale.settings.editorResetWarning,
                 (button) =>
                     button
@@ -97,8 +104,20 @@ export async function createCookiesEditor(
                         }),
                     );
                     updateValidityIndicator(true);
-                    await saveData(app.vault, backupData);
+                    await saveData(st.app.vault, backupData);
                 },
             ).open();
+        });
+    const refresh = new ButtonComponent(buttonsDiv);
+    refresh
+        .setIcon("rotate-ccw")
+        .setTooltip(locale.settings.editorRefreshTooltip)
+        .onClick(async () => {
+            try {
+                await getUserInfo(st.app.vault);
+                st.display();
+            } catch (error) {
+                new Notice(locale.settings.editorRefreshFailedNotice);
+            }
         });
 }
