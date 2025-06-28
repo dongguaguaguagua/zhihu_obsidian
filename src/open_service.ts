@@ -4,6 +4,7 @@ import * as cookies from "./cookies";
 import i18n, { type Lang } from "../locales";
 const locale = i18n.current;
 import { htmlToMd } from "./html_to_markdown";
+import { toCurl } from "./utilities";
 
 export async function openZhihuLink(app: App, link: string) {
     const type = getZhihuContentType(link);
@@ -83,6 +84,26 @@ async function getZhihuContentHTML(app: App, zhihuLink: string) {
     try {
         const data = await dataUtil.loadData(app.vault);
         const cookiesHeader = cookies.cookiesHeaderBuilder(data, []);
+        console.log(
+            toCurl({
+                url: zhihuLink,
+                headers: {
+                    "User-Agent":
+                        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:138.0) Gecko/20100101 Firefox/138.0",
+                    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                    "accept-language":
+                        "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+                    "upgrade-insecure-requests": "1",
+                    "sec-fetch-dest": "document",
+                    "sec-fetch-mode": "navigate",
+                    "sec-fetch-site": "none",
+                    "sec-fetch-user": "?1",
+                    priority: "u=0, i",
+                    Cookie: cookiesHeader,
+                },
+                method: "GET",
+            }),
+        );
         const response = await requestUrl({
             url: zhihuLink,
             headers: {

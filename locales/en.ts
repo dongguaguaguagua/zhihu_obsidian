@@ -139,5 +139,8 @@ export default {
         editorResetWarningButtonText: "Reset to default cookies",
         editorSyntaxSaved: "Saved automatically",
         editorSyntaxInvalid: "Invalid syntax. Changes not saved",
+        editorRefreshTooltip: "Refresh login state",
+        editorRefreshFailedNotice:
+            "Refresh login state failed! Missing necessary cookies.",
     },
 };

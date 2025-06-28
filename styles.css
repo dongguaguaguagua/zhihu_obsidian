@@ -182,6 +182,10 @@
 }
 
 /* cookies editor */
+.hidden {
+    display: none;
+}
+
 .cookies-setting-area {
     display: inline-block;
 }
@@ -253,4 +257,8 @@
 .cookies-editor-buttons {
     display: flex;
     flex-direction: row;
+}
+
+.cookies-editor-buttons button + button {
+    margin-left: 8px;
 }
