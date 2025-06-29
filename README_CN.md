@@ -21,9 +21,9 @@ Zhihu on Obsidian允许你在Obsidian内将markdown内容直接发布到知乎�
 
 ### 登录知乎
 
-可以通过运行 `Zhihu: QRCode login` 命令，唤出知乎二维码。然后打开知乎app扫码登录，插件会自动获取所有需要的cookie和用户信息。(**插件永远不会上传你的用户信息**)
+运行 `Zhihu: Web login` 命令，可以看到弹出了一个知乎网页端登录页面。打开知乎app扫码登录，插件会自动获取所有需要的cookie和用户信息。(**插件永远不会上传你的用户信息**)
 
-![image-20250503144240817](./imgs/QRCode.png)
+![image-20250503144240817](./imgs/zhihu-weblogin.jpg)
 
 打开`设置->Zhihu Obsidian`, 如果看到你的头像和账号可以正常显示，说明登录成功。
 
