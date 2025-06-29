@@ -21,9 +21,9 @@ This plugin allows you publish your markdown file directly to [Zhihu](https://ww
 
 ### Login to Zhihu
 
-You can login to Zhihu by the command `Zhihu: QRCode login`, then you will see a QRCode. Open Zhihu app and scan it, the plugin will fetch all cookies and user data automatically. (**The plugin will never, ever upload your information**)
+You can login to Zhihu by the command `Zhihu: Web login`, then you will see a web login page. Open Zhihu app and scan it, the plugin will fetch all cookies and user data automatically. (**The plugin will never, ever upload your information**)
 
-![image-20250503144240817](./imgs/QRCode.png)
+![image-20250503144240817](./imgs/zhihu-weblogin.jpg)
 
 Open the `settings->Zhihu Obsidian`, an account and avatar indicates that the login is successful.
 
