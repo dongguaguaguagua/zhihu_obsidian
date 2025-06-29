@@ -53,7 +53,7 @@ Open command palette, type `Zhihu: Create new answer`, the plugin will ask you t
 
 There are no properties you should fulfill, just type your thoughts or experience and run command `Zhihu: Publish current answer`. That's it, the answer URL then appear in the `zhihu-link` property. You can also edit your answers anytime with the same command.
 
-It is worth mentioning that **you can't create two answers in one question**, witch means that if you've created an answer (or answer draft) for a question, you can't create it again. In this situation, **you should manually edit properties: `zhihu-tags`, `zhihu-question` and `zhihu-link`**. Then run publish command will update your answer.
+It is worth mentioning that **you can't create two answers in one question**, witch means that if you've created an answer (or answer draft) for a question, you can't create it again. In this situation, **you should manually edit properties: `zhihu-question` and `zhihu-link`**. Then run publish command will update your answer.
 
 ### Browsing
 
