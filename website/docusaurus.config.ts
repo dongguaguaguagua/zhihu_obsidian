@@ -86,8 +86,8 @@ const config: Config = {
                     title: "Docs",
                     items: [
                         {
-                            label: "Tutorial",
-                            to: "/docs/intro",
+                            label: "介绍",
+                            to: "/docs/介绍",
                         },
                     ],
                 },
