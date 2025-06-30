@@ -15,7 +15,7 @@ const config: Config = {
     },
 
     // Set the production url of your site here
-    url: "https://zhihu-obsidian.pages.dev/",
+    url: "https://zhihu.melonhu.cn/",
     // Set the /<baseUrl>/ pathname under which your site is served
     // For GitHub pages deployment, it is often '/<projectName>/'
     baseUrl: "/",
@@ -45,7 +45,7 @@ const config: Config = {
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
                     editUrl:
-                        "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
+                        "https://github.com/dongguaguaguagua/zhihu_obsidian/tree/master/website/",
                 },
                 blog: false,
                 theme: {
@@ -71,7 +71,6 @@ const config: Config = {
                     position: "left",
                     label: "文档",
                 },
-                // { to: "/blog", label: "Blog", position: "left" },
                 {
                     href: "https://github.com/dongguaguaguagua/zhihu_obsidian",
                     label: "GitHub",
@@ -83,38 +82,34 @@ const config: Config = {
             style: "dark",
             links: [
                 {
-                    title: "Docs",
+                    title: "文档",
                     items: [
                         {
                             label: "介绍",
                             to: "/docs/介绍",
                         },
-                    ],
-                },
-                {
-                    title: "Community",
-                    items: [
                         {
-                            label: "Stack Overflow",
-                            href: "https://stackoverflow.com/questions/tagged/docusaurus",
+                            label: "快速开始",
+                            to: "/docs/快速开始/安装插件",
                         },
                         {
-                            label: "Discord",
-                            href: "https://discordapp.com/invite/docusaurus",
-                        },
-                        {
-                            label: "X",
-                            href: "https://x.com/docusaurus",
+                            label: "语法",
+                            to: "/docs/语法/通用语法",
                         },
                     ],
                 },
                 {
-                    title: "More",
+                    title: "社区",
                     items: [
-                        // {
-                        //     label: "Blog",
-                        //     to: "/blog",
-                        // },
+                        {
+                            label: "知乎",
+                            href: "https://www.zhihu.com/",
+                        },
+                    ],
+                },
+                {
+                    title: "做贡献",
+                    items: [
                         {
                             label: "GitHub",
                             href: "https://github.com/dongguaguaguagua/zhihu_obsidian",
