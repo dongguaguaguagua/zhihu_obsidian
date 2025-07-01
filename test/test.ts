@@ -9,11 +9,9 @@ import type { Element } from "hast";
 import type { Link } from "mdast";
 
 const markdownContent = `
-这是一个注释[^1]
-这是另一个注释[^2],ssss
-
-[^1]: 注释文本啊啊啊啊 https://www.githubzhihu.com ABC
-[^2]: 另一个注释文本 https://www.zhihu.com
+# 一级标题
+## 二级标题
+### 更多标题
 `;
 const zhihuHandlers = {
     link(state: any, node: Link): Element {
@@ -164,6 +162,30 @@ const zhihuHandlers = {
 
     footnoteDefinition(): undefined {
         return;
+    },
+    // 如果是一个#，则是二级标题<h2>
+    // 如果是两个#，则是三级标题<h3>
+    // 如果是三个及以上的#，则是加粗处理
+    heading(state: any, node: any): Element {
+        const children = state.all(node) as Element[];
+        let tagName;
+        switch (node.depth) {
+            case 1:
+                tagName = "h2";
+                break;
+            case 2:
+                tagName = "h3";
+                break;
+            default:
+                tagName = "strong";
+                break;
+        }
+        return {
+            type: "element",
+            tagName: tagName,
+            properties: {},
+            children,
+        };
     },
 };
 
