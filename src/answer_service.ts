@@ -58,7 +58,8 @@ export class ZhihuQuestionLinkModal extends Modal {
 export async function publishCurrentAnswer(app: App) {
     const activeFile = app.workspace.getActiveFile();
     const locale = i18n.current;
-    const settings = await loadSettings(app.vault);
+    const vault = app.vault;
+    const settings = await loadSettings(vault);
     if (!activeFile) {
         console.error(locale.error.noActiveFileFound);
         return;
@@ -98,19 +99,7 @@ export async function publishCurrentAnswer(app: App) {
             new Notice(`${locale.error.unknownError}`);
             return;
     }
-
-    let transedImgContent = await imageService.processLocalImgs(
-        app.vault,
-        rmFmContent,
-    );
-    transedImgContent = await imageService.processOnlineImgs(
-        app.vault,
-        transedImgContent,
-    );
-    let zhihuHTML = await render.mdToZhihuHTML(
-        transedImgContent,
-        settings.useZhihuHeadings,
-    );
+    let zhihuHTML = await render.remarkMdToHTML(vault, rmFmContent);
     zhihuHTML = addPopularizeStr(zhihuHTML);
 
     const patchBody = {

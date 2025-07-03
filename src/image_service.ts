@@ -1,6 +1,5 @@
 import { Vault, Notice, requestUrl } from "obsidian";
 import * as fs from "fs";
-import * as path from "path";
 import * as crypto from "crypto";
 import { fileTypeFromBuffer } from "file-type";
 import * as cookies from "./cookies";
@@ -208,79 +207,29 @@ export async function getZhihuImgLink(vault: Vault, imgBuffer: Buffer) {
     return imgOriginalPath;
 }
 
-export async function processLocalImgs(
-    vault: Vault,
-    md: string,
-): Promise<string> {
-    const matches = [...md.matchAll(/!\[\[([^|\]]+)(?:\|([^\]]+))?\]\]/g)];
-    const settings = await loadSettings(vault);
-    for (const match of matches) {
-        const [fullMatch, imgName, caption] = match;
-        const imgLink = await file.getFilePathFromName(vault, imgName);
+export async function getOnlineImg(vault: Vault, url: string) {
+    try {
+        const settings = await loadSettings(vault);
+        const response = requestUrl({
+            url: url,
+            headers: {
+                "User-Agent": settings.user_agent,
+                "Accept-Encoding": "gzip, deflate, br, zstd",
+                Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "accept-language":
+                    "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+            },
+            method: "GET",
+            contentType: undefined,
+        });
+        const arrayBuffer = await response.arrayBuffer;
+        const imgBuffer = Buffer.from(arrayBuffer);
 
-        let alt: string;
-        if (caption) {
-            alt = caption;
-        } else {
-            alt = settings.useImgNameDefault ? path.basename(imgName) : "";
-        }
-
-        const imgBuffer = fs.readFileSync(imgLink);
-        const imgOriginalPath = await getZhihuImgLink(vault, imgBuffer);
-        const zhihuImgStr = zhihuImgStringBuilder(imgOriginalPath, alt);
-        md = md.replace(fullMatch, zhihuImgStr);
+        return imgBuffer;
+    } catch (err) {
+        new Notice(`failed to fetch image:${err}`);
+        return Buffer.from([]);
     }
-    return md;
-}
-
-export async function processOnlineImgs(
-    vault: Vault,
-    md: string,
-): Promise<string> {
-    const settings = await loadSettings(vault);
-    const imageRegex = /!\[([^\]]*)\]\(([^)]+)\)/g;
-    const matches = Array.from(md.matchAll(imageRegex));
-
-    const replacements = await Promise.all(
-        matches.map(async (match) => {
-            const fullMatch = match[0];
-            const alt = match[1];
-            const url = match[2];
-
-            try {
-                const response = requestUrl({
-                    url: url,
-                    headers: {
-                        "User-Agent": settings.user_agent,
-                        "Accept-Encoding": "gzip, deflate, br, zstd",
-                        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-                        "accept-language":
-                            "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
-                    },
-                    method: "GET",
-                    contentType: undefined,
-                });
-                const arrayBuffer = await response.arrayBuffer;
-                const imgBuffer = Buffer.from(arrayBuffer);
-
-                const zhihuImgLink = await getZhihuImgLink(vault, imgBuffer);
-                const htmlString = zhihuImgStringBuilder(
-                    zhihuImgLink,
-                    alt || "Untitled Image",
-                );
-
-                return { original: fullMatch, replacement: htmlString };
-            } catch (err) {
-                console.error(locale.error.processImageFailed, url, err);
-                const fallback = `<span>Image failed to load: ${alt || url}</span>`;
-                return { original: fullMatch, replacement: fallback };
-            }
-        }),
-    );
-    for (const { original, replacement } of replacements) {
-        md = md.replace(original, replacement);
-    }
-    return md;
 }
 
 function stringToSignBuilder(
@@ -306,15 +255,4 @@ async function calculateSignature(
 
 function imgOriginalPathBuilder(hash: string, ext: string) {
     return `https://picx.zhimg.com/v2-${hash}.${ext}`;
-}
-
-export function zhihuImgStringBuilder(path: string, alt: string) {
-    return `\
-<img src=${path} \
-data-caption="${alt}" \
-data-size="normal" \
-data-watermark="watermark" \
-data-original-src=${path} \
-data-watermark-src="" \
-data-private-watermark-src=""/>`;
 }

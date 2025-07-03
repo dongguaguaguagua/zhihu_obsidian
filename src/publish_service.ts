@@ -75,18 +75,7 @@ export async function publishCurrentArticle(app: App) {
         await patchDraft(vault, articleId, patchBody);
         new Notice(`${locale.notice.coverUploadSuccess}`);
     }
-    let transedImgContent = await imageService.processLocalImgs(
-        vault,
-        rmFmContent,
-    );
-    transedImgContent = await imageService.processOnlineImgs(
-        vault,
-        transedImgContent,
-    );
-    let zhihuHTML = await render.mdToZhihuHTML(
-        transedImgContent,
-        settings.useZhihuHeadings,
-    );
+    let zhihuHTML = await render.remarkMdToHTML(vault, rmFmContent);
     zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
     const patchBody = {
         title: title,
@@ -355,7 +344,6 @@ async function publishDraft(
                 },
             }),
         });
-        console.log("response:", response.json);
         if (response.json.message === "success") {
             const result = JSON.parse(response.json.data.result);
             return result;
