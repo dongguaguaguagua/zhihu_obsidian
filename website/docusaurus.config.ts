@@ -103,7 +103,7 @@ const config: Config = {
                     items: [
                         {
                             label: "知乎",
-                            href: "https://www.zhihu.com/",
+                            href: "https://zhuanlan.zhihu.com/p/1901622331102696374",
                         },
                     ],
                 },
