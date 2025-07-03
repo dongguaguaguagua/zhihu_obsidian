@@ -116,7 +116,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             .setCta()
                             .onClick(async () => {
                                 try {
-                                    await login.zhihuQRcodeLogin(this.app);
+                                    await login.zhihuWebLogin(this.app);
                                     this.isLoggedIn =
                                         await login.checkIsUserLogin(
                                             this.app.vault,
