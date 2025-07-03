@@ -63,6 +63,7 @@ export const remarkZhihuImgsOnline: Plugin<[Vault], Parent, Parent> = (
                         "data-watermark-src": "",
                         "data-private-watermark-src": "",
                     },
+                    hChildren: [],
                 };
             })();
             tasks.push(task);
@@ -91,6 +92,7 @@ interface WikiLinkNode extends Node {
             "data-watermark-src": string;
             "data-private-watermark-src": string;
         };
+        hChildren: [];
     };
 }
 
@@ -132,6 +134,7 @@ export const remarkZhihuImgsLocal: Plugin<[Vault], Parent, Parent> = (
                         "data-watermark-src": "",
                         "data-private-watermark-src": "",
                     },
+                    hChildren: [],
                 };
             })();
             tasks.push(task);
@@ -297,24 +300,37 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         // 如果是三个及以上的#，则是加粗处理
         heading(state: any, node: any): Element {
             const children = state.all(node) as Element[];
-            let tagName;
+
             switch (node.depth) {
                 case 1:
-                    tagName = "h2";
-                    break;
+                    return {
+                        type: "element",
+                        tagName: "h2",
+                        properties: {},
+                        children,
+                    };
                 case 2:
-                    tagName = "h3";
-                    break;
+                    return {
+                        type: "element",
+                        tagName: "h3",
+                        properties: {},
+                        children,
+                    };
                 default:
-                    tagName = "strong";
-                    break;
+                    return {
+                        type: "element",
+                        tagName: "p",
+                        properties: {},
+                        children: [
+                            {
+                                type: "element",
+                                tagName: "strong",
+                                properties: {},
+                                children,
+                            },
+                        ],
+                    };
             }
-            return {
-                type: "element",
-                tagName: tagName,
-                properties: {},
-                children,
-            };
         },
     };
     const rehypeOpts: RemarkRehypeOptions = {
