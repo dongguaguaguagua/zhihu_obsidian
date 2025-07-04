@@ -135,5 +135,8 @@ export default {
         editorSyntaxInvalid: "语法错误，未保存更改",
         editorRefreshTooltip: "刷新登录状态",
         editorRefreshFailedNotice: "刷新登录状态失败！缺少必要的 Cookies",
+        autoOpenZhihuLink: "自动打开知乎链接",
+        autoOpenZhihuLinkDesc:
+            "如果启用，那么点击知乎链接时，链接将在 Obsidian 中自动打开。(需要重启插件)",
     },
 };

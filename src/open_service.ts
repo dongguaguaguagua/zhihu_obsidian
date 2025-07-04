@@ -30,9 +30,8 @@ export async function openZhihuLink(app: App, link: string) {
     return;
 }
 
-export async function handleAnswerClickReadMode(app: App, evt: MouseEvent) {
+export async function clickInReadMode(app: App, evt: MouseEvent) {
     const target = evt.target as HTMLElement;
-    // if (!(target && target.tagName === 'A')) return;
     if (
         !(target instanceof HTMLAnchorElement) ||
         !target.classList.contains("external-link")
@@ -49,7 +48,7 @@ export async function handleAnswerClickReadMode(app: App, evt: MouseEvent) {
     openZhihuLink(app, link);
 }
 
-export async function handleAnswerClickLivePreview(app: App, evt: MouseEvent) {
+export async function clickInPreview(app: App, evt: MouseEvent) {
     const markdownView = app.workspace.getActiveViewOfType(MarkdownView);
     if (!markdownView) return;
     const editor = markdownView.editor;
