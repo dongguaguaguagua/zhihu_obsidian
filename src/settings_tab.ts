@@ -262,7 +262,23 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         }
                     }),
             );
-
+        // auto open zhihulink
+        new Setting(containerEl)
+            .setName(locale.settings.autoOpenZhihuLink)
+            .setDesc(locale.settings.autoOpenZhihuLinkDesc)
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(settings.autoOpenZhihuLink)
+                    .onChange(async (value) => {
+                        try {
+                            await saveSettings(this.app.vault, {
+                                autoOpenZhihuLink: value,
+                            });
+                        } catch (e) {
+                            console.error("save settings failed:", e);
+                        }
+                    }),
+            );
         // 添加“手动编辑Cookies”开关
         new Setting(containerEl)
             .setName(locale.settings.editCookies)
