@@ -10,6 +10,7 @@ interface ZhihuSettings {
     useZhihuHeadings: boolean;
     useImgNameDefault: boolean;
     manualCookieEdit: boolean;
+    autoOpenZhihuLink: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     useZhihuHeadings: true,
     useImgNameDefault: false,
     manualCookieEdit: false,
+    autoOpenZhihuLink: true,
 };
 
 /**

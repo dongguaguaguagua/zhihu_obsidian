@@ -142,5 +142,8 @@ export default {
         editorRefreshTooltip: "Refresh login state",
         editorRefreshFailedNotice:
             "Refresh login state failed! Missing necessary cookies.",
+        autoOpenZhihuLink: "Auto open Zhihu link",
+        autoOpenZhihuLinkDesc:
+            "If this enabled, Zhihu link will be opened in Obsidian automatically when you click it. (Plugin reload required)",
     },
 };

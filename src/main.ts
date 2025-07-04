@@ -29,18 +29,21 @@ export default class ZhihuObPlugin extends Plugin {
 
     async onload() {
         const settings = await loadSettings(this.app.vault);
-        this.registerDomEvent(
-            document,
-            "click",
-            (e) => {
-                open.handleAnswerClickReadMode(this.app, e);
-                open.handleAnswerClickLivePreview(this.app, e);
-            },
-            true,
-        );
-        this.registerEditorSuggest(
-            new MentionSuggest(this.app, settings.restrictToZhihuFM),
-        );
+        if (settings.autoOpenZhihuLink) {
+            this.registerDomEvent(
+                document,
+                "click",
+                (e) => {
+                    open.clickInReadMode(this.app, e);
+                    open.clickInPreview(this.app, e);
+                },
+                true,
+            );
+        }
+
+        if (settings.restrictToZhihuFM) {
+            this.registerEditorSuggest(new MentionSuggest(this.app));
+        }
         registerMenuCommands(this); // 监听右键菜单和文件菜单事件
         const loginNoticeStr = this.i18n.notice.notLogin;
         loadIcons();
