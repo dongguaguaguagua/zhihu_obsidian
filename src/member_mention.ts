@@ -74,11 +74,8 @@ export async function autoCompletePeople(
 }
 
 export class MentionSuggest extends EditorSuggest<MentionSuggestion> {
-    shouldRestrict: boolean;
-
-    constructor(app: any, restrict: boolean) {
+    constructor(app: any) {
         super(app);
-        this.shouldRestrict = restrict;
     }
 
     onTrigger(
@@ -87,7 +84,7 @@ export class MentionSuggest extends EditorSuggest<MentionSuggestion> {
         file: TFile | null,
     ): EditorSuggestTriggerInfo | null {
         // Check if note has 'zhihu-' str in frontmatter when restrictToZhihuFM is enabled
-        if (this.shouldRestrict && file) {
+        if (file) {
             const metadata = this.app.metadataCache.getFileCache(file);
             const fm = metadata?.frontmatter || [];
             const hasZhihuKey = Object.keys(fm).some((key) =>
