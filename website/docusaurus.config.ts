@@ -6,8 +6,8 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
     title: "Zhihu on Obsidian",
-    tagline: "让知乎写作再次伟大",
-    favicon: "img/favicon.ico",
+    tagline: "重拾知乎创作的乐趣",
+    favicon: "img/logo.svg",
 
     // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
     future: {
@@ -104,6 +104,10 @@ const config: Config = {
                         {
                             label: "知乎",
                             href: "https://zhuanlan.zhihu.com/p/1901622331102696374",
+                        },
+                        {
+                            label: "LINUX DO",
+                            href: "https://linux.do/t/topic/767606",
                         },
                     ],
                 },
