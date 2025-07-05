@@ -15,8 +15,8 @@ const FeatureList: FeatureItem[] = [
         Img: require("@site/static/img/publish.png").default,
         description: (
             <>
-                让您可以轻松地在 Obsidian 内发布文章或回答，再也不用和知乎的 bug
-                编辑器接触了。
+                支持一切知乎富文本编辑器功能，让您可以轻松地在 Obsidian
+                内发布文章或回答。
             </>
         ),
     },
