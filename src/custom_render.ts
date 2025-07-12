@@ -363,7 +363,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
                 .filter((child: any) => {
                     const hName = child.data?.hName;
                     return (
-                        hName !== "p" ||
+                        hName !== "div" ||
                         !child.data?.hProperties?.dataCalloutTitle
                     );
                 })
@@ -377,18 +377,8 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
                     }
                     return [child];
                 });
-            console.log(contentNodes);
-            // const wrappedParagraphs = contentNodes.map((node: any) => {
-            //     // 若本身是 paragraph，则取其 children 包裹
-            //     const children =
-            //         node.type === "paragraph" ? node.children : [node];
-            //     return {
-            //         type: "element",
-            //         tagName: "p",
-            //         properties: {},
-            //         children: state.all({ children }),
-            //     };
-            // });
+            // 由于中间换行不会被检测到，所以需要将所有\n替换成break节点。
+            const breakedNodes = contentNodes.flatMap(replaceTextWithBreaks);
             return {
                 type: "element",
                 tagName: "p",
@@ -400,7 +390,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
                         properties: {},
                         children: [u("text", titleText)],
                     },
-                    ...state.all({ children: contentNodes }),
+                    ...state.all({ children: breakedNodes }),
                 ],
             };
         },
@@ -424,4 +414,34 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
     const htmlOutput = String(output);
     console.log(htmlOutput);
     return htmlOutput;
+}
+
+function replaceTextWithBreaks(node: any): any[] {
+    if (node.type === "text") {
+        const parts = node.value.split(/\n/);
+        const result = [];
+
+        for (let i = 0; i < parts.length; i++) {
+            result.push(u("text", parts[i]));
+            if (i < parts.length - 1) {
+                result.push({
+                    type: "break",
+                });
+            }
+        }
+
+        return result;
+    }
+
+    // 如果是段落、强调等元素，也递归处理它的 children
+    if (node.children && Array.isArray(node.children)) {
+        return [
+            {
+                ...node,
+                children: node.children.flatMap(replaceTextWithBreaks),
+            },
+        ];
+    }
+
+    return [node];
 }
