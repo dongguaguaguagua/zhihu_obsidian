@@ -19,6 +19,7 @@ import * as file from "./files";
 import * as fs from "fs";
 import * as path from "path";
 import remarkCallout from "@r4ai/remark-callout";
+import remarkBreaks from "remark-breaks";
 
 function wikiLinkPlugin(this: any, opts = {}) {
     const data = this.data();
@@ -377,8 +378,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
                     }
                     return [child];
                 });
-            // 由于中间换行不会被检测到，所以需要将所有\n替换成break节点。
-            const breakedNodes = contentNodes.flatMap(replaceTextWithBreaks);
+
             return {
                 type: "element",
                 tagName: "p",
@@ -390,7 +390,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
                         properties: {},
                         children: [u("text", titleText)],
                     },
-                    ...state.all({ children: breakedNodes }),
+                    ...state.all({ children: contentNodes }),
                 ],
             };
         },
@@ -405,6 +405,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .use(remarkMath)
         .use(wikiLinkPlugin)
         .use(remarkCallout)
+        .use(remarkBreaks)
         .use(remarkZhihuImgsOnline, vault)
         .use(remarkZhihuImgsLocal, vault)
         .use(remarkRehype, undefined, rehypeOpts)
@@ -416,32 +417,33 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
     return htmlOutput;
 }
 
-function replaceTextWithBreaks(node: any): any[] {
-    if (node.type === "text") {
-        const parts = node.value.split(/\n/);
-        const result = [];
+// 由于中间换行不会被检测到，所以需要将所有\n替换成break节点。
+// function replaceTextWithBreaks(node: any): any[] {
+//     if (node.type === "text") {
+//         const parts = node.value.split(/\n/);
+//         const result = [];
 
-        for (let i = 0; i < parts.length; i++) {
-            result.push(u("text", parts[i]));
-            if (i < parts.length - 1) {
-                result.push({
-                    type: "break",
-                });
-            }
-        }
+//         for (let i = 0; i < parts.length; i++) {
+//             result.push(u("text", parts[i]));
+//             if (i < parts.length - 1) {
+//                 result.push({
+//                     type: "break",
+//                 });
+//             }
+//         }
 
-        return result;
-    }
+//         return result;
+//     }
 
-    // 如果是段落、强调等元素，也递归处理它的 children
-    if (node.children && Array.isArray(node.children)) {
-        return [
-            {
-                ...node,
-                children: node.children.flatMap(replaceTextWithBreaks),
-            },
-        ];
-    }
+//     // 如果是段落、强调等元素，也递归处理它的 children
+//     if (node.children && Array.isArray(node.children)) {
+//         return [
+//             {
+//                 ...node,
+//                 children: node.children.flatMap(replaceTextWithBreaks),
+//             },
+//         ];
+//     }
 
-    return [node];
-}
+//     return [node];
+// }
