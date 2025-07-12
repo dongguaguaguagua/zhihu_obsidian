@@ -38,6 +38,7 @@
         "unified": "^11.0.5"
     },
     "dependencies": {
+        "@r4ai/remark-callout": "^0.6.2",
         "file-type": "^20.4.1",
         "hast-util-to-string": "^3.0.1",
         "marked": "^15.0.8",

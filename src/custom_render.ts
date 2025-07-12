@@ -18,6 +18,7 @@ import { getOnlineImg, getZhihuImgLink } from "./image_service";
 import * as file from "./files";
 import * as fs from "fs";
 import * as path from "path";
+import remarkCallout from "@r4ai/remark-callout";
 
 function wikiLinkPlugin(this: any, opts = {}) {
     const data = this.data();
@@ -332,6 +333,77 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
                     };
             }
         },
+
+        blockquote(state: any, node: any): Element {
+            const props = node.data?.hProperties || {};
+            // ignore类型直接返回空 p
+            // EXAMPLE:
+            // > [!ignore] Title
+            // > some text
+            const ignoreType = ["ignore", "忽略", "注释"];
+            if (ignoreType.includes(props.dataCalloutType)) {
+                return {
+                    type: "element",
+                    tagName: "p",
+                    properties: {},
+                    children: [],
+                };
+            }
+
+            // 找到标题段落（带有 dataCalloutTitle）
+            const titleParagraph = node.children.find(
+                (child: any) => child.data?.hProperties?.dataCalloutTitle,
+            );
+
+            // 提取标题文本
+            const titleText = titleParagraph?.children?.[0]?.value ?? "";
+
+            // 提取正文（去掉 title 节点和嵌套 blockquote）
+            const contentNodes = node.children
+                .filter((child: any) => {
+                    const hName = child.data?.hName;
+                    return (
+                        hName !== "p" ||
+                        !child.data?.hProperties?.dataCalloutTitle
+                    );
+                })
+                .flatMap((child: any) => {
+                    // 若是嵌套 blockquote 包含 dataCalloutBody，取其子项
+                    if (
+                        child.type === "blockquote" &&
+                        child.data?.hProperties?.dataCalloutBody
+                    ) {
+                        return child.children ?? [];
+                    }
+                    return [child];
+                });
+            console.log(contentNodes);
+            // const wrappedParagraphs = contentNodes.map((node: any) => {
+            //     // 若本身是 paragraph，则取其 children 包裹
+            //     const children =
+            //         node.type === "paragraph" ? node.children : [node];
+            //     return {
+            //         type: "element",
+            //         tagName: "p",
+            //         properties: {},
+            //         children: state.all({ children }),
+            //     };
+            // });
+            return {
+                type: "element",
+                tagName: "p",
+                properties: {},
+                children: [
+                    {
+                        type: "element",
+                        tagName: "strong",
+                        properties: {},
+                        children: [u("text", titleText)],
+                    },
+                    ...state.all({ children: contentNodes }),
+                ],
+            };
+        },
     };
     const rehypeOpts: RemarkRehypeOptions = {
         allowDangerousHtml: true,
@@ -342,6 +414,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .use(remarkGfm)
         .use(remarkMath)
         .use(wikiLinkPlugin)
+        .use(remarkCallout)
         .use(remarkZhihuImgsOnline, vault)
         .use(remarkZhihuImgsLocal, vault)
         .use(remarkRehype, undefined, rehypeOpts)
@@ -349,5 +422,6 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .process(md);
 
     const htmlOutput = String(output);
+    console.log(htmlOutput);
     return htmlOutput;
 }
