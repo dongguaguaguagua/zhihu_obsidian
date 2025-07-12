@@ -47,6 +47,7 @@
         "micromark-extension-wiki-link": "github:dongguaguaguagua/micromark-extension-wiki-link",
         "qrcode": "^1.5.4",
         "rehype-stringify": "^10.0.1",
+        "remark-breaks": "^4.0.0",
         "remark-footnotes": "^5.0.0",
         "remark-gfm": "^4.0.1",
         "remark-math": "^6.0.0",
