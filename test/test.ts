@@ -7,11 +7,16 @@ import rehypeStringify from "rehype-stringify";
 import { u } from "unist-builder";
 import type { Element } from "hast";
 import type { Link } from "mdast";
+// import remarkObsidianCallout from "remark-obsidian-callout";
+import remarkCallout from "@r4ai/remark-callout";
 
 const markdownContent = `
 # 一级标题
 ## 二级标题
 ### 更多标题
+
+> [!ignore]
+> some text
 `;
 const zhihuHandlers = {
     link(state: any, node: Link): Element {
@@ -207,6 +212,7 @@ async function runTest() {
         .use(remarkParse)
         .use(remarkGfm)
         .use(remarkMath)
+        .use(remarkCallout)
         .use(remarkRehype, {
             allowDangerousHtml: true,
             handlers: zhihuHandlers,

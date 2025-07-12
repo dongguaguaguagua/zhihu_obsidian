@@ -18,6 +18,7 @@ import { getOnlineImg, getZhihuImgLink } from "./image_service";
 import * as file from "./files";
 import * as fs from "fs";
 import * as path from "path";
+import remarkCallout from "@r4ai/remark-callout";
 
 function wikiLinkPlugin(this: any, opts = {}) {
     const data = this.data();
@@ -332,6 +333,67 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
                     };
             }
         },
+
+        blockquote(state: any, node: any): Element {
+            const props = node.data?.hProperties || {};
+            // ignore类型直接返回空 p
+            // EXAMPLE:
+            // > [!ignore] Title
+            // > some text
+            const ignoreType = ["ignore", "忽略", "注释"];
+            if (ignoreType.includes(props.dataCalloutType)) {
+                return {
+                    type: "element",
+                    tagName: "p",
+                    properties: {},
+                    children: [],
+                };
+            }
+
+            // 找到标题段落（带有 dataCalloutTitle）
+            const titleParagraph = node.children.find(
+                (child: any) => child.data?.hProperties?.dataCalloutTitle,
+            );
+
+            // 提取标题文本
+            const titleText = titleParagraph?.children?.[0]?.value ?? "";
+
+            // 提取正文（去掉 title 节点和嵌套 blockquote）
+            const contentNodes = node.children
+                .filter((child: any) => {
+                    const hName = child.data?.hName;
+                    return (
+                        hName !== "div" ||
+                        !child.data?.hProperties?.dataCalloutTitle
+                    );
+                })
+                .flatMap((child: any) => {
+                    // 若是嵌套 blockquote 包含 dataCalloutBody，取其子项
+                    if (
+                        child.type === "blockquote" &&
+                        child.data?.hProperties?.dataCalloutBody
+                    ) {
+                        return child.children ?? [];
+                    }
+                    return [child];
+                });
+            // 由于中间换行不会被检测到，所以需要将所有\n替换成break节点。
+            const breakedNodes = contentNodes.flatMap(replaceTextWithBreaks);
+            return {
+                type: "element",
+                tagName: "p",
+                properties: {},
+                children: [
+                    {
+                        type: "element",
+                        tagName: "strong",
+                        properties: {},
+                        children: [u("text", titleText)],
+                    },
+                    ...state.all({ children: breakedNodes }),
+                ],
+            };
+        },
     };
     const rehypeOpts: RemarkRehypeOptions = {
         allowDangerousHtml: true,
@@ -342,6 +404,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .use(remarkGfm)
         .use(remarkMath)
         .use(wikiLinkPlugin)
+        .use(remarkCallout)
         .use(remarkZhihuImgsOnline, vault)
         .use(remarkZhihuImgsLocal, vault)
         .use(remarkRehype, undefined, rehypeOpts)
@@ -349,5 +412,36 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .process(md);
 
     const htmlOutput = String(output);
+    console.log(htmlOutput);
     return htmlOutput;
+}
+
+function replaceTextWithBreaks(node: any): any[] {
+    if (node.type === "text") {
+        const parts = node.value.split(/\n/);
+        const result = [];
+
+        for (let i = 0; i < parts.length; i++) {
+            result.push(u("text", parts[i]));
+            if (i < parts.length - 1) {
+                result.push({
+                    type: "break",
+                });
+            }
+        }
+
+        return result;
+    }
+
+    // 如果是段落、强调等元素，也递归处理它的 children
+    if (node.children && Array.isArray(node.children)) {
+        return [
+            {
+                ...node,
+                children: node.children.flatMap(replaceTextWithBreaks),
+            },
+        ];
+    }
+
+    return [node];
 }
