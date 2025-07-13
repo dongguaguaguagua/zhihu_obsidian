@@ -1,7 +1,7 @@
 import { unified, Plugin, Transformer } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
-import remarkMath from "remark-math";
+// import remarkMath from "remark-math";
 import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
 import { syntax } from "micromark-extension-wiki-link";
@@ -20,6 +20,24 @@ import * as fs from "fs";
 import * as path from "path";
 import remarkCallout from "@r4ai/remark-callout";
 import remarkBreaks from "remark-breaks";
+import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
+import { math } from "micromark-extension-math";
+
+export default function remarkMath(this: any) {
+    const settings = this || {};
+    const data = this.data();
+
+    const micromarkExtensions =
+        data.micromarkExtensions || (data.micromarkExtensions = []);
+    const fromMarkdownExtensions =
+        data.fromMarkdownExtensions || (data.fromMarkdownExtensions = []);
+    const toMarkdownExtensions =
+        data.toMarkdownExtensions || (data.toMarkdownExtensions = []);
+
+    micromarkExtensions.push(math(settings));
+    fromMarkdownExtensions.push(mathFromMarkdown());
+    toMarkdownExtensions.push(mathToMarkdown(settings));
+}
 
 function wikiLinkPlugin(this: any, opts = {}) {
     const data = this.data();
@@ -413,7 +431,6 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .process(md);
 
     const htmlOutput = String(output);
-    console.log(htmlOutput);
     return htmlOutput;
 }
 
