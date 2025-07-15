@@ -101,6 +101,12 @@ export default {
         htmlToMdConvertionFailed: "HTML 轉換為 Markdown 失敗：",
         saveUseZhihuHeadingFailed: "儲存 useZhihuHeading 設定失敗：",
         saveUseImgNameFailed: "Failed to save useImgNameDefault setting:",
+        identifySVGFailed: "識別 SVG 原始縮放比例失敗。",
+        fetchContextFailed: "獲取 Canvas 2D 上下文失敗。",
+        generateBlobFailed: "從 Canvas 生成 Blob 失敗。",
+        loadSVGFailed: "加載 SVG 失敗：",
+        uploadMermaidImgFailed: "上傳 Mermaid 圖像到知乎失敗。",
+        errorHandlingMermaid: "處理 Mermaid 圖時出錯：",
     },
     settings: {
         accountTitle: "我的帳戶",
@@ -138,5 +144,10 @@ export default {
         autoOpenZhihuLink: "自动打开知乎链接",
         autoOpenZhihuLinkDesc:
             "如果启用，那么点击知乎链接时，链接将在 Obsidian 中自动打开。(需要重启插件)",
+        mermaidScale: "Mermaid 圖像清晰度",
+        mermaidScaleDesc: "調整 Mermaid 圖像的清晰度",
+        UltraHD: "超清",
+        HD: "高清",
+        LR: "低清",
     },
 };

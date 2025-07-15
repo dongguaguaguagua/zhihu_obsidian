@@ -104,6 +104,12 @@ export default {
         htmlToMdConvertionFailed: "HTML to Markdown conversion failed:",
         saveUseZhihuHeadingFailed: "Failed to save useZhihuHeading setting:",
         saveUseImgNameFailed: "Failed to save useImgNameDefault setting:",
+        identifySVGFailed: "Failed to identify SVG original scale.",
+        fetchContextFailed: "Failed to fetch Canvas 2D context.",
+        generateBlobFailed: "Failed to generate Blob from Canvas",
+        loadSVGFailed: "Failed to load SVG:",
+        uploadMermaidImgFailed: "Failed to upload Mermaid image to Zhihu.",
+        errorHandlingMermaid: "Error handling Mermaid diagram:",
     },
     settings: {
         accountTitle: "My account",
@@ -145,5 +151,10 @@ export default {
         autoOpenZhihuLink: "Auto open Zhihu link",
         autoOpenZhihuLinkDesc:
             "If this enabled, Zhihu link will be opened in Obsidian automatically when you click it. (Plugin reload required)",
+        mermaidScale: "Mermaid image clarity",
+        mermaidScaleDesc: "Adjust the clarity of Mermaid images",
+        UltraHD: "Ultra High Definition",
+        HD: "High Definition",
+        LR: "Low Resolution",
     },
 };
