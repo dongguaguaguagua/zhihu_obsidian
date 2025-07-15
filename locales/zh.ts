@@ -80,6 +80,12 @@ export default {
         giveTopicSuccess: "添加话题成功！",
         giveTopicFailed: "添加话题失败：",
         openZhihuSideFailed: "打开知乎侧边栏失败：无法创建侧边面板。",
+        identifySVGFailed: "识别 SVG 原始缩放比例失败。",
+        fetchContextFailed: "获取 Canvas 2D 上下文失败。",
+        generateBlobFailed: "从 Canvas 生成 Blob 失败。",
+        loadSVGFailed: "加载 SVG 失败：",
+        uploadMermaidImgFailed: "上传 Mermaid 图像到知乎失败。",
+        errorHandlingMermaid: "处理 Mermaid 图时出错：",
     },
     error: {
         unknownError: "未知错误",
@@ -138,5 +144,10 @@ export default {
         autoOpenZhihuLink: "自动打开知乎链接",
         autoOpenZhihuLinkDesc:
             "如果启用，那么点击知乎链接时，链接将在 Obsidian 中自动打开。(需要重启插件)",
+        mermaidScale: "Mermaid 图像清晰度",
+        mermaidScaleDesc: "调整 Mermaid 图像的清晰度",
+        UltraHD: "超清",
+        HD: "高清",
+        LR: "低清",
     },
 };
