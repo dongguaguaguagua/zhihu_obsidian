@@ -1,4 +1,7 @@
 import { loadMermaid } from "obsidian";
+import i18n, { type Lang } from "../locales";
+
+const locale = i18n.current;
 
 /**
  * Renders Mermaid code into a container element.
@@ -28,34 +31,59 @@ export function cleanSvg(svgString: string): string {
         return computedStyle.getPropertyValue(varName).trim();
     });
 }
-
-export async function svgToPngBuffer(svgString: string): Promise<Buffer> {
+/**
+ * 将SVG字符串转换为高清晰度的PNG格式的Node.js Buffer对象。
+ * @param svgString SVG原始内容
+ * @param scaleFactor 缩放因子。例如，2代表2倍分辨率。建议值为 2 或 3。
+ * @returns 一个解析为Buffer对象的Promise
+ */
+export async function svgToPngBuffer(
+    svgString: string,
+    scaleFactor: number,
+): Promise<Buffer> {
     const dataUrl = svgToDataURL(svgString);
 
-    // 创建一个Image对象
     const image = new Image();
 
     return new Promise((resolve, reject) => {
         image.onload = () => {
-            // 图片加载成功后，创建Canvas
-            const canvas = document.createElement("canvas");
-            canvas.width = image.width;
-            canvas.height = image.height;
-            const ctx = canvas.getContext("2d");
+            // 图片加载成功后，获取其原始（自然）尺寸
+            const originalWidth = image.naturalWidth;
+            const originalHeight = image.naturalHeight;
 
-            if (!ctx) {
-                return reject(new Error("无法获取Canvas 2D上下文"));
+            if (originalWidth === 0 || originalHeight === 0) {
+                URL.revokeObjectURL(dataUrl); // 释放之前创建的URL对象
+                return reject(new Error(locale.error.identifySVGFailed));
             }
 
-            // 将图片绘制到Canvas上
-            ctx.drawImage(image, 0, 0);
+            // 创建一个临时的Canvas
+            const canvas = document.createElement("canvas");
 
-            // 从Canvas获取PNG格式的Blob对象
+            // 关键步骤：根据缩放因子设置Canvas的像素尺寸
+            canvas.width = originalWidth * scaleFactor;
+            canvas.height = originalHeight * scaleFactor;
+
+            const ctx = canvas.getContext("2d");
+            if (!ctx) {
+                URL.revokeObjectURL(dataUrl);
+                return reject(new Error(locale.error.fetchContextFailed));
+            }
+
+            // 关键步骤：缩放Canvas的坐标系
+            // 这样后续的绘制操作都会被放大
+            ctx.scale(scaleFactor, scaleFactor);
+
+            // 将原始SVG图像绘制到被放大的Canvas上
+            ctx.drawImage(image, 0, 0, originalWidth, originalHeight);
+
+            // 从高分辨率的Canvas导出Blob
             canvas.toBlob(async (blob) => {
+                // 释放之前创建的URL对象，避免内存泄漏
+                URL.revokeObjectURL(dataUrl);
+
                 if (!blob) {
-                    return reject(new Error("无法从Canvas生成Blob"));
+                    return reject(new Error(locale.error.generateBlobFailed));
                 }
-                // 将Blob转换为ArrayBuffer
                 const arrayBuffer = await blob.arrayBuffer();
                 const buffer = Buffer.from(arrayBuffer);
                 resolve(buffer);
@@ -63,10 +91,10 @@ export async function svgToPngBuffer(svgString: string): Promise<Buffer> {
         };
 
         image.onerror = (error) => {
-            reject(new Error(`加载SVG图片失败: ${error}`));
+            URL.revokeObjectURL(dataUrl);
+            reject(new Error(`${locale.error.loadSVGFailed}: ${error}`));
         };
 
-        // 设置Image的源为我们的Data URL
         image.src = dataUrl;
     });
 }

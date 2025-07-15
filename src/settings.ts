@@ -11,6 +11,7 @@ interface ZhihuSettings {
     useImgNameDefault: boolean;
     manualCookieEdit: boolean;
     autoOpenZhihuLink: boolean;
+    mermaidScale: number;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -24,6 +25,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     useImgNameDefault: false,
     manualCookieEdit: false,
     autoOpenZhihuLink: true,
+    mermaidScale: 3,
 };
 
 /**

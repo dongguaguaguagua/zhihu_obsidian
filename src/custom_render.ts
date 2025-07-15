@@ -22,6 +22,9 @@ import remarkBreaks from "remark-breaks";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
 import { math } from "micromark-extension-math";
 import * as mermaid from "./mermaid";
+import i18n, { type Lang } from "../locales";
+
+const locale = i18n.current;
 
 // edit from `https://github.com/landakram/mdast-util-wiki-link/blob/master/src/from-markdown.ts`
 // line 20-28
@@ -153,26 +156,27 @@ export const remarkZhihuImgs: Plugin<[Vault], Parent, Parent> = (vault) => {
 
             const task = (async () => {
                 try {
-                    // 1. 使用Obsidian API渲染Mermaid代码块以获取SVG
+                    // 使用Obsidian API渲染Mermaid代码块以获取SVG
                     const mermaidCode = node.value;
                     const container = document.createElement("div");
                     await mermaid.renderMermaid(mermaidCode, container);
-                    // 2. 解析SVG，将CSS变量替换为具体值
                     const svgEl = container.querySelector("svg");
-
                     if (!svgEl) return;
                     let svgString = svgEl.outerHTML;
-                    svgString = mermaid.cleanSvg(svgString); // 将svg中的动态变量变成静态值
-                    const imgBuffer = await mermaid.svgToPngBuffer(svgString);
+                    svgString = mermaid.cleanSvg(svgString); // 将svg中的动态变量变成具体值
+                    const imgBuffer = await mermaid.svgToPngBuffer(
+                        svgString,
+                        settings.mermaidScale,
+                    );
 
-                    // 4. 上传图片到知乎
+                    // 上传图片到知乎
                     const imgLink = await getZhihuImgLink(vault, imgBuffer);
                     if (!imgLink) {
-                        console.error("Mermaid图片上传知乎失败。");
+                        console.error(locale.error.uploadMermaidImgFailed);
                         return;
                     }
 
-                    // 5. 将代码块节点替换为图片节点
+                    // 将代码块节点替换为图片节点
                     const alt = "Mermaid Diagram"; // 建议在设置中增加此选项
                     node.type = "image"; // 改变节点类型
                     node.url = imgLink;
@@ -192,7 +196,7 @@ export const remarkZhihuImgs: Plugin<[Vault], Parent, Parent> = (vault) => {
                         hChildren: [],
                     };
                 } catch (error) {
-                    console.error("处理Mermaid图表时出错:", error);
+                    console.error(locale.error.errorHandlingMermaid, error);
                 }
             })();
             tasks.push(task);
