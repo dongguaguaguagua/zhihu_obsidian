@@ -1,7 +1,6 @@
 import { unified, Plugin, Transformer } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
-// import remarkMath from "remark-math";
 import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
 import { syntax } from "micromark-extension-wiki-link";
@@ -22,8 +21,32 @@ import remarkCallout from "@r4ai/remark-callout";
 import remarkBreaks from "remark-breaks";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
 import { math } from "micromark-extension-math";
+import * as mermaid from "./mermaid";
 
-export default function remarkMath(this: any) {
+// edit from `https://github.com/landakram/mdast-util-wiki-link/blob/master/src/from-markdown.ts`
+// line 20-28
+interface WikiLinkNode extends Node {
+    type: "wikiLink";
+    value: string;
+    data: {
+        alias: string;
+        permalink: string;
+        exists: boolean;
+        hName?: string;
+        hProperties?: {
+            src: string;
+            "data-caption": string;
+            "data-size": string;
+            "data-watermark": string;
+            "data-original-src": string;
+            "data-watermark-src": string;
+            "data-private-watermark-src": string;
+        };
+        hChildren: [];
+    };
+}
+
+function mathPlugin(this: any) {
     const settings = this || {};
     const data = this.data();
 
@@ -54,9 +77,8 @@ function wikiLinkPlugin(this: any, opts = {}) {
 
 // 获取![alt](link)格式的图片，先下载到本地，
 // 再上传到知乎，获得链接URL，最后转换为知乎HTML
-export const remarkZhihuImgsOnline: Plugin<[Vault], Parent, Parent> = (
-    vault,
-) => {
+// 获取![[link|alt]]格式的本地图片，再上传到知乎
+export const remarkZhihuImgs: Plugin<[Vault], Parent, Parent> = (vault) => {
     const transformer: Transformer<Parent, Parent> = async (tree) => {
         const settings = await loadSettings(vault);
         const tasks: Promise<void>[] = [];
@@ -88,42 +110,7 @@ export const remarkZhihuImgsOnline: Plugin<[Vault], Parent, Parent> = (
             })();
             tasks.push(task);
         });
-        await Promise.all(tasks);
-    };
-    return transformer;
-};
-
-// edit from `https://github.com/landakram/mdast-util-wiki-link/blob/master/src/from-markdown.ts`
-// line 20-28
-interface WikiLinkNode extends Node {
-    type: "wikiLink";
-    value: string;
-    data: {
-        alias: string;
-        permalink: string;
-        exists: boolean;
-        hName?: string;
-        hProperties?: {
-            src: string;
-            "data-caption": string;
-            "data-size": string;
-            "data-watermark": string;
-            "data-original-src": string;
-            "data-watermark-src": string;
-            "data-private-watermark-src": string;
-        };
-        hChildren: [];
-    };
-}
-
-// 获取本地图片：![[link|alt]] 格式。
-export const remarkZhihuImgsLocal: Plugin<[Vault], Parent, Parent> = (
-    vault,
-) => {
-    const transformer: Transformer<Parent, Parent> = async (tree) => {
-        const settings = await loadSettings(vault);
-        const tasks: Promise<void>[] = [];
-        visit(tree as any, "wikiLink", (node: WikiLinkNode) => {
+        visit(tree, "wikiLink", (node: WikiLinkNode) => {
             const task = (async () => {
                 let alt = node.data.alias;
                 const imgName = node.value;
@@ -156,6 +143,57 @@ export const remarkZhihuImgsLocal: Plugin<[Vault], Parent, Parent> = (
                     },
                     hChildren: [],
                 };
+            })();
+            tasks.push(task);
+        });
+        visit(tree, "code", (node: any) => {
+            if (node.lang !== "mermaid") {
+                return;
+            }
+
+            const task = (async () => {
+                try {
+                    // 1. 使用Obsidian API渲染Mermaid代码块以获取SVG
+                    const mermaidCode = node.value;
+                    const container = document.createElement("div");
+                    await mermaid.renderMermaid(mermaidCode, container);
+                    // 2. 解析SVG，将CSS变量替换为具体值
+                    const svgEl = container.querySelector("svg");
+
+                    if (!svgEl) return;
+                    let svgString = svgEl.outerHTML;
+                    svgString = mermaid.cleanSvg(svgString); // 将svg中的动态变量变成静态值
+                    const imgBuffer = await mermaid.svgToPngBuffer(svgString);
+
+                    // 4. 上传图片到知乎
+                    const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                    if (!imgLink) {
+                        console.error("Mermaid图片上传知乎失败。");
+                        return;
+                    }
+
+                    // 5. 将代码块节点替换为图片节点
+                    const alt = "Mermaid Diagram"; // 建议在设置中增加此选项
+                    node.type = "image"; // 改变节点类型
+                    node.url = imgLink;
+                    node.alt = alt;
+                    node.data = {
+                        ...node.data,
+                        hName: "img",
+                        hProperties: {
+                            src: imgLink,
+                            "data-caption": alt,
+                            "data-size": "normal",
+                            "data-watermark": "watermark",
+                            "data-original-src": imgLink,
+                            "data-watermark-src": "",
+                            "data-private-watermark-src": "",
+                        },
+                        hChildren: [],
+                    };
+                } catch (error) {
+                    console.error("处理Mermaid图表时出错:", error);
+                }
             })();
             tasks.push(task);
         });
@@ -420,12 +458,11 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
     const output = await unified()
         .use(remarkParse)
         .use(remarkGfm)
-        .use(remarkMath)
+        .use(mathPlugin)
         .use(wikiLinkPlugin)
         .use(remarkCallout)
         .use(remarkBreaks)
-        .use(remarkZhihuImgsOnline, vault)
-        .use(remarkZhihuImgsLocal, vault)
+        .use(remarkZhihuImgs, vault)
         .use(remarkRehype, undefined, rehypeOpts)
         .use(rehypeStringify)
         .process(md);
