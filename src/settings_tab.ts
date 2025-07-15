@@ -279,6 +279,23 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         }
                     }),
             );
+        // mermaid scale option
+        new Setting(containerEl)
+            .setName(locale.settings.mermaidScale)
+            .setDesc(locale.settings.mermaidScaleDesc)
+            .addDropdown((dropdown) => {
+                dropdown
+                    .addOption("4", locale.settings.UltraHD)
+                    .addOption("3", locale.settings.HD)
+                    .addOption("2", locale.settings.LR)
+                    .setValue(settings.mermaidScale.toString())
+                    .onChange(async (value) => {
+                        settings.mermaidScale = parseFloat(value);
+                        await saveSettings(this.app.vault, {
+                            mermaidScale: parseInt(value),
+                        });
+                    });
+            });
         // 添加“手动编辑Cookies”开关
         new Setting(containerEl)
             .setName(locale.settings.editCookies)
@@ -300,7 +317,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 value !== true,
                             );
                         } catch (e) {
-                            console.error("保存设置失败", e);
+                            console.error("save settings failed:", e);
                         }
                     }),
             );
