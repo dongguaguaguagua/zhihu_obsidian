@@ -3,6 +3,7 @@ import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
+import rehypeFormat from "rehype-format";
 import { syntax } from "micromark-extension-wiki-link";
 import { fromMarkdown, toMarkdown } from "mdast-util-wiki-link";
 import { visit } from "unist-util-visit";
@@ -244,8 +245,9 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
             };
         },
         inlineMath(state: any, node: any): Element {
-            const alt = node.value;
-            const encoded = encodeURI(alt);
+            const eq = node.value;
+            const alt = eq.replace(/[\n\r]/g, " ");
+            const encoded = encodeURI(eq);
             return {
                 type: "element",
                 tagName: "img",
@@ -258,17 +260,25 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
             };
         },
         math(state: any, node: any): Element {
-            const alt = node.value + "\\\\";
-            const encoded = encodeURI(alt);
+            const eq = node.value + "\\\\";
+            const alt = eq.replace(/[\n\r]/g, " ");
+            const encoded = encodeURI(eq);
             return {
                 type: "element",
-                tagName: "img",
-                properties: {
-                    eeimg: "1",
-                    src: `//www.zhihu.com/equation?tex=${encoded}`,
-                    alt: alt,
-                },
-                children: [],
+                tagName: "p",
+                properties: {},
+                children: [
+                    {
+                        type: "element",
+                        tagName: "img",
+                        properties: {
+                            eeimg: "1",
+                            src: `//www.zhihu.com/equation?tex=${encoded}`,
+                            alt: alt,
+                        },
+                        children: [],
+                    },
+                ],
             };
         },
         // EXAMPLE:
@@ -468,6 +478,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .use(remarkBreaks)
         .use(remarkZhihuImgs, vault)
         .use(remarkRehype, undefined, rehypeOpts)
+        .use(rehypeFormat, { indent: 0 })
         .use(rehypeStringify)
         .process(md);
 
