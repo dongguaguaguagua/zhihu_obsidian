@@ -137,7 +137,7 @@ You can fork this repo to `vault/.obsidian/plugins`, make sure your NodeJS is at
 
 ## TODO
 
-- [ ] add: mermaid support
+- [x] add: mermaid support
 - [ ] add: desmos-graph support
 - [x] add: reference syntax
 - [ ] add: view upvotes number in status bar

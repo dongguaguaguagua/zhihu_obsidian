@@ -177,7 +177,7 @@ export const remarkZhihuImgs: Plugin<[Vault], Parent, Parent> = (vault) => {
                     }
 
                     // 将代码块节点替换为图片节点
-                    const alt = "Mermaid Diagram"; // 建议在设置中增加此选项
+                    const alt = "";
                     node.type = "image"; // 改变节点类型
                     node.url = imgLink;
                     node.alt = alt;
