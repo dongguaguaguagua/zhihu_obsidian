@@ -1,7 +1,7 @@
 {
-    "name": "obsidian-sample-plugin",
-    "version": "1.0.0",
-    "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+    "name": "zhihu-obsidian",
+    "version": "0.3.1",
+    "description": "Enable you to publish your articles and answers to Zhihu",
     "main": "main.js",
     "scripts": {
         "dev": "node esbuild.config.mjs",
