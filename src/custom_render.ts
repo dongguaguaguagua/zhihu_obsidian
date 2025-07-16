@@ -244,8 +244,9 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
             };
         },
         inlineMath(state: any, node: any): Element {
-            const alt = node.value;
-            const encoded = encodeURI(alt);
+            const eq = node.value;
+            const alt = eq.replace(/[\n\r]/g, " ");
+            const encoded = encodeURI(eq);
             return {
                 type: "element",
                 tagName: "img",
@@ -258,17 +259,25 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
             };
         },
         math(state: any, node: any): Element {
-            const alt = node.value + "\\\\";
-            const encoded = encodeURI(alt);
+            const eq = node.value + "\\\\";
+            const alt = eq.replace(/[\n\r]/g, " ");
+            const encoded = encodeURI(eq);
             return {
                 type: "element",
-                tagName: "img",
-                properties: {
-                    eeimg: "1",
-                    src: `//www.zhihu.com/equation?tex=${encoded}`,
-                    alt: alt,
-                },
-                children: [],
+                tagName: "p",
+                properties: {},
+                children: [
+                    {
+                        type: "element",
+                        tagName: "img",
+                        properties: {
+                            eeimg: "1",
+                            src: `//www.zhihu.com/equation?tex=${encoded}`,
+                            alt: alt,
+                        },
+                        children: [],
+                    },
+                ],
             };
         },
         // EXAMPLE:
@@ -468,10 +477,11 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .use(remarkBreaks)
         .use(remarkZhihuImgs, vault)
         .use(remarkRehype, undefined, rehypeOpts)
-        .use(rehypeStringify)
+        .use(rehypeStringify, { closeSelfClosing: true })
         .process(md);
 
     const htmlOutput = String(output);
+    console.log(JSON.stringify(htmlOutput));
     return htmlOutput;
 }
 
