@@ -15,13 +15,10 @@ export function htmlToMd(html: string): string {
         // 规则 1：数学公式图片转为 $公式$ 或 $$公式$$
         turndownService.addRule("mathImgToLatex", {
             filter: function (node) {
-                return (
-                    node.nodeName === "IMG" &&
-                    (node as HTMLElement).getAttribute("eeimg") === "1"
-                );
+                return (node as HTMLElement).getAttribute("class") === "ztext-math";
             },
             replacement: function (content, node) {
-                const alt = (node as HTMLElement).getAttribute("alt") || "";
+                const alt = (node as HTMLElement).getAttribute("data-tex") || "";
                 const escapedAlt = alt.replace(/\$/g, "\\$");
                 const trimmedAlt = escapedAlt.trim();
                 if (trimmedAlt.endsWith("\\\\")) {
