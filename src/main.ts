@@ -18,9 +18,11 @@ import { loadSettings } from "./settings";
 import * as open from "./open_service";
 import i18n, { type Lang } from "../locales";
 import { registerMenuCommands } from "./menu";
+import { ViewPlugin, ViewUpdate, EditorView } from "@codemirror/view";
 
 export default class ZhihuObPlugin extends Plugin {
     i18n: Lang;
+    public lastCursorPos: number | null = null; // 记录上一次光标的位置
 
     constructor(app: App, manifest: PluginManifest) {
         super(app, manifest);
@@ -29,13 +31,21 @@ export default class ZhihuObPlugin extends Plugin {
 
     async onload() {
         const settings = await loadSettings(this.app.vault);
+
+        // 注册 EditorViewPlugin 来跟踪光标位置 (lastCursorPos)
+        // 这是 CodeMirror 6 中跟踪状态（如光标位置）的标准方式
+        this.registerEditorExtension([
+            open.pluginField.init(() => this),
+            ViewPlugin.fromClass(open.CursorPosTrace),
+        ]);
+
         if (settings.autoOpenZhihuLink) {
             this.registerDomEvent(
                 document,
                 "click",
                 (e) => {
-                    open.clickInReadMode(this.app, e);
-                    open.clickInPreview(this.app, e);
+                    open.clickInReadMode(this.app, e); // 在阅读模式下自动打开链接
+                    open.clickInPreview(this, e); // 在Live Preview模式下自动打开链接
                 },
                 true,
             );

@@ -1,10 +1,47 @@
-import { App, Vault, MarkdownView, Notice, TFile, requestUrl } from "obsidian";
+import { App, MarkdownView, Notice, TFile, requestUrl } from "obsidian";
+import ZhihuObPlugin from "./main";
 import * as dataUtil from "./data";
 import * as cookies from "./cookies";
 import i18n, { type Lang } from "../locales";
 const locale = i18n.current;
 import { htmlToMd } from "./html_to_markdown";
 import { toCurl } from "./utilities";
+import { StateField } from "@codemirror/state";
+import { ViewUpdate, EditorView } from "@codemirror/view";
+
+// 定义一个 StateField 来持有插件实例
+// 这个 StateField 将被添加到编辑器的 state 中
+// 与 clickInPreview 的上次次光标位置(plugin.lastCursorPos)有关
+export const pluginField = StateField.define<ZhihuObPlugin>({
+    create: () => null as any,
+    update: (value) => value,
+});
+
+export class CursorPosTrace {
+    plugin: ZhihuObPlugin;
+
+    constructor(view: EditorView) {
+        this.plugin = view.state.field(pluginField);
+    }
+
+    update(update: ViewUpdate) {
+        // 确保 plugin 实例已正确加载
+        if (!this.plugin) {
+            this.plugin = update.view.state.field(pluginField);
+            if (!this.plugin) return;
+        }
+
+        if (update.selectionSet) {
+            this.updateCursor(update);
+        }
+    }
+
+    updateCursor(update: ViewUpdate) {
+        if (this.plugin) {
+            this.plugin.lastCursorPos = update.startState.selection.main.head;
+        }
+    }
+}
 
 export async function openZhihuLink(app: App, link: string) {
     const type = getZhihuContentType(link);
@@ -38,9 +75,8 @@ export async function clickInReadMode(app: App, evt: MouseEvent) {
     )
         return;
     const link = target.href;
-    // const link = (target as HTMLAnchorElement).getAttribute("href");
-    const targetConetent = target.textContent;
-    if (!targetConetent) return;
+    const targetContent = target.textContent;
+    if (!targetContent) return;
     const type = getZhihuContentType(link);
     if (type === "Unknown Item Type") return;
     evt.preventDefault();
@@ -48,7 +84,8 @@ export async function clickInReadMode(app: App, evt: MouseEvent) {
     openZhihuLink(app, link);
 }
 
-export async function clickInPreview(app: App, evt: MouseEvent) {
+export async function clickInPreview(plugin: ZhihuObPlugin, evt: MouseEvent) {
+    const app = plugin.app;
     const markdownView = app.workspace.getActiveViewOfType(MarkdownView);
     if (!markdownView) return;
     const editor = markdownView.editor;
@@ -66,7 +103,12 @@ export async function clickInPreview(app: App, evt: MouseEvent) {
     while ((found = match.exec(text))) {
         const linkStart = line.from + found.index;
         const linkEnd = linkStart + found[0].length;
-        if (pos >= linkStart && pos <= linkEnd) {
+        if (pos > linkStart && pos < linkEnd) {
+            const lastPos = plugin.lastCursorPos;
+            // 检测上一次光标是否在当前链接内，如果是的话表明在编辑链接，从而return掉
+            const wasLastCursorInside =
+                lastPos !== null && lastPos >= linkStart && lastPos <= linkEnd;
+            if (wasLastCursorInside) return;
             const linkText = found[1];
             const link = found[2];
             const type = getZhihuContentType(link);
@@ -75,6 +117,7 @@ export async function clickInPreview(app: App, evt: MouseEvent) {
             evt.preventDefault();
             evt.stopPropagation();
             openZhihuLink(app, link);
+            return;
         }
     }
 }
