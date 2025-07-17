@@ -19,7 +19,11 @@ export function htmlToMd(html: string): string {
             },
             replacement: function (content, node) {
                 const alt = (node as HTMLElement).getAttribute("data-tex") || "";
-                const escapedAlt = alt.replace(/\$/g, "\\$");
+                
+                // 应该可以假设知乎提供的LaTeX公式是规范的
+                // const escapedAlt = alt.replace(/\$/g, "\\$");
+                const escapedAlt = alt;
+
                 const trimmedAlt = escapedAlt.trim();
                 if (trimmedAlt.endsWith("\\\\")) {
                     const cleanAlt = trimmedAlt.slice(0, -2);
