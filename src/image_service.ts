@@ -7,7 +7,7 @@ import * as dataUtil from "./data";
 import * as file from "./files";
 import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
-
+import { App } from "obsidian";
 const locale = i18n.current;
 
 async function getImgIdFromHash(vault: Vault, imgHash: string) {
@@ -50,16 +50,16 @@ async function getImgIdFromHash(vault: Vault, imgHash: string) {
     }
 }
 
-export async function uploadCover(vault: Vault, cover: string) {
+export async function uploadCover(app: App, cover: string) {
     const match = cover.match(/\[\[(.*?)\]\]/);
     if (!match) {
         new Notice(`${locale.notice.coverSyntaxInvalid}`);
         return;
     } else {
         const imgName = match[1];
-        const imgLink = await file.getFilePathFromName(vault, imgName);
+        const imgLink = await file.getFilePathFromName(app, imgName);
         const imgBuffer = fs.readFileSync(imgLink);
-        const imgOriginalPath = await getZhihuImgLink(vault, imgBuffer);
+        const imgOriginalPath = await getZhihuImgLink(app.vault, imgBuffer);
         return imgOriginalPath;
     }
 }

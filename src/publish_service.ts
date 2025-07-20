@@ -66,7 +66,7 @@ export async function publishCurrentArticle(app: App) {
     // 处理文章封面上传
     const cover = frontmatter["zhihu-cover"];
     if (!(typeof cover === "undefined" || cover === null)) {
-        const coverURL = await imageService.uploadCover(vault, cover);
+        const coverURL = await imageService.uploadCover(app, cover);
         const patchBody = {
             titleImage: coverURL,
             isTitleImageFullScreen: false,
@@ -75,7 +75,7 @@ export async function publishCurrentArticle(app: App) {
         await patchDraft(vault, articleId, patchBody);
         new Notice(`${locale.notice.coverUploadSuccess}`);
     }
-    let zhihuHTML = await render.remarkMdToHTML(vault, rmFmContent);
+    let zhihuHTML = await render.remarkMdToHTML(app, rmFmContent);
     zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
     const patchBody = {
         title: title,
@@ -170,6 +170,39 @@ export async function createNewZhihuArticle(app: App) {
     }
 }
 
+export async function convertToNewZhihuArticle(app: App) {
+    const vault = app.vault;
+    const workspace = app.workspace;
+
+    // 获取当前活动文件
+    const activeFile = workspace.getActiveFile();
+    if (!activeFile) {
+        new Notice("未找到当前活动文件");
+        return;
+    }
+
+    try {
+        // 获取文件名作为标题（去除扩展名）
+        const fileName = activeFile.name.replace(/\.md$/, "");
+        const defaultTitle = fileName;
+        const articleId = await newDraft(vault, defaultTitle);
+
+        // 给当前文件添加/更新 frontmatter 信息
+        await app.fileManager.processFrontMatter(activeFile, (fm) => {
+            fm["zhihu-title"] = defaultTitle;
+            fm["zhihu-topics"] = "";
+            fm["zhihu-link"] = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
+        });
+
+        // 可选：打开当前文件
+        const leaf = workspace.getLeaf(false);
+        await leaf.openFile(activeFile);
+        return activeFile.path;
+    } catch (error) {
+        console.error(locale.error.createModifyFileFailed, error);
+        new Notice("添加知乎元信息失败，请重试。");
+    }
+}
 async function newDraft(vault: Vault, title: string) {
     try {
         const data = await dataUtil.loadData(vault);
