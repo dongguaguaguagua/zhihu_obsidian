@@ -10,7 +10,7 @@ import { visit } from "unist-util-visit";
 import { u } from "unist-builder";
 import type { Element } from "hast";
 import type { Link, Image } from "mdast";
-import { Vault } from "obsidian";
+import { Vault, Notice, App, TFile } from "obsidian";
 import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
 import { loadSettings } from "./settings";
@@ -82,7 +82,9 @@ function wikiLinkPlugin(this: any, opts = {}) {
 // 获取![alt](link)格式的图片，先下载到本地，
 // 再上传到知乎，获得链接URL，最后转换为知乎HTML
 // 获取![[link|alt]]格式的本地图片，再上传到知乎
-export const remarkZhihuImgs: Plugin<[Vault], Parent, Parent> = (vault) => {
+export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
+    const vault = app.vault;
+    // 处理图片和Mermaid代码块的转换
     const transformer: Transformer<Parent, Parent> = async (tree) => {
         const settings = await loadSettings(vault);
         const tasks: Promise<void>[] = [];
@@ -118,35 +120,41 @@ export const remarkZhihuImgs: Plugin<[Vault], Parent, Parent> = (vault) => {
             const task = (async () => {
                 let alt = node.data.alias;
                 const imgName = node.value;
+                // new Notice(`正在处理图片: ${imgName}`);
                 const imgPathOnDisk = await file.getFilePathFromName(
-                    vault,
+                    app,
                     imgName,
                 );
-                const imgBuffer = fs.readFileSync(imgPathOnDisk);
-                const imgLink = await getZhihuImgLink(vault, imgBuffer);
-                if (alt === imgName) {
-                    // 图片名称和alt相同，说明没加alt，则通过设置判断是否加alt
-                    alt = settings.useImgNameDefault
-                        ? path.basename(imgName)
-                        : "";
+                try {
+                    const imgBuffer = fs.readFileSync(imgPathOnDisk);
+                    const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                    if (alt === imgName) {
+                        // 图片名称和alt相同，说明没加alt，则通过设置判断是否加alt
+                        alt = settings.useImgNameDefault
+                            ? path.basename(imgName)
+                            : "";
+                    }
+                    (node as any).type = "image";
+                    (node as any).url = imgLink;
+                    (node as any).alt = alt;
+                    node.data = {
+                        ...node.data,
+                        hName: "img",
+                        hProperties: {
+                            src: imgLink,
+                            "data-caption": alt,
+                            "data-size": "normal",
+                            "data-watermark": "watermark",
+                            "data-original-src": imgLink,
+                            "data-watermark-src": "",
+                            "data-private-watermark-src": "",
+                        },
+                        hChildren: [],
+                    };
+                } catch (error) {
+                    new Notice( `图片读取失败: ${error.message}`);
                 }
-                (node as any).type = "image";
-                (node as any).url = imgLink;
-                (node as any).alt = alt;
-                node.data = {
-                    ...node.data,
-                    hName: "img",
-                    hProperties: {
-                        src: imgLink,
-                        "data-caption": alt,
-                        "data-size": "normal",
-                        "data-watermark": "watermark",
-                        "data-original-src": imgLink,
-                        "data-watermark-src": "",
-                        "data-private-watermark-src": "",
-                    },
-                    hChildren: [],
-                };
+                // new Notice(`图片处理完成: ${imgPathOnDisk}`);
             })();
             tasks.push(task);
         });
@@ -207,7 +215,8 @@ export const remarkZhihuImgs: Plugin<[Vault], Parent, Parent> = (vault) => {
     return transformer;
 };
 
-export async function remarkMdToHTML(vault: Vault, md: string) {
+export async function remarkMdToHTML(app: App, md: string) {
+    const vault = app.vault;
     const zhihuHandlers = {
         link(state: any, node: Link): Element {
             const properties: { [key: string]: string } = {};
@@ -476,7 +485,7 @@ export async function remarkMdToHTML(vault: Vault, md: string) {
         .use(wikiLinkPlugin)
         .use(remarkCallout)
         .use(remarkBreaks)
-        .use(remarkZhihuImgs, vault)
+        .use(remarkZhihuImgs, app)
         .use(remarkRehype, undefined, rehypeOpts)
         .use(rehypeFormat, { indent: 0 })
         .use(rehypeStringify)
