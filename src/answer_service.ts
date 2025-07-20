@@ -99,7 +99,7 @@ export async function publishCurrentAnswer(app: App) {
             new Notice(`${locale.error.unknownError}`);
             return;
     }
-    let zhihuHTML = await render.remarkMdToHTML(vault, rmFmContent);
+    let zhihuHTML = await render.remarkMdToHTML(app, rmFmContent);
     zhihuHTML = addPopularizeStr(zhihuHTML);
 
     const patchBody = {
@@ -347,6 +347,34 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
     } catch (error) {
         console.error(locale.error.createModifyFileFailed, error);
         throw error;
+    }
+}
+export async function convertToNewZhihuAnswer(app: App, questionLink: string) {
+    const vault = app.vault;
+    const workspace = app.workspace;
+
+    // 获取当前活动文件
+    const activeFile = workspace.getActiveFile();
+    if (!activeFile) {
+        new Notice("未找到当前活动文件");
+        return;
+    }
+
+    try {
+        // 给当前文件添加/更新 frontmatter 信息
+        await app.fileManager.processFrontMatter(activeFile, (fm) => {
+            fm["zhihu-question"] = questionLink;
+        });
+
+        // 重新打开当前文件以刷新显示
+        const leaf = workspace.getLeaf(false);
+        await leaf.openFile(activeFile);
+        
+        new Notice("已将当前文件转换为知乎回答格式");
+        return activeFile.path;
+    } catch (error) {
+        console.error(locale.error.createModifyFileFailed, error);
+        new Notice("添加知乎回答元信息失败，请重试。");
     }
 }
 

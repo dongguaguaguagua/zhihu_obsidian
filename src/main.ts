@@ -141,6 +141,37 @@ export default class ZhihuObPlugin extends Plugin {
             },
         });
 
+        this.addCommand({
+            id: "convert-to-new-article",
+            name: "Convert to new article",
+            callback: async () => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    await publish.convertToNewZhihuArticle(this.app);
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
+        this.addCommand({
+            id: "convert-to-new-answer",
+            name: "Convert to new answer",
+            callback: async () => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    new answer.ZhihuQuestionLinkModal(
+                        this.app,
+                        async (questionLink) => {
+                            await answer.convertToNewZhihuAnswer(
+                                this.app,
+                                questionLink,
+                            );
+                        },
+                    ).open();
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });    
+        
         // Register the settings tab
         this.addSettingTab(new ZhihuSettingTab(this.app, this));
     }

@@ -1,5 +1,6 @@
 import { Vault, FileSystemAdapter, TFile, normalizePath } from "obsidian";
 import * as path from "path";
+import { Notice, App} from "obsidian";
 
 interface FileSearchResult {
     file: TFile;
@@ -7,9 +8,10 @@ interface FileSearchResult {
 }
 
 export async function getFilePathFromName(
-    vault: Vault,
+    app: App,
     fileName: string,
 ): Promise<string> {
+    const vault = app.vault;
     const adapter = vault.adapter;
     if (!(adapter instanceof FileSystemAdapter)) {
         throw new Error("Vault is not using a local file system adapter.");
@@ -33,6 +35,25 @@ export async function getFilePathFromName(
     let baseName = normalizedName;
     if (!hasExtension) {
         baseName = normalizedName.split("/").pop() || normalizedName;
+    }
+
+    // 处理相对路径
+    if (normalizedName.startsWith("../") || normalizedName.startsWith("./")) {
+        const activeFile = app.workspace.getActiveFile?.();
+        if (activeFile) {
+            const activeFileAbsPath = path.join(vaultBasePath, activeFile.path);
+            const imageAbsPath = path.resolve(path.dirname(activeFileAbsPath), fileName);
+
+            try {
+                const fs = require("fs");
+                if (fs.existsSync(imageAbsPath)) {
+                    // new Notice(`图片文件存在: ${imageAbsPath}`);
+                    return imageAbsPath;
+                }
+            } catch (e) {
+                new Notice(`图片文件检查异常: ${e}`);
+            }
+        }
     }
 
     // 搜索逻辑
