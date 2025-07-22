@@ -18,7 +18,10 @@
 <img src="https://img.shields.io/github/license/dongguaguaguagua/zhihu_obsidian">
 </a>
 <a href="https://zhihu.melonhu.cn">
-<img src="https://img.shields.io/badge/doc-cn-blue?logo=obsidian">
+<img src="https://img.shields.io/badge/doc-cn-blue">
+</a>
+<a href="obsidian://show-plugin?id=zhihu">
+<img src="https://img.shields.io/badge/Obsidian-install-483699?logo=obsidian&logoColor=white">
 </a>
 </p>
 
@@ -36,6 +39,10 @@ Zhihu on Obsidian允许你在Obsidian内将markdown内容直接发布到知乎�
 - 浏览首页推荐、关注、热榜，并直接在Obsidian内查看。
 
 ## 使用方法
+
+### 安装插件
+
+在 Obsidian 的插件市场中搜索 Zhihu, 或者直接[在 Obsidian 内打开](obsidian://show-plugin?id=zhihu)并安装即可。
 
 ### 登录知乎
 
