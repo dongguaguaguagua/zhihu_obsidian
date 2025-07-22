@@ -20,10 +20,6 @@
 <a href="https://zhihu.melonhu.cn">
 <img src="https://img.shields.io/badge/doc-cn-blue">
 </a>
-</a>
-<a href="obsidian://show-plugin?id=zhihu">
-<img src="https://img.shields.io/badge/Obsidian-install-483699?logo=obsidian&logoColor=white">
-</a>
 </p>
 
 [中文 README](./README_CN.md)
@@ -43,7 +39,7 @@ This plugin allows you publish your markdown file directly to [Zhihu](https://ww
 
 ### Install
 
-Search Zhihu in community plugin, or just [open in Obsidian](obsidian://show-plugin?id=zhihu) and install.
+Search `Zhihu` in community plugin, click the first plugin and install.
 
 ### Login to Zhihu
 
