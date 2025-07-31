@@ -1,11 +1,18 @@
-import { App, MarkdownView, Notice, TFile, requestUrl } from "obsidian";
+import {
+    App,
+    MarkdownView,
+    Notice,
+    TFile,
+    requestUrl,
+    Modal,
+    TextComponent,
+} from "obsidian";
 import ZhihuObPlugin from "./main";
 import * as dataUtil from "./data";
 import * as cookies from "./cookies";
 import i18n, { type Lang } from "../locales";
 const locale = i18n.current;
 import { htmlToMd } from "./html_to_markdown";
-import { toCurl } from "./utilities";
 import { StateField } from "@codemirror/state";
 import { ViewUpdate, EditorView } from "@codemirror/view";
 
@@ -43,8 +50,7 @@ export class CursorPosTrace {
     }
 }
 
-export async function openZhihuLink(app: App, link: string) {
-    const type = getZhihuContentType(link);
+async function openZhihuLink(app: App, link: string, type: string) {
     let title = "";
     let content = "";
     let authorName = "";
@@ -82,7 +88,7 @@ export async function clickInReadMode(app: App, evt: MouseEvent) {
     if (type === "Unknown Item Type") return;
     evt.preventDefault();
     evt.stopPropagation();
-    openZhihuLink(app, link);
+    openZhihuLink(app, link, type);
 }
 
 export async function clickInPreview(plugin: ZhihuObPlugin, evt: MouseEvent) {
@@ -117,7 +123,7 @@ export async function clickInPreview(plugin: ZhihuObPlugin, evt: MouseEvent) {
             // 拦截点击
             evt.preventDefault();
             evt.stopPropagation();
-            openZhihuLink(app, link);
+            openZhihuLink(app, link, type);
             return;
         }
     }
@@ -406,4 +412,42 @@ function getQestionId(link: string): string {
     const match = link.match(/^https:\/\/www\.zhihu\.com\/question\/(\d+)$/);
     if (match) return match[1];
     return "";
+}
+
+export class ZhihuInputLinkModal extends Modal {
+    inputEl: TextComponent;
+
+    constructor(app: App) {
+        super(app);
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.createEl("h2", { text: locale.ui.enterZhihuLink });
+
+        this.inputEl = new TextComponent(contentEl);
+        this.inputEl.inputEl.addClass("zhihu-link-input");
+        this.inputEl.setPlaceholder(locale.ui.enterZhihuLinkPlaceholder);
+
+        // 添加键盘事件监听
+        this.inputEl.inputEl.addEventListener(
+            "keydown",
+            async (event: KeyboardEvent) => {
+                if (event.key === "Enter") {
+                    const value = this.inputEl.getValue().trim();
+                    const type = getZhihuContentType(value);
+                    if (type === "Unknown Item Type") {
+                        new Notice(`${locale.notice.linkInvalid}`);
+                        return;
+                    }
+                    await openZhihuLink(this.app, value, type);
+                    this.close();
+                }
+            },
+        );
+    }
+
+    onClose() {
+        this.contentEl.empty();
+    }
 }
