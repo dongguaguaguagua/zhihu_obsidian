@@ -1,4 +1,4 @@
-import { App, Vault, Notice, requestUrl } from "obsidian";
+import { App, Vault, Notice, requestUrl, normalizePath } from "obsidian";
 import * as dataUtil from "./data";
 import * as topicsUtil from "./topics";
 import * as fm from "./frontmatter";
@@ -138,8 +138,7 @@ export async function publishCurrentArticle(app: App) {
 }
 
 export async function createNewZhihuArticle(app: App) {
-    const vault = app.vault;
-    const workspace = app.workspace;
+    const { vault, workspace, fileManager } = app;
 
     let fileName = "untitled";
     let filePath = `${fileName}.md`;
@@ -156,7 +155,7 @@ export async function createNewZhihuArticle(app: App) {
         const newFile = await vault.create(filePath, "");
         const defaultTitle = "untitled";
         const articleId = await newDraft(vault, defaultTitle);
-        await app.fileManager.processFrontMatter(newFile, (fm) => {
+        await fileManager.processFrontMatter(newFile, (fm) => {
             fm["zhihu-title"] = defaultTitle;
             fm["zhihu-topics"] = "";
             fm["zhihu-link"] = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
