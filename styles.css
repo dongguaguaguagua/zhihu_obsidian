@@ -181,6 +181,9 @@
     width: 100%;
 }
 
+.zhihu-link-input {
+    width: 100%;
+}
 /* cookies editor */
 .hidden {
     display: none;

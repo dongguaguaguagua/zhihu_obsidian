@@ -70,6 +70,18 @@ export default class ZhihuObPlugin extends Plugin {
         );
 
         this.addCommand({
+            id: "open-content",
+            name: "Open link",
+            callback: async () => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    new open.ZhihuInputLinkModal(this.app).open();
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
+
+        this.addCommand({
             id: "qrcode-login",
             name: "QRCode login",
             callback: async () => {
@@ -170,8 +182,8 @@ export default class ZhihuObPlugin extends Plugin {
                     new Notice(loginNoticeStr);
                 }
             },
-        });    
-        
+        });
+
         // Register the settings tab
         this.addSettingTab(new ZhihuSettingTab(this.app, this));
     }

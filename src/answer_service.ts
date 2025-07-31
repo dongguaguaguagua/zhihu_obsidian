@@ -4,8 +4,6 @@ import * as fm from "./frontmatter";
 import * as render from "./custom_render";
 import { v4 as uuidv4 } from "uuid";
 import * as cookies from "./cookies";
-import * as imageService from "./image_service";
-import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
 import { fmtDate } from "./utilities";
@@ -323,8 +321,8 @@ async function publishAnswerDraft(
 }
 
 export async function createNewZhihuAnswer(app: App, questionLink: string) {
-    const vault = app.vault;
-    const workspace = app.workspace;
+    const { vault, workspace, fileManager } = app;
+
     let fileName = "untitled";
     let filePath = `${fileName}.md`;
     let counter = 1;
@@ -338,7 +336,7 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
 
     try {
         const newFile = await vault.create(filePath, "");
-        await app.fileManager.processFrontMatter(newFile, (fm) => {
+        await fileManager.processFrontMatter(newFile, (fm) => {
             fm["zhihu-question"] = questionLink;
         });
         const leaf = workspace.getLeaf(false);
@@ -369,7 +367,7 @@ export async function convertToNewZhihuAnswer(app: App, questionLink: string) {
         // 重新打开当前文件以刷新显示
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(activeFile);
-        
+
         new Notice("已将当前文件转换为知乎回答格式");
         return activeFile.path;
     } catch (error) {
