@@ -161,20 +161,19 @@ async function phaseAnswer(
     // 使用 DOMParser 解析 HTML 字符串
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, "text/html");
-    // 定位回答内容 div
-    const contentEle = doc.querySelector(".RichContent-inner .RichText");
-    const writerInfoEle = doc.querySelector(
-        ".UserLink.AuthorInfo-name .UserLink-link",
+    // 获取指定 script 标签，里面有关于回答和问题的所有数据
+    const scriptTag = doc.querySelector(
+        'script#js-initialData[type="text/json"]',
     );
-    const title = doc.querySelector(".QuestionHeader-title");
-    if (contentEle && writerInfoEle && title) {
-        const writerName = writerInfoEle.textContent?.trim() || "知乎用户";
-        const titleStr = title.textContent?.trim() || `知乎问题${questionId}`;
-        return [titleStr, contentEle.innerHTML, writerName];
-    } else {
-        new Notice(`${locale.notice.unableToFindAnswerContent}`);
-        return ["", "", ""];
-    }
+    if (!scriptTag) throw new Error("js-initialData script tag not found");
+    const jsonText = scriptTag.textContent; // 提取 JSON 内容并解析
+    if (!jsonText) throw new Error("js-initialData is empty");
+    const jsonData = JSON.parse(jsonText);
+    const answerData = jsonData?.initialState?.entities?.answers?.[answerId];
+    const writerName = answerData?.author?.name || "知乎用户";
+    const content = answerData?.content;
+    const title = answerData?.question?.title || `知乎问题${questionId}`;
+    return [title, content, writerName];
 }
 
 async function phaseArticle(
@@ -185,65 +184,68 @@ async function phaseArticle(
     const htmlText = await getZhihuContentHTML(app, zhihuLink);
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, "text/html");
-    const contentEle = doc.querySelector(".RichText");
-    const writerInfoEle = doc.querySelector(
-        ".UserLink.AuthorInfo-name .UserLink-link",
+    // 获取指定 script 标签，里面有关于文章的所有数据
+    const scriptTag = doc.querySelector(
+        'script#js-initialData[type="text/json"]',
     );
-    const questionTitleEle = doc.querySelector(".Post-Title");
-    if (contentEle && writerInfoEle && questionTitleEle) {
-        const writerName = writerInfoEle.textContent?.trim() || "知乎用户";
-        const title =
-            questionTitleEle.textContent?.trim() || `知乎文章${articleId}`;
-        return [title, contentEle.innerHTML, writerName];
-    } else {
-        new Notice(`${locale.notice.unableToFindAnswerContent}`);
-        return ["", "", ""];
-    }
+    if (!scriptTag) throw new Error("js-initialData script tag not found");
+    const jsonText = scriptTag.textContent; // 提取 JSON 内容并解析
+    if (!jsonText) throw new Error("js-initialData is empty");
+    const jsonData = JSON.parse(jsonText);
+    const articleData = jsonData?.initialState?.entities?.articles?.[articleId];
+    const writerName = articleData?.author?.name || "知乎用户";
+    const content = articleData?.content;
+    const title = articleData?.title || `知乎文章${articleId}`;
+    return [title, content, writerName];
 }
 
 async function phasePin(
     app: App,
     zhihuLink: string,
 ): Promise<[string, string, string]> {
+    const pinId = getPinId(zhihuLink);
     const htmlText = await getZhihuContentHTML(app, zhihuLink);
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, "text/html");
-    const contentEle = doc.querySelector(".RichText");
-    const writerInfoEle = doc.querySelector(
-        ".UserLink.AuthorInfo-name .UserLink-link",
+    // 获取指定 script 标签，里面有关于想法的所有数据
+    const scriptTag = doc.querySelector(
+        'script#js-initialData[type="text/json"]',
     );
-
-    if (contentEle && writerInfoEle) {
-        const writerName = writerInfoEle.textContent?.trim() || "知乎用户";
-
-        // 知乎想法比较特殊，有图片和文字。先解析文字，再解析图片
-        // 将图片的链接放在一个div里，并添加到文字后面
-        const imagePreviewSpans = doc.querySelectorAll(".Image-PreviewVague");
-        const imagePreviewContainer = doc.createElement("div");
-
-        imagePreviewSpans.forEach((span) => {
-            const originalImg = span.querySelector("img");
-            if (originalImg) {
-                const dataOriginal = originalImg.getAttribute("data-original");
-                if (dataOriginal) {
-                    // 创建新的 <img> 标签
-                    const newImg = doc.createElement("img");
-                    newImg.src = dataOriginal;
-                    newImg.alt = originalImg.alt || "";
-                    newImg.width = originalImg.width;
-                    newImg.height = originalImg.height;
-                    imagePreviewContainer.appendChild(newImg);
-                }
+    if (!scriptTag) throw new Error("js-initialData script tag not found");
+    const jsonText = scriptTag.textContent; // 提取 JSON 内容并解析
+    if (!jsonText) throw new Error("js-initialData is empty");
+    const jsonData = JSON.parse(jsonText);
+    const pinData = jsonData?.initialState?.entities?.pins?.[pinId];
+    const users = jsonData?.initialState?.entities?.users;
+    const contentHtml = pinData?.contentHtml;
+    const title = `想法${pinId}`;
+    // author 在JSON中，但是由于不知道用户的id，所以无法直接获取
+    // 需要遍历JSON中的names字段获取
+    let author = "知乎用户";
+    for (const key in users) {
+        if (Object.prototype.hasOwnProperty.call(users, key)) {
+            const user = users[key as keyof typeof users];
+            if (user && "name" in user && typeof user.name === "string") {
+                author = user.name;
+                break;
             }
-        });
-
-        imagePreviewSpans.forEach((span) => span.remove());
-        contentEle.appendChild(imagePreviewContainer);
-        return ["", contentEle.innerHTML, writerName];
-    } else {
-        new Notice(`${locale.notice.unableToFindAnswerContent}`);
-        return ["", "", ""];
+        }
     }
+    // 下面是想法后面附加的图片
+    const imgContainer = doc.createElement("div");
+    const content = pinData?.content;
+    for (const entry of content) {
+        if (entry?.type === "image") {
+            const newImg = doc.createElement("img");
+            newImg.src = entry.originalUrl;
+            newImg.alt = "";
+            newImg.width = entry.width;
+            newImg.height = entry.height;
+            imgContainer.appendChild(newImg);
+        }
+    }
+    contentHtml.innerHTML = imgContainer;
+    return [title, contentHtml, author];
 }
 
 export async function openContent(
@@ -342,16 +344,18 @@ function getQuestionAndAnswerId(link: string): [string, string] {
     const match = link.match(
         /^https?:\/\/www\.zhihu\.com\/question\/(\d+)\/answer\/(\d+)/,
     );
-    if (match) {
-        return [match[1], match[2]];
-    }
+    if (match) return [match[1], match[2]];
     return ["", ""];
 }
 
 function getArticleId(link: string): string {
-    const match = link.match(/^https:\/\/zhuanlan\.zhihu\.com\/p\/\d+$/);
-    if (match) {
-        return match[1];
-    }
+    const match = link.match(/^https:\/\/zhuanlan\.zhihu\.com\/p\/(\d+)$/);
+    if (match) return match[1];
+    return "";
+}
+
+function getPinId(link: string): string {
+    const match = link.match(/^https:\/\/www\.zhihu\.com\/pin\/(\d+)$/);
+    if (match) return match[1];
     return "";
 }
