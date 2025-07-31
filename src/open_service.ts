@@ -53,7 +53,8 @@ export async function openZhihuLink(app: App, link: string) {
             [title, content, authorName] = await phaseArticle(app, link);
             break;
         case "question":
-            return;
+            [title, content, authorName] = await phaseQuestion(app, link);
+            break;
         case "answer":
             [title, content, authorName] = await phaseAnswer(app, link);
             break;
@@ -169,10 +170,10 @@ async function phaseAnswer(
     const jsonText = scriptTag.textContent; // 提取 JSON 内容并解析
     if (!jsonText) throw new Error("js-initialData is empty");
     const jsonData = JSON.parse(jsonText);
-    const answerData = jsonData?.initialState?.entities?.answers?.[answerId];
-    const writerName = answerData?.author?.name || "知乎用户";
-    const content = answerData?.content;
-    const title = answerData?.question?.title || `知乎问题${questionId}`;
+    const data = jsonData?.initialState?.entities?.answers?.[answerId];
+    const writerName = data?.author?.name || "知乎用户";
+    const content = data?.content;
+    const title = data?.question?.title || `知乎问题${questionId}`;
     return [title, content, writerName];
 }
 
@@ -192,11 +193,52 @@ async function phaseArticle(
     const jsonText = scriptTag.textContent; // 提取 JSON 内容并解析
     if (!jsonText) throw new Error("js-initialData is empty");
     const jsonData = JSON.parse(jsonText);
-    const articleData = jsonData?.initialState?.entities?.articles?.[articleId];
-    const writerName = articleData?.author?.name || "知乎用户";
-    const content = articleData?.content;
-    const title = articleData?.title || `知乎文章${articleId}`;
+    const data = jsonData?.initialState?.entities?.articles?.[articleId];
+    const writerName = data?.author?.name || "知乎用户";
+    const content = data?.content;
+    const title = data?.title || `知乎文章${articleId}`;
     return [title, content, writerName];
+}
+
+export async function phaseQuestion(
+    app: App,
+    zhihuLink: string,
+): Promise<[string, string, string]> {
+    const questionId = getQestionId(zhihuLink);
+    const htmlText = await getZhihuContentHTML(app, zhihuLink);
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, "text/html");
+    // 获取指定 script 标签，里面有关于问题的所有数据
+    const scriptTag = doc.querySelector(
+        'script#js-initialData[type="text/json"]',
+    );
+    if (!scriptTag) throw new Error("js-initialData script tag not found");
+    const jsonText = scriptTag.textContent; // 提取 JSON 内容并解析
+    if (!jsonText) throw new Error("js-initialData is empty");
+    const jsonData = JSON.parse(jsonText);
+    const quesData = jsonData?.initialState?.entities?.questions?.[questionId];
+    const asker = quesData?.author?.name || "知乎用户";
+    const questionDetail = quesData?.detail;
+    const title = quesData?.title || `知乎问题${questionId}`;
+    // 下面需要附上问题回答，一般在5个左右
+    const answerData = jsonData?.initialState?.entities?.answers;
+    const answerContainer = doc.createElement("div");
+    for (const key in answerData) {
+        const answer = answerData[key];
+        const header = doc.createElement("h1");
+        const link = doc.createElement("a");
+        link.href = `https://www.zhihu.com/question/${questionId}/answer/${answer?.id}`;
+        link.textContent = `${answer?.author?.name || "知乎用户"}的回答`;
+        header.appendChild(link);
+        const content = doc.createElement("div");
+        content.innerHTML = answer.content;
+        answerContainer.appendChild(header);
+        answerContainer.appendChild(content);
+    }
+    const container = doc.createElement("div");
+    container.innerHTML = questionDetail; // 问题详情
+    container.appendChild(answerContainer); // 问题回答
+    return [title, container.innerHTML, asker];
 }
 
 async function phasePin(
@@ -356,6 +398,12 @@ function getArticleId(link: string): string {
 
 function getPinId(link: string): string {
     const match = link.match(/^https:\/\/www\.zhihu\.com\/pin\/(\d+)$/);
+    if (match) return match[1];
+    return "";
+}
+
+function getQestionId(link: string): string {
+    const match = link.match(/^https:\/\/www\.zhihu\.com\/question\/(\d+)$/);
     if (match) return match[1];
     return "";
 }
