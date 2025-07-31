@@ -15,11 +15,14 @@ export function htmlToMd(html: string): string {
         // 规则 1：数学公式图片转为 $公式$ 或 $$公式$$
         turndownService.addRule("mathImgToLatex", {
             filter: function (node) {
-                return (node as HTMLElement).getAttribute("class") === "ztext-math";
+                return (
+                    node.nodeName === "IMG" &&
+                    (node as HTMLElement).getAttribute("eeimg") === "1"
+                );
             },
             replacement: function (content, node) {
-                const alt = (node as HTMLElement).getAttribute("data-tex") || "";
-                
+                const alt = (node as HTMLElement).getAttribute("alt") || "";
+
                 // 应该可以假设知乎提供的LaTeX公式是规范的
                 // const escapedAlt = alt.replace(/\$/g, "\\$");
                 const escapedAlt = alt;

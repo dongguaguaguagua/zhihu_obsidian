@@ -2,6 +2,9 @@ export default {
     untitled: "Untitled",
     ui: {
         enterQuestionLink: "Please enter Zhihu question link",
+        enterZhihuLink: "Please enter Zhihu link",
+        enterZhihuLinkPlaceholder:
+            "You can enter Zhihu Answer, Question, Article and Pin link",
         forExample: "Example:",
         scanLoginToZhihu: "Scan to login Zhihu",
         generateQRCodeFailed: "Failed to generate QRCode",

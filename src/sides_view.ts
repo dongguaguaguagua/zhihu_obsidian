@@ -19,7 +19,7 @@ import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 const locale = i18n.current;
 export const SIDES_VIEW_TYPE = "zhihu-sides-view";
-import { openContent } from "./open_service";
+import { openContent, phaseQuestion } from "./open_service";
 
 export async function activateSideView() {
     const { workspace } = this.app;
@@ -298,7 +298,10 @@ export class ZhihuSideView extends View {
             )[2] as HTMLElement);
         list.empty();
         this.hotLists = await loadHotList(this.vault);
-        this.hotLists.forEach((hot) => {
+        this.hotLists.forEach(async (hot) => {
+            let qTitle = "";
+            let qContent = "";
+            let qAsker = "";
             const item = list.createEl("li");
             item.addClass("side-item");
             item.setAttr("aria-label", `${hot.title}\n${hot.detail_text}`);
@@ -312,15 +315,18 @@ export class ZhihuSideView extends View {
                 text: `🔥${hot.detail_text}🔥`,
             });
             excerpt.appendText(": " + hot.excerpt);
-
+            [qTitle, qContent, qAsker] = await phaseQuestion(
+                this.app,
+                hot.link,
+            );
             item.onClickEvent(async () => {
                 openContent(
                     this.app,
-                    hot.title,
+                    qTitle,
                     hot.link,
-                    hot.excerpt,
+                    qContent,
                     hot.type,
-                    hot.author,
+                    qAsker,
                 );
             });
         });
