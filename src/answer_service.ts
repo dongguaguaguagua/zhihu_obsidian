@@ -4,8 +4,6 @@ import * as fm from "./frontmatter";
 import * as render from "./custom_render";
 import { v4 as uuidv4 } from "uuid";
 import * as cookies from "./cookies";
-import * as imageService from "./image_service";
-import { normalizeStr } from "./utilities";
 import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
 import { fmtDate } from "./utilities";

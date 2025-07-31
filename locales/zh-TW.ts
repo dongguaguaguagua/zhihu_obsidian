@@ -1,6 +1,8 @@
 export default {
     ui: {
         enterQuestionLink: "請輸入知乎問題連結",
+        enterZhihuLink: "請輸入知乎連結",
+        enterZhihuLinkPlaceholder: "您可以輸入知乎問題、文章、回答、想法的連結",
         forExample: "例如：",
         scanLoginToZhihu: "掃碼登入知乎",
         generateQRCodeFailed: "生成二維碼失敗",
