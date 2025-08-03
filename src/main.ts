@@ -5,6 +5,7 @@ import {
     Plugin,
     type PluginManifest,
     Notice,
+    Platform,
 } from "obsidian";
 
 import { MentionSuggest } from "./member_mention";
@@ -80,22 +81,25 @@ export default class ZhihuObPlugin extends Plugin {
                 }
             },
         });
+        // 在移动端设备上不能直接登录,
+        // 可以使用自定义cookie或者iCloud云同步登录
+        if (!Platform.isMobile) {
+            this.addCommand({
+                id: "qrcode-login",
+                name: "QRCode login",
+                callback: async () => {
+                    await login.zhihuQRcodeLogin(this.app);
+                },
+            });
 
-        this.addCommand({
-            id: "qrcode-login",
-            name: "QRCode login",
-            callback: async () => {
-                await login.zhihuQRcodeLogin(this.app);
-            },
-        });
-
-        this.addCommand({
-            id: "web-login",
-            name: "Web login",
-            callback: async () => {
-                await login.zhihuWebLogin(this.app);
-            },
-        });
+            this.addCommand({
+                id: "web-login",
+                name: "Web login",
+                callback: async () => {
+                    await login.zhihuWebLogin(this.app);
+                },
+            });
+        }
 
         this.addCommand({
             id: "publish-current-article",
