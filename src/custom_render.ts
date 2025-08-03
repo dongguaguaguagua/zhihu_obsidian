@@ -152,7 +152,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                         hChildren: [],
                     };
                 } catch (error) {
-                    new Notice( `图片读取失败: ${error.message}`);
+                    new Notice(`图片读取失败: ${error.message}`);
                 }
                 // new Notice(`图片处理完成: ${imgPathOnDisk}`);
             })();
