@@ -156,8 +156,8 @@ export default {
             "在文章結尾新增推廣語句：本文由 Zhihu on Obsidian 創作並發布",
         closePopularStrWarning:
             "**您確定要關閉嗎？**\n製作插件不易，如果插件對您有幫助的話，不妨動動手指支持一下作者吧！\n\
-        * 點讚作者的知乎文章：https://zhuanlan.zhihu.com/p/1901622331102696374\n\
-        * 給插件的 GitHub 倉庫點個星星：https://github.com/dongguaguaguagua/zhihu_obsidian\
+* 點讚作者的知乎文章：https://zhuanlan.zhihu.com/p/1901622331102696374\n\
+* 給插件的 GitHub 倉庫點個星星：https://github.com/dongguaguaguagua/zhihu_obsidian\
         ",
         closePopularStrWarningButtonText: "關閉推廣語句",
     },
