@@ -5,6 +5,8 @@ import {
     Notice,
     ButtonComponent,
     Modal,
+    MarkdownRenderer,
+    Component,
 } from "obsidian";
 import ZhihuObPlugin from "./main";
 import { loadSettings, saveSettings } from "./settings";
@@ -296,6 +298,53 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         });
                     });
             });
+        // Add popularize string option
+        new Setting(containerEl)
+            .setName(locale.settings.addPopularStr)
+            .setDesc(locale.settings.addPopularStrDesc)
+            .addToggle((toggle) =>
+                toggle.setValue(settings.popularize).onChange(async (value) => {
+                    if (value) {
+                        settings.popularize = true;
+                        await saveSettings(this.app.vault, {
+                            popularize: value,
+                        });
+                        return;
+                    }
+                    // 如果是关闭开关，则显示确认弹窗
+                    // 用于跟踪用户是否点击了确认按钮
+                    let confirmed = false;
+
+                    const modal = new ConfirmationModal(
+                        this.app,
+                        locale.settings.closePopularStrWarning,
+                        (button) => {
+                            button
+                                .setButtonText(
+                                    locale.settings
+                                        .closePopularStrWarningButtonText,
+                                )
+                                .setWarning();
+                        },
+                        async () => {
+                            confirmed = true; // 标记为已确认
+                            settings.popularize = false;
+                            await saveSettings(this.app.vault, {
+                                popularize: value,
+                            });
+                        },
+                    );
+
+                    modal.onClose = () => {
+                        if (!confirmed) {
+                            toggle.setValue(true);
+                        }
+                    };
+
+                    modal.open();
+                }),
+            );
+
         // 添加“手动编辑Cookies”开关
         new Setting(containerEl)
             .setName(locale.settings.editCookies)
@@ -337,14 +386,22 @@ export class ZhihuSettingTab extends PluginSettingTab {
 export class ConfirmationModal extends Modal {
     constructor(
         app: App,
-        body: string,
+        bodyMarkdown: string,
         buttonCallback: (button: ButtonComponent) => void,
         clickCallback: () => Promise<void>,
     ) {
         super(app);
-
         this.contentEl.addClass("zhihu-obsidian-confirmation-modal");
-        this.contentEl.createEl("p", { text: body });
+        const contentDiv = this.contentEl.createDiv();
+        const component = new (class extends Component {})();
+
+        MarkdownRenderer.render(
+            this.app,
+            bodyMarkdown,
+            contentDiv,
+            "", // sourcePath 通常留空
+            component, // 将 modal 实例自身作为 Component 传入
+        );
 
         new Setting(this.contentEl)
             .addButton((button) => {

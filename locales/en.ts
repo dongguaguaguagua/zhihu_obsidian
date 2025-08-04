@@ -159,5 +159,14 @@ export default {
         UltraHD: "Ultra High Definition",
         HD: "High Definition",
         LR: "Low Resolution",
+        addPopularStr: "Add promotional statement",
+        addPopularStrDesc:
+            "Add a promotional statement at the end of the article: This article was created and published by Zhihu on Obsidian",
+        closePopularStrWarning:
+            "**Are you sure you want to turn it off?**\nCreating plugins is not easy. If this plugin has been helpful to you, consider supporting the author!\n\
+* Like the author's Zhihu article: https://zhuanlan.zhihu.com/p/1901622331102696374\n\
+* Star the plugin's GitHub repository: https://github.com/dongguaguaguagua/zhihu_obsidian\
+        ",
+        closePopularStrWarningButtonText: "Turn off promotional statement",
     },
 };

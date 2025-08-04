@@ -12,6 +12,7 @@ interface ZhihuSettings {
     manualCookieEdit: boolean;
     autoOpenZhihuLink: boolean;
     mermaidScale: number;
+    popularize: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -26,6 +27,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     manualCookieEdit: false,
     autoOpenZhihuLink: true,
     mermaidScale: 3,
+    popularize: true,
 };
 
 /**
