@@ -86,6 +86,8 @@ export async function clickInReadMode(app: App, evt: MouseEvent) {
     if (!targetContent) return;
     const type = getZhihuContentType(link);
     if (type === "Unknown Item Type") return;
+    // 在 modal 里点击我的知乎文章，需要跳转
+    if (link === "https://zhuanlan.zhihu.com/p/1901622331102696374") return;
     evt.preventDefault();
     evt.stopPropagation();
     openZhihuLink(app, link, type);

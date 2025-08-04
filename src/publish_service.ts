@@ -76,7 +76,9 @@ export async function publishCurrentArticle(app: App) {
         new Notice(`${locale.notice.coverUploadSuccess}`);
     }
     let zhihuHTML = await render.remarkMdToHTML(app, rmFmContent);
-    zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
+    if (settings.popularize) {
+        zhihuHTML = addPopularizeStr(zhihuHTML); // 加上推广文字
+    }
     const patchBody = {
         title: title,
         content: zhihuHTML,
