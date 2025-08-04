@@ -151,5 +151,14 @@ export default {
         UltraHD: "超清",
         HD: "高清",
         LR: "低清",
+        addPopularStr: "添加推广语句",
+        addPopularStrDesc:
+            "在文章末尾添加推广语句：本文由Zhihu on Obsidian创作并发布",
+        closePopularStrWarning:
+            "**您确认要关闭吗？**\n制作插件不易，如果插件对您有帮助的话，不妨动动手指支持一下作者吧！\n\
+* 点赞作者的知乎文章：https://zhuanlan.zhihu.com/p/1901622331102696374\n\
+* 给插件的 GitHub 仓库打个星星：https://github.com/dongguaguaguagua/zhihu_obsidian\
+",
+        closePopularStrWarningButtonText: "关闭推广语句",
     },
 };

@@ -98,8 +98,9 @@ export async function publishCurrentAnswer(app: App) {
             return;
     }
     let zhihuHTML = await render.remarkMdToHTML(app, rmFmContent);
-    zhihuHTML = addPopularizeStr(zhihuHTML);
-
+    if (settings.popularize) {
+        zhihuHTML = addPopularizeStr(zhihuHTML);
+    }
     const patchBody = {
         content: zhihuHTML,
         draft_type: "normal",
