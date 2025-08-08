@@ -216,7 +216,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
 };
 
 export async function remarkMdToHTML(app: App, md: string) {
-    const vault = app.vault;
+    const idMap = new Map<string, number>(); // 原始id → 新编号
     const zhihuHandlers = {
         link(state: any, node: Link): Element {
             const properties: { [key: string]: string } = {};
@@ -336,17 +336,22 @@ export async function remarkMdToHTML(app: App, md: string) {
         // data-draft-node="inline" data-draft-type="reference"
         // data-numero="1">[1]</sup>
         footnoteReference(state: any, node: any): Element {
-            const id = String(node.identifier).toUpperCase(); // 标准化 id（内部存的是大写）
-
+            const rawId = String(node.identifier).toUpperCase(); // 标准化 id（内部存的是大写）
+            // 分配新编号
+            let numero = idMap.get(rawId);
+            if (!numero) {
+                numero = idMap.size + 1;
+                idMap.set(rawId, numero);
+            }
             // 从 state.footnoteById 拿到 FootnoteDefinition 节点
-            const def = state.footnoteById.get(id);
+            const def = state.footnoteById.get(rawId);
             if (!def) {
                 // 没找到定义就直接渲染一个普通的 [1]
                 return {
                     type: "element",
                     tagName: "sup",
                     properties: {},
-                    children: [{ type: "text", value: `[${id}]` }],
+                    children: [{ type: "text", value: `[${numero}]` }],
                 };
             }
 
@@ -367,9 +372,9 @@ export async function remarkMdToHTML(app: App, md: string) {
                     "data-url": url,
                     "data-draft-node": "inline",
                     "data-draft-type": "reference",
-                    "data-numero": id,
+                    "data-numero": String(numero),
                 },
-                children: [u("text", `[${id}]`)],
+                children: [u("text", `[${numero}]`)],
             };
         },
 
