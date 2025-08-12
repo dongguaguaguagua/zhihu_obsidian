@@ -496,11 +496,10 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         }
                         try {
                             versionName = getTypstVersion(path);
-
                             if (!versionName) {
-                                new Notice(`未找到Typst`);
+                                new Notice(`未找到 Typst`);
+                                versionName = "未找到";
                             }
-                            new Notice(`Typst 版本：${versionName}`);
                             typstPathSetting.setName(
                                 `Typst 版本：${versionName}`,
                             );
