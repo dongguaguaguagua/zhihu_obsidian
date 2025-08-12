@@ -13,6 +13,13 @@ interface ZhihuSettings {
     autoOpenZhihuLink: boolean;
     mermaidScale: number;
     popularize: boolean;
+    typstMode: boolean;
+    typstCliPath: string;
+    typstImgPPI: number;
+    typstRenderLang: string;
+    typstPresetStyle: string;
+    typstFallbackToTeX: boolean;
+    typstDisplayToTeX: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -28,6 +35,14 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     autoOpenZhihuLink: true,
     mermaidScale: 3,
     popularize: true,
+    typstMode: true,
+    typstCliPath: "",
+    typstImgPPI: 300,
+    typstRenderLang: "typrender",
+    typstPresetStyle:
+        "#set page(width: auto, height: auto, margin:(x: 40pt, y: 10pt))",
+    typstFallbackToTeX: true,
+    typstDisplayToTeX: false,
 };
 
 /**

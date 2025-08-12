@@ -54,6 +54,7 @@
         "remark-footnotes": "^5.0.0",
         "remark-gfm": "github:dongguaguaguagua/remark-gfm",
         "remark-rehype": "^11.1.2",
+        "tex2typst": "^0.3.14",
         "tslib": "^2.8.1",
         "turndown": "^7.2.0",
         "unist-builder": "^4.0.0",
