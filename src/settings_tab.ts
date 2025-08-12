@@ -15,6 +15,8 @@ import { loadData, deleteData } from "./data";
 import i18n, { type Lang } from "../locales";
 import { EditorView } from "@codemirror/view";
 import { createCookiesEditor } from "./ui/cookies_editor/editor";
+import { createTypstEditor, getTypstVersion } from "./typst";
+import { execFile, execSync } from "child_process";
 
 const locale = i18n.current;
 
@@ -22,9 +24,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
     plugin: ZhihuObPlugin;
     isLoggedIn = false;
     cookiesEditor: EditorView;
+    typstEditor: EditorView;
 
     hide() {
         this.cookiesEditor?.destroy();
+        this.typstEditor?.destroy();
     }
 
     userInfo: { avatar_url: string; name: string; headline?: string } | null =
@@ -359,11 +363,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             });
                             cookiesSetting.settingEl.toggleClass(
                                 "cookies-setting-area",
-                                value === true,
+                                value,
                             );
                             cookiesSetting.settingEl.toggleClass(
                                 "hidden",
-                                value !== true,
+                                !value,
                             );
                         } catch (e) {
                             console.error("save settings failed:", e);
@@ -380,6 +384,181 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         const data = await loadData(this.app.vault);
         createCookiesEditor(this, cookiesSetting, data);
+
+        new Setting(containerEl)
+            .setName("Typst mode (Experimental)")
+            .setDesc("Enable you to publish you typst math to Zhihu")
+            .addToggle((toggle) =>
+                toggle.setValue(settings.typstMode).onChange(async (value) => {
+                    if (!value) {
+                        settings.typstMode = false;
+                        await saveSettings(this.app.vault, {
+                            typstMode: value,
+                        });
+                        ppiSetting.settingEl.toggleClass("hidden", true);
+                        typstStyleSetting.settingEl.toggleClass("hidden", true);
+                        displaySetting.settingEl.toggleClass("hidden", true);
+                        typstPathSetting.settingEl.toggleClass("hidden", true);
+                        return;
+                    }
+                    // 如果是关闭开关，则显示确认弹窗
+                    // 用于跟踪用户是否点击了确认按钮
+                    let confirmed = false;
+
+                    const modal = new ConfirmationModal(
+                        this.app,
+                        "**这是一个实验性功能**\n\
+为了保证更好的编辑体验，请安装 https://github.com/fogsong233/Typsidian 插件。\n\
+本功能需要您电脑上已安装了 [Typst](https://github.com/typst/typst) 命令行程序，\
+",
+                        (button) => {
+                            button.setButtonText("确认打开").setWarning();
+                        },
+                        async () => {
+                            confirmed = true; // 标记为已确认
+                            settings.typstMode = true;
+                            await saveSettings(this.app.vault, {
+                                typstMode: value,
+                            });
+                            ppiSetting.settingEl.toggleClass(
+                                "ppi-setting-area",
+                                value,
+                            );
+                            typstStyleSetting.settingEl.toggleClass(
+                                "preset-style-area",
+                                value,
+                            );
+                            displaySetting.settingEl.toggleClass(
+                                "display-setting-area",
+                                value,
+                            );
+                            typstPathSetting.settingEl.toggleClass(
+                                "typst-path-area",
+                                value,
+                            );
+                            ppiSetting.settingEl.toggleClass("hidden", !value);
+                            typstStyleSetting.settingEl.toggleClass(
+                                "hidden",
+                                !value,
+                            );
+                            displaySetting.settingEl.toggleClass(
+                                "hidden",
+                                !value,
+                            );
+                            typstPathSetting.settingEl.toggleClass(
+                                "hidden",
+                                !value,
+                            );
+                        },
+                    );
+
+                    modal.onClose = () => {
+                        if (!confirmed) {
+                            toggle.setValue(false);
+                            ppiSetting.settingEl.toggleClass("hidden", true);
+                        }
+                    };
+
+                    modal.open();
+                }),
+            );
+
+        // Typst path setting
+        let versionName = getTypstVersion(settings.typstCliPath);
+        if (!versionName && settings.typstMode) {
+            new Notice(`未找到 Typst`);
+            versionName = "未找到";
+        }
+        const typstPathSetting = new Setting(containerEl)
+            .setName(`Typst 版本：${versionName}`)
+            .setDesc("请输入 Typst 可执行文件的路径：")
+            .addText((text) => {
+                text.setValue(settings.typstCliPath).onChange(async (value) => {
+                    try {
+                        settings.typstCliPath = value;
+                        await saveSettings(this.app.vault, {
+                            typstCliPath: value,
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                });
+            })
+            .addButton((button) => {
+                button
+                    .setIcon("rotate-ccw")
+                    .setTooltip("检测 Typst 路径并显示版本")
+                    .onClick(async () => {
+                        const path = settings.typstCliPath.trim();
+                        if (!path) {
+                            new Notice("Typst 路径为空");
+                            return;
+                        }
+                        try {
+                            versionName = getTypstVersion(path);
+
+                            if (!versionName) {
+                                new Notice(`未找到Typst`);
+                            }
+                            new Notice(`Typst 版本：${versionName}`);
+                            typstPathSetting.setName(
+                                `Typst 版本：${versionName}`,
+                            );
+                        } catch (e) {
+                            console.error(e);
+                            new Notice("检测 Typst 版本时出错");
+                        }
+                    });
+            })
+            .setClass(settings.typstMode ? "typst-path-area" : "hidden");
+
+        // 对于行间公式的处理：是否转成LaTeX
+        const displaySetting = new Setting(containerEl)
+            .setName("对于行间公式的处理")
+            .setDesc(
+                "如果一些复杂的Typst公式转成LaTeX，可能会导致公式无法正常显示。",
+            )
+            .addDropdown((dropdown) => {
+                dropdown
+                    .addOption("false", "转换为图片")
+                    .addOption("true", "转换为LaTeX")
+                    .setValue(settings.typstDisplayToTeX.toString())
+                    .onChange(async (value) => {
+                        settings.typstDisplayToTeX = value === "true";
+                        await saveSettings(this.app.vault, {
+                            typstDisplayToTeX: settings.typstDisplayToTeX,
+                        });
+                    });
+            })
+            .setClass(settings.typstMode ? "display-setting-area" : "hidden");
+
+        // Typst PPI setting
+        const ppiSetting = new Setting(containerEl)
+            .setName("Typst 行间公式图片清晰度")
+            .setDesc("设置行间公式图片的清晰度，单位为像素每英寸(PPI)")
+            .addDropdown((dropdown) => {
+                dropdown
+                    .addOption("500", "500")
+                    .addOption("400", "400")
+                    .addOption("300", "300")
+                    .addOption("200", "200")
+                    .setValue(settings.typstImgPPI.toString())
+                    .onChange(async (value) => {
+                        settings.typstImgPPI = parseFloat(value);
+                        await saveSettings(this.app.vault, {
+                            typstImgPPI: parseInt(value),
+                        });
+                    });
+            })
+            .setClass(settings.typstMode ? "ppi-setting-area" : "hidden");
+
+        // typst 内容编辑器
+        const typstStyleSetting = new Setting(containerEl)
+            .setName("Preset styles")
+            .setDesc("Typst 渲染前的内容")
+            .setClass(settings.typstMode ? "preset-style-area" : "hidden");
+
+        createTypstEditor(this, typstStyleSetting, settings.typstPresetStyle);
     }
 }
 

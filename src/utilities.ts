@@ -1,3 +1,5 @@
+import { execFile } from "child_process";
+
 type RequestOptions = {
     url: string;
     method?: string;
@@ -44,4 +46,14 @@ export function fmtDate(date: Date): string {
     const minute = String(date.getMinutes()).padStart(2, "0");
 
     return `${year}-${month}-${day} ${hour}:${minute}`;
+}
+
+// 执行命令并等待
+export function execFileAsync(cmd: string, args: string[]) {
+    return new Promise<void>((resolve, reject) => {
+        execFile(cmd, args, (err) => {
+            if (err) reject(err);
+            else resolve();
+        });
+    });
 }

@@ -15,15 +15,21 @@ import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
 import { loadSettings } from "./settings";
 import { getOnlineImg, getZhihuImgLink } from "./image_service";
+import os from "os";
 import * as file from "./files";
 import * as fs from "fs";
 import * as path from "path";
+import { writeFile, mkdtemp } from "fs/promises";
 import remarkCallout from "@r4ai/remark-callout";
 import remarkBreaks from "remark-breaks";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
 import { math } from "micromark-extension-math";
 import * as mermaid from "./mermaid";
+import { tex2typst, typst2tex } from "tex2typst";
+import * as fsp from "fs/promises";
 import i18n, { type Lang } from "../locales";
+import { execFileSync } from "child_process";
+import { findTypstPath } from "./typst";
 
 const locale = i18n.current;
 
@@ -209,6 +215,64 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                 }
             })();
             tasks.push(task);
+        });
+        await Promise.all(tasks);
+    };
+    return transformer;
+};
+
+export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
+    const vault = app.vault;
+    const transformer: Transformer<Parent, Parent> = async (tree) => {
+        const settings = await loadSettings(vault);
+        const tasks: Promise<void>[] = [];
+        if (settings.typstMode === false) {
+            return;
+        }
+        visit(tree, "inlineMath", (node: any) => {
+            const typst = node.value;
+            const tex = typst2tex(typst);
+            node.value = tex;
+        });
+        visit(tree, "math", (node: any) => {
+            const typst = node.value;
+            const presetStyle = settings.typstPresetStyle;
+            const typstContent = `${presetStyle}\n$ ${typst} $`;
+            const toPicTask = (async () => {
+                const tmpDir = await mkdtemp(path.join(os.tmpdir(), "typst-"));
+                const typFile = path.join(tmpDir, "formula.typ");
+                const pngFile = path.join(tmpDir, "formula.png");
+                await writeFile(typFile, typstContent, "utf8");
+                // 使用命令行转换成png图片
+                const typstPath = findTypstPath();
+                console.log(typstPath);
+                if (!typstPath) {
+                    new Notice("Typst 未找到！请在设置中添加 Typst 路径");
+                    return;
+                }
+                execFileSync(typstPath, [
+                    "compile",
+                    "--ppi",
+                    settings.typstImgPPI.toString(),
+                    typFile,
+                    pngFile,
+                ]);
+                const imgBuffer = fs.readFileSync(pngFile);
+                const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                node.type = "image"; // 转换成 img 节点
+                node.url = imgLink;
+                node.alt = "";
+                await fsp.rm(tmpDir, { recursive: true, force: true }); // 清理临时文件夹
+            })();
+            const toTeXTask = (async () => {
+                const typst = node.value;
+                const tex = typst2tex(typst);
+                node.value = tex;
+            })();
+            // 在设置中查看如何处理行间公式
+            settings.typstDisplayToTeX
+                ? tasks.push(toTeXTask) // 转换成TeX
+                : tasks.push(toPicTask); // 转换成图片
         });
         await Promise.all(tasks);
     };
@@ -490,6 +554,7 @@ export async function remarkMdToHTML(app: App, md: string) {
         .use(wikiLinkPlugin)
         .use(remarkCallout)
         .use(remarkBreaks)
+        .use(remarkTypst, app)
         .use(remarkZhihuImgs, app)
         .use(remarkRehype, undefined, rehypeOpts)
         .use(rehypeFormat, { indent: 0 })
@@ -497,6 +562,7 @@ export async function remarkMdToHTML(app: App, md: string) {
         .process(md);
 
     const htmlOutput = String(output);
+    console.log(htmlOutput);
     return htmlOutput;
 }
 
