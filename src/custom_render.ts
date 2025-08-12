@@ -29,7 +29,6 @@ import { tex2typst, typst2tex } from "tex2typst";
 import * as fsp from "fs/promises";
 import i18n, { type Lang } from "../locales";
 import { execFileSync } from "child_process";
-import { findTypstPath } from "./typst";
 
 const locale = i18n.current;
 
@@ -239,30 +238,35 @@ export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
             const presetStyle = settings.typstPresetStyle;
             const typstContent = `${presetStyle}\n$ ${typst} $`;
             const toPicTask = (async () => {
-                const tmpDir = await mkdtemp(path.join(os.tmpdir(), "typst-"));
-                const typFile = path.join(tmpDir, "formula.typ");
-                const pngFile = path.join(tmpDir, "formula.png");
-                await writeFile(typFile, typstContent, "utf8");
-                // 使用命令行转换成png图片
-                const typstPath = findTypstPath();
-                console.log(typstPath);
-                if (!typstPath) {
+                try {
+                    const tmpDir = await mkdtemp(
+                        path.join(os.tmpdir(), "typst-"),
+                    );
+                    const typFile = path.join(tmpDir, "formula.typ");
+                    const pngFile = path.join(tmpDir, "formula.png");
+                    await writeFile(typFile, typstContent, "utf8");
+                    // 使用命令行转换成png图片
+                    const typstPath = settings.typstCliPath.trim();
+                    console.log(typstPath);
+
+                    execFileSync(typstPath, [
+                        "compile",
+                        "--ppi",
+                        settings.typstImgPPI.toString(),
+                        typFile,
+                        pngFile,
+                    ]);
+                    const imgBuffer = fs.readFileSync(pngFile);
+                    const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                    node.type = "image"; // 转换成 img 节点
+                    node.url = imgLink;
+                    node.alt = "";
+                    await fsp.rm(tmpDir, { recursive: true, force: true }); // 清理临时文件夹
+                } catch (error) {
+                    console.error("Typst conversion failed:", error);
                     new Notice("Typst 未找到！请在设置中添加 Typst 路径");
                     return;
                 }
-                execFileSync(typstPath, [
-                    "compile",
-                    "--ppi",
-                    settings.typstImgPPI.toString(),
-                    typFile,
-                    pngFile,
-                ]);
-                const imgBuffer = fs.readFileSync(pngFile);
-                const imgLink = await getZhihuImgLink(vault, imgBuffer);
-                node.type = "image"; // 转换成 img 节点
-                node.url = imgLink;
-                node.alt = "";
-                await fsp.rm(tmpDir, { recursive: true, force: true }); // 清理临时文件夹
             })();
             const toTeXTask = (async () => {
                 const typst = node.value;
