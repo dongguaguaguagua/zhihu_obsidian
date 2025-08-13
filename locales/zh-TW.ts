@@ -18,6 +18,8 @@ export default {
         publishCurrentAnswer: "发布当前回答",
         publishCurrentArticle: "发布当前文章",
         cancel: "取消",
+        confirmOpen: "確認打開",
+        notFound: "未找到",
     },
     notice: {
         notLogin: "你已登出，請先登入。",
@@ -82,6 +84,9 @@ export default {
         giveTopicSuccess: "新增話題成功！",
         giveTopicFailed: "新增話題失敗：",
         openZhihuSideFailed: "開啟知乎側邊欄失敗：無法建立側邊面板。",
+        typstNotFound: "未找到 Typst",
+        typstPathEmpty: "Typst 路徑為空",
+        typstVersion: "Typst 版本",
     },
     error: {
         unknownError: "未知錯誤",
@@ -109,6 +114,7 @@ export default {
         loadSVGFailed: "加載 SVG 失敗：",
         uploadMermaidImgFailed: "上傳 Mermaid 圖像到知乎失敗。",
         errorHandlingMermaid: "處理 Mermaid 圖時出錯：",
+        detectTypstVersionFailed: "檢測 Typst 版本時出錯",
     },
     settings: {
         accountTitle: "我的帳戶",
@@ -160,5 +166,28 @@ export default {
 * 給插件的 GitHub 倉庫點個星星：https://github.com/dongguaguaguagua/zhihu_obsidian\
         ",
         closePopularStrWarningButtonText: "關閉推廣語句",
+        typstMode: "Typst 模式（實驗性）",
+        typstModeDesc: "允許您將 Typst 公式以圖片或公式的形式發佈到知乎",
+        typstModeWarning:
+            "**這是一個實驗性功能**\n\
+* 為了保證更好的 Typst 編輯體驗，推薦安裝 [Typsidian](https://github.com/fogsong233/Typsidian) 或 [Wypst](obsidian://show-plugin?id=wypst) 外掛。\n\
+* 本功能需要您電腦上已安裝 [Typst](https://github.com/typst/typst) 命令列程式，\n\
+* 由於這是一個實驗性功能，如果您遇到問題或 bug，可以在 GitHub 發 [issue](https://github.com/dongguaguaguagua/zhihu_obsidian/issues) 給我。\n\
+",
+        typstVersion: "Typst 版本：",
+        typstPathDesc: "請輸入 Typst 可執行檔的路徑",
+        typstPathToolTip: "檢測 Typst 路徑並顯示版本",
+        displayMathSetting: "對於行間公式的處理",
+        displayMathSettingDesc:
+            "如果一些複雜的 Typst 公式轉成 LaTeX，可能會導致公式無法正常顯示",
+        displayMathTransPic: "轉換為圖片",
+        displayMathTransTex: "轉換為 LaTeX",
+        typstPicPPI: "Typst 行間公式圖片清晰度",
+        typstPicPPIDesc: "設定行間公式圖片的清晰度，單位為像素每英吋（PPI）",
+        typstPresetStyle: "Typst 行間公式預設樣式",
+        typstPresetStyleDesc:
+            "外掛將使用該樣式轉換您的公式，具體是將行間公式附加在樣式後面。\
+如果您將樣式刪除，會導致每個行間公式都有 A4 紙大小。您也可以在這裡定義函數或公式字型等更多內容。\
+需要注意的是，編輯器中不會檢測您的 Typst 語法是否正確，請確保設定的是正確且可編譯的 Typst。",
     },
 };

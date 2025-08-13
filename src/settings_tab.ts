@@ -16,7 +16,6 @@ import i18n, { type Lang } from "../locales";
 import { EditorView } from "@codemirror/view";
 import { createCookiesEditor } from "./ui/cookies_editor/editor";
 import { createTypstEditor, getTypstVersion } from "./typst";
-import { execFile, execSync } from "child_process";
 
 const locale = i18n.current;
 
@@ -386,8 +385,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
         createCookiesEditor(this, cookiesSetting, data);
 
         new Setting(containerEl)
-            .setName("Typst mode (Experimental)")
-            .setDesc("Enable you to publish you typst math to Zhihu")
+            .setName(locale.settings.typstMode)
+            .setDesc(locale.settings.typstModeDesc)
             .addToggle((toggle) =>
                 toggle.setValue(settings.typstMode).onChange(async (value) => {
                     if (!value) {
@@ -407,12 +406,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
                     const modal = new ConfirmationModal(
                         this.app,
-                        "**这是一个实验性功能**\n\
-为了保证更好的编辑体验，请安装 https://github.com/fogsong233/Typsidian 插件。\n\
-本功能需要您电脑上已安装了 [Typst](https://github.com/typst/typst) 命令行程序，\
-",
+                        locale.settings.typstModeWarning,
                         (button) => {
-                            button.setButtonText("确认打开").setWarning();
+                            button
+                                .setButtonText(locale.ui.confirmOpen)
+                                .setWarning();
                         },
                         async () => {
                             confirmed = true; // 标记为已确认
@@ -466,12 +464,12 @@ export class ZhihuSettingTab extends PluginSettingTab {
         // Typst path setting
         let versionName = getTypstVersion(settings.typstCliPath);
         if (!versionName && settings.typstMode) {
-            new Notice(`未找到 Typst`);
-            versionName = "未找到";
+            new Notice(locale.notice.typstNotFound);
+            versionName = locale.ui.notFound;
         }
         const typstPathSetting = new Setting(containerEl)
-            .setName(`Typst 版本：${versionName}`)
-            .setDesc("请输入 Typst 可执行文件的路径：")
+            .setName(`${locale.settings.typstVersion}${versionName}`)
+            .setDesc(locale.settings.typstPathDesc)
             .addText((text) => {
                 text.setValue(settings.typstCliPath).onChange(async (value) => {
                     try {
@@ -487,25 +485,27 @@ export class ZhihuSettingTab extends PluginSettingTab {
             .addButton((button) => {
                 button
                     .setIcon("rotate-ccw")
-                    .setTooltip("检测 Typst 路径并显示版本")
+                    .setTooltip(locale.settings.typstPathToolTip)
                     .onClick(async () => {
                         const path = settings.typstCliPath.trim();
                         if (!path) {
-                            new Notice("Typst 路径为空");
+                            new Notice(locale.settings.typstPathEmpty);
                             return;
                         }
                         try {
                             versionName = getTypstVersion(path);
                             if (!versionName) {
-                                new Notice(`未找到 Typst`);
-                                versionName = "未找到";
+                                new Notice(locale.notice.typstNotFound);
+                                versionName = locale.ui.notFound;
                             }
+                            new Notice(
+                                `${locale.notice.typstVersion}:${versionName}`,
+                            );
                             typstPathSetting.setName(
-                                `Typst 版本：${versionName}`,
+                                `${locale.settings.typstVersion} ${versionName}`,
                             );
                         } catch (e) {
                             console.error(e);
-                            new Notice("检测 Typst 版本时出错");
                         }
                     });
             })
@@ -513,14 +513,12 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         // 对于行间公式的处理：是否转成LaTeX
         const displaySetting = new Setting(containerEl)
-            .setName("对于行间公式的处理")
-            .setDesc(
-                "如果一些复杂的Typst公式转成LaTeX，可能会导致公式无法正常显示。",
-            )
+            .setName(locale.settings.displayMathSetting)
+            .setDesc(locale.settings.displayMathSettingDesc)
             .addDropdown((dropdown) => {
                 dropdown
-                    .addOption("false", "转换为图片")
-                    .addOption("true", "转换为LaTeX")
+                    .addOption("false", locale.settings.displayMathTransPic)
+                    .addOption("true", locale.settings.displayMathTransTex)
                     .setValue(settings.typstDisplayToTeX.toString())
                     .onChange(async (value) => {
                         settings.typstDisplayToTeX = value === "true";
@@ -533,8 +531,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         // Typst PPI setting
         const ppiSetting = new Setting(containerEl)
-            .setName("Typst 行间公式图片清晰度")
-            .setDesc("设置行间公式图片的清晰度，单位为像素每英寸(PPI)")
+            .setName(locale.settings.typstPicPPI)
+            .setDesc(locale.settings.typstPicPPIDesc)
             .addDropdown((dropdown) => {
                 dropdown
                     .addOption("500", "500")
@@ -553,8 +551,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         // typst 内容编辑器
         const typstStyleSetting = new Setting(containerEl)
-            .setName("Preset styles")
-            .setDesc("Typst 渲染前的内容")
+            .setName(locale.settings.typstPresetStyle)
+            .setDesc(locale.settings.typstPresetStyleDesc)
             .setClass(settings.typstMode ? "preset-style-area" : "hidden");
 
         createTypstEditor(this, typstStyleSetting, settings.typstPresetStyle);

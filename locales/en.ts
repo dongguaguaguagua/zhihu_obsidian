@@ -20,6 +20,8 @@ export default {
         publishCurrentAnswer: "publish current answer",
         publishCurrentArticle: "publish current article",
         cancel: "Cancel",
+        confirmOpen: "Confirm to open",
+        notFound: "Not found",
     },
     notice: {
         notLogin: "You are logout, please login first.",
@@ -86,6 +88,9 @@ export default {
         giveTopicFailed: "Failed to give topic:",
         openZhihuSideFailed:
             "Failed to open Zhihu sides: unable to create a sidebar leaf.",
+        typstNotFound: "Typst not found",
+        typstPathEmpty: "Typst path is empty",
+        typstVersion: "Typst Version",
     },
     error: {
         unknownError: "Unknown error",
@@ -113,6 +118,8 @@ export default {
         loadSVGFailed: "Failed to load SVG:",
         uploadMermaidImgFailed: "Failed to upload Mermaid image to Zhihu.",
         errorHandlingMermaid: "Error handling Mermaid diagram:",
+        detectTypstVersionFailed:
+            "Error occurred while detecting Typst version",
     },
     settings: {
         accountTitle: "My account",
@@ -168,5 +175,30 @@ export default {
 * Star the plugin's GitHub repository: https://github.com/dongguaguaguagua/zhihu_obsidian\
         ",
         closePopularStrWarningButtonText: "Turn off promotional statement",
+        typstMode: "Typst Mode (Experimental)",
+        typstModeDesc:
+            "Allows you to publish Typst formulas to Zhihu as images or formulas",
+        typstModeWarning:
+            "**This is an experimental feature**\n\
+* For a better Typst editing experience, it is recommended to install the [Typsidian](https://github.com/fogsong233/Typsidian) or [Wypst](obsidian://show-plugin?id=wypst) plugin.\n\
+* This feature requires that the [Typst](https://github.com/typst/typst) command-line program is installed on your computer.\n\
+* Since this is an experimental feature, if you encounter any issues or bugs, you can submit an [issue](https://github.com/dongguaguaguagua/zhihu_obsidian/issues) on GitHub.\n\
+",
+        typstVersion: "Typst Version:",
+        typstPathDesc: "Please enter the path to the Typst executable file",
+        typstPathToolTip: "Detect Typst path and display version",
+        displayMathSetting: "Handling of display (block) formulas",
+        displayMathSettingDesc:
+            "If some complex Typst formulas are converted to LaTeX, it may cause the formulas to fail to render properly",
+        displayMathTransPic: "Convert to Image",
+        displayMathTransTex: "Convert to LaTeX",
+        typstPicPPI: "Typst Display Formula Image Resolution",
+        typstPicPPIDesc:
+            "Set the resolution of display formula images, in pixels per inch (PPI)",
+        typstPresetStyle: "Typst Display Formula Preset Style",
+        typstPresetStyleDesc:
+            "The plugin will use this style to convert your formulas, specifically by appending display formulas after the style.\
+If you delete the style, each display formula will have the size of an A4 page. You can also define functions, formula fonts, and more here.\
+Note that the editor will not check whether your Typst syntax is correct; please ensure the style is valid and compilable Typst.",
     },
 };
