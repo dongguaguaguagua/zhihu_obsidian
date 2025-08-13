@@ -15,6 +15,7 @@ import { loadData, deleteData } from "./data";
 import i18n, { type Lang } from "../locales";
 import { EditorView } from "@codemirror/view";
 import { createCookiesEditor } from "./ui/cookies_editor/editor";
+import { createTypstEditor, getTypstVersion } from "./typst";
 
 const locale = i18n.current;
 
@@ -22,9 +23,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
     plugin: ZhihuObPlugin;
     isLoggedIn = false;
     cookiesEditor: EditorView;
+    typstEditor: EditorView;
 
     hide() {
         this.cookiesEditor?.destroy();
+        this.typstEditor?.destroy();
     }
 
     userInfo: { avatar_url: string; name: string; headline?: string } | null =
@@ -359,11 +362,11 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             });
                             cookiesSetting.settingEl.toggleClass(
                                 "cookies-setting-area",
-                                value === true,
+                                value,
                             );
                             cookiesSetting.settingEl.toggleClass(
                                 "hidden",
-                                value !== true,
+                                !value,
                             );
                         } catch (e) {
                             console.error("save settings failed:", e);
@@ -380,6 +383,179 @@ export class ZhihuSettingTab extends PluginSettingTab {
 
         const data = await loadData(this.app.vault);
         createCookiesEditor(this, cookiesSetting, data);
+
+        new Setting(containerEl)
+            .setName(locale.settings.typstMode)
+            .setDesc(locale.settings.typstModeDesc)
+            .addToggle((toggle) =>
+                toggle.setValue(settings.typstMode).onChange(async (value) => {
+                    if (!value) {
+                        settings.typstMode = false;
+                        await saveSettings(this.app.vault, {
+                            typstMode: value,
+                        });
+                        ppiSetting.settingEl.toggleClass("hidden", true);
+                        typstStyleSetting.settingEl.toggleClass("hidden", true);
+                        displaySetting.settingEl.toggleClass("hidden", true);
+                        typstPathSetting.settingEl.toggleClass("hidden", true);
+                        return;
+                    }
+                    // 如果是关闭开关，则显示确认弹窗
+                    // 用于跟踪用户是否点击了确认按钮
+                    let confirmed = false;
+
+                    const modal = new ConfirmationModal(
+                        this.app,
+                        locale.settings.typstModeWarning,
+                        (button) => {
+                            button
+                                .setButtonText(locale.ui.confirmOpen)
+                                .setWarning();
+                        },
+                        async () => {
+                            confirmed = true; // 标记为已确认
+                            settings.typstMode = true;
+                            await saveSettings(this.app.vault, {
+                                typstMode: value,
+                            });
+                            ppiSetting.settingEl.toggleClass(
+                                "ppi-setting-area",
+                                value,
+                            );
+                            typstStyleSetting.settingEl.toggleClass(
+                                "preset-style-area",
+                                value,
+                            );
+                            displaySetting.settingEl.toggleClass(
+                                "display-setting-area",
+                                value,
+                            );
+                            typstPathSetting.settingEl.toggleClass(
+                                "typst-path-area",
+                                value,
+                            );
+                            ppiSetting.settingEl.toggleClass("hidden", !value);
+                            typstStyleSetting.settingEl.toggleClass(
+                                "hidden",
+                                !value,
+                            );
+                            displaySetting.settingEl.toggleClass(
+                                "hidden",
+                                !value,
+                            );
+                            typstPathSetting.settingEl.toggleClass(
+                                "hidden",
+                                !value,
+                            );
+                        },
+                    );
+
+                    modal.onClose = () => {
+                        if (!confirmed) {
+                            toggle.setValue(false);
+                            ppiSetting.settingEl.toggleClass("hidden", true);
+                        }
+                    };
+
+                    modal.open();
+                }),
+            );
+
+        // Typst path setting
+        let versionName = getTypstVersion(settings.typstCliPath);
+        if (!versionName && settings.typstMode) {
+            new Notice(locale.notice.typstNotFound);
+            versionName = locale.ui.notFound;
+        }
+        const typstPathSetting = new Setting(containerEl)
+            .setName(`${locale.settings.typstVersion}${versionName}`)
+            .setDesc(locale.settings.typstPathDesc)
+            .addText((text) => {
+                text.setValue(settings.typstCliPath).onChange(async (value) => {
+                    try {
+                        settings.typstCliPath = value;
+                        await saveSettings(this.app.vault, {
+                            typstCliPath: value,
+                        });
+                    } catch (e) {
+                        console.error(e);
+                    }
+                });
+            })
+            .addButton((button) => {
+                button
+                    .setIcon("rotate-ccw")
+                    .setTooltip(locale.settings.typstPathToolTip)
+                    .onClick(async () => {
+                        const path = settings.typstCliPath.trim();
+                        if (!path) {
+                            new Notice(locale.settings.typstPathEmpty);
+                            return;
+                        }
+                        try {
+                            versionName = getTypstVersion(path);
+                            if (!versionName) {
+                                new Notice(locale.notice.typstNotFound);
+                                versionName = locale.ui.notFound;
+                            }
+                            new Notice(
+                                `${locale.notice.typstVersion}:${versionName}`,
+                            );
+                            typstPathSetting.setName(
+                                `${locale.settings.typstVersion} ${versionName}`,
+                            );
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    });
+            })
+            .setClass(settings.typstMode ? "typst-path-area" : "hidden");
+
+        // 对于行间公式的处理：是否转成LaTeX
+        const displaySetting = new Setting(containerEl)
+            .setName(locale.settings.displayMathSetting)
+            .setDesc(locale.settings.displayMathSettingDesc)
+            .addDropdown((dropdown) => {
+                dropdown
+                    .addOption("false", locale.settings.displayMathTransPic)
+                    .addOption("true", locale.settings.displayMathTransTex)
+                    .setValue(settings.typstDisplayToTeX.toString())
+                    .onChange(async (value) => {
+                        settings.typstDisplayToTeX = value === "true";
+                        await saveSettings(this.app.vault, {
+                            typstDisplayToTeX: settings.typstDisplayToTeX,
+                        });
+                    });
+            })
+            .setClass(settings.typstMode ? "display-setting-area" : "hidden");
+
+        // Typst PPI setting
+        const ppiSetting = new Setting(containerEl)
+            .setName(locale.settings.typstPicPPI)
+            .setDesc(locale.settings.typstPicPPIDesc)
+            .addDropdown((dropdown) => {
+                dropdown
+                    .addOption("500", "500")
+                    .addOption("400", "400")
+                    .addOption("300", "300")
+                    .addOption("200", "200")
+                    .setValue(settings.typstImgPPI.toString())
+                    .onChange(async (value) => {
+                        settings.typstImgPPI = parseFloat(value);
+                        await saveSettings(this.app.vault, {
+                            typstImgPPI: parseInt(value),
+                        });
+                    });
+            })
+            .setClass(settings.typstMode ? "ppi-setting-area" : "hidden");
+
+        // typst 内容编辑器
+        const typstStyleSetting = new Setting(containerEl)
+            .setName(locale.settings.typstPresetStyle)
+            .setDesc(locale.settings.typstPresetStyleDesc)
+            .setClass(settings.typstMode ? "preset-style-area" : "hidden");
+
+        createTypstEditor(this, typstStyleSetting, settings.typstPresetStyle);
     }
 }
 
