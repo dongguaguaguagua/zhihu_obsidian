@@ -18,6 +18,8 @@ export default {
         publishCurrentAnswer: "发布当前回答",
         publishCurrentArticle: "发布当前文章",
         cancel: "取消",
+        confirmOpen: "确认打开",
+        notFound: "未找到",
     },
     notice: {
         notLogin: "你已登出，请先登录。",
@@ -82,12 +84,9 @@ export default {
         giveTopicSuccess: "添加话题成功！",
         giveTopicFailed: "添加话题失败：",
         openZhihuSideFailed: "打开知乎侧边栏失败：无法创建侧边面板。",
-        identifySVGFailed: "识别 SVG 原始缩放比例失败。",
-        fetchContextFailed: "获取 Canvas 2D 上下文失败。",
-        generateBlobFailed: "从 Canvas 生成 Blob 失败。",
-        loadSVGFailed: "加载 SVG 失败：",
-        uploadMermaidImgFailed: "上传 Mermaid 图像到知乎失败。",
-        errorHandlingMermaid: "处理 Mermaid 图时出错：",
+        typstNotFound: "未找到 Typst",
+        typstPathEmpty: "Typst 路径为空",
+        typstVersion: "Typst 版本",
     },
     error: {
         unknownError: "未知错误",
@@ -109,6 +108,13 @@ export default {
         htmlToMdConvertionFailed: "HTML 转 Markdown 失败：",
         saveUseZhihuHeadingFailed: "保存 useZhihuHeading 设置失败：",
         saveUseImgNameFailed: "Failed to save useImgNameDefault setting:",
+        identifySVGFailed: "识别 SVG 原始缩放比例失败。",
+        fetchContextFailed: "获取 Canvas 2D 上下文失败。",
+        generateBlobFailed: "从 Canvas 生成 Blob 失败。",
+        loadSVGFailed: "加载 SVG 失败：",
+        uploadMermaidImgFailed: "上传 Mermaid 图像到知乎失败。",
+        errorHandlingMermaid: "处理 Mermaid 图时出错：",
+        detectTypstVersionFailed: "检测 Typst 版本时出错",
     },
     settings: {
         accountTitle: "我的账户",
@@ -160,5 +166,28 @@ export default {
 * 给插件的 GitHub 仓库打个星星：https://github.com/dongguaguaguagua/zhihu_obsidian\
 ",
         closePopularStrWarningButtonText: "关闭推广语句",
+        typstMode: "Typst 模式 (实验性)",
+        typstModeDesc: "允许您将 Typst 公式以图片或公式的形式发表到知乎",
+        typstModeWarning:
+            "**这是一个实验性功能**\n\
+* 为了保证更好的 Typst 编辑体验，推荐安装 [Typsidian](https://github.com/fogsong233/Typsidian) 或 [Wypst](obsidian://show-plugin?id=wypst) 插件。\n\
+* 本功能需要您电脑上已安装了 [Typst](https://github.com/typst/typst) 命令行程序，\n\
+* 由于这是一个实验性功能，如果您遇到了问题或者bug，可以在GitHub发 [issue](https://github.com/dongguaguaguagua/zhihu_obsidian/issues) 给我。\n\
+",
+        typstVersion: "Typst 版本：",
+        typstPathDesc: "请输入 Typst 可执行文件的路径",
+        typstPathToolTip: "检测 Typst 路径并显示版本",
+        displayMathSetting: "对于行间公式的处理",
+        displayMathSettingDesc:
+            "如果一些复杂的 Typst 公式转成 LaTeX，可能会导致公式无法正常显示",
+        displayMathTransPic: "转换为图片",
+        displayMathTransTex: "转换为LaTeX",
+        typstPicPPI: "Typst 行间公式图片清晰度",
+        typstPicPPIDesc: "设置行间公式图片的清晰度，单位为像素每英寸(PPI)",
+        typstPresetStyle: "Typst 行间公式预设样式",
+        typstPresetStyleDesc:
+            "插件将使用该样式转换您的公式，具体是将行间公式附加在样式后面。\
+如果您将样式删除，会导致每个行间公式都有A4纸大小。您也可以在这里定义函数或公式字体等更多内容。\
+需要注意的是，编辑器中不会检测您的 Typst 语法是否正确，请确保设置的是正确、可编译的 Typst。",
     },
 };
