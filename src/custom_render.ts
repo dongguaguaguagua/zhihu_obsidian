@@ -29,6 +29,7 @@ import { tex2typst, typst2tex } from "tex2typst";
 import * as fsp from "fs/promises";
 import i18n, { type Lang } from "../locales";
 import { execFileSync } from "child_process";
+import rehypeRaw from "rehype-raw";
 
 const locale = i18n.current;
 
@@ -553,14 +554,15 @@ export async function remarkMdToHTML(app: App, md: string) {
     };
     const output = await unified()
         .use(remarkParse)
-        .use(remarkGfm)
-        .use(mathPlugin)
-        .use(wikiLinkPlugin)
-        .use(remarkCallout)
-        .use(remarkBreaks)
-        .use(remarkTypst, app)
-        .use(remarkZhihuImgs, app)
-        .use(remarkRehype, undefined, rehypeOpts)
+        .use(remarkGfm) // 解析脚注、表格等
+        .use(mathPlugin) // 解析数学公式
+        .use(wikiLinkPlugin) // 解析 Obsidian 风格的图片链接
+        .use(remarkCallout) // 解析 Obsidian 风格的 Callout
+        .use(remarkBreaks) // 换行符换行
+        .use(remarkTypst, app) // 将数学公式转换为 Typst 或者图片节点
+        .use(remarkZhihuImgs, app) // 将上面解析的图片节点和维基链接节点转换为知乎图片
+        .use(remarkRehype, undefined, rehypeOpts) // 转换其余不需要异步的节点
+        .use(rehypeRaw) // 解析 HTML 标签
         .use(rehypeFormat, { indent: 0 })
         .use(rehypeStringify)
         .process(md);
