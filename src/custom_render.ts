@@ -489,6 +489,15 @@ export async function remarkMdToHTML(app: App, md: string) {
         },
 
         blockquote(state: any, node: any): Element {
+            // 如果不存在callout，说明是普通引用块，则返回原本结果
+            if (node?.data?.hProperties?.dataCallout === undefined) {
+                return {
+                    type: "element",
+                    tagName: "blockquote",
+                    properties: {},
+                    children: state.all(node),
+                };
+            }
             const props = node.data?.hProperties || {};
             // ignore类型直接返回空 p
             // EXAMPLE:
