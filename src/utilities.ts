@@ -57,3 +57,12 @@ export function execFileAsync(cmd: string, args: string[]) {
         });
     });
 }
+
+export function isWebUrl(url: string): boolean {
+    try {
+        const parsed = new URL(url, "file://"); // 基于 file:// 解析相对路径
+        return parsed.protocol === "http:" || parsed.protocol === "https:";
+    } catch {
+        return false; // URL 解析失败
+    }
+}

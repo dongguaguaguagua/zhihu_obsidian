@@ -15,22 +15,19 @@ import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
 import { loadSettings } from "./settings";
 import { getOnlineImg, getZhihuImgLink } from "./image_service";
-import os from "os";
 import * as file from "./files";
 import * as fs from "fs";
 import * as path from "path";
-import { writeFile, mkdtemp } from "fs/promises";
 import remarkCallout from "@r4ai/remark-callout";
 import remarkBreaks from "remark-breaks";
 import { mathFromMarkdown, mathToMarkdown } from "mdast-util-math";
 import { math } from "micromark-extension-math";
 import * as mermaid from "./mermaid";
-import { tex2typst, typst2tex } from "tex2typst";
-import * as fsp from "fs/promises";
+import { typst2tex } from "tex2typst";
 import i18n, { type Lang } from "../locales";
-import { execFileSync } from "child_process";
 import rehypeRaw from "rehype-raw";
 import { typstCode2Img } from "./typst";
+import { isWebUrl } from "./utilities";
 
 const locale = i18n.current;
 
@@ -99,7 +96,18 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
             const task = (async () => {
                 let alt = node.alt;
                 const url = node.url || "";
-                const imgBuffer = await getOnlineImg(vault, url);
+                // 自动判断是否是HTTP/HTTPS协议
+                // 如果是则获取在线图片，否则按照原路经处理
+                let imgBuffer: Buffer;
+                if (isWebUrl(url)) {
+                    imgBuffer = await getOnlineImg(vault, url);
+                } else {
+                    const imgPathOnDisk = await file.getFilePathFromName(
+                        app,
+                        url,
+                    );
+                    imgBuffer = fs.readFileSync(imgPathOnDisk);
+                }
                 const imgLink = await getZhihuImgLink(vault, imgBuffer);
                 if (!alt) {
                     // 如果alt为空，则通过设置判断是否加alt
