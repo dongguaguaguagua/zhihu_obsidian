@@ -16,6 +16,7 @@ import i18n, { type Lang } from "../locales";
 import { EditorView } from "@codemirror/view";
 import { createCookiesEditor } from "./ui/cookies_editor/editor";
 import { createTypstEditor, getTypstVersion } from "./typst";
+import locales from "../locales";
 
 const locale = i18n.current;
 
@@ -398,6 +399,10 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         typstStyleSetting.settingEl.toggleClass("hidden", true);
                         displaySetting.settingEl.toggleClass("hidden", true);
                         typstPathSetting.settingEl.toggleClass("hidden", true);
+                        typstRenderSetting.settingEl.toggleClass(
+                            "hidden",
+                            true,
+                        );
                         return;
                     }
                     // 如果是关闭开关，则显示确认弹窗
@@ -434,6 +439,10 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 "typst-path-area",
                                 value,
                             );
+                            typstRenderSetting.settingEl.toggleClass(
+                                "typst-render-area",
+                                value,
+                            );
                             ppiSetting.settingEl.toggleClass("hidden", !value);
                             typstStyleSetting.settingEl.toggleClass(
                                 "hidden",
@@ -444,6 +453,10 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                 !value,
                             );
                             typstPathSetting.settingEl.toggleClass(
+                                "hidden",
+                                !value,
+                            );
+                            typstRenderSetting.settingEl.toggleClass(
                                 "hidden",
                                 !value,
                             );
@@ -548,6 +561,26 @@ export class ZhihuSettingTab extends PluginSettingTab {
                     });
             })
             .setClass(settings.typstMode ? "ppi-setting-area" : "hidden");
+
+        // Typst code identifier
+        const typstRenderSetting = new Setting(containerEl)
+            .setName(locale.settings.typstRenderSetting)
+            .setDesc(locale.settings.typstRenderSettingDesc)
+            .addText((text) => {
+                text.setValue(settings.typstRenderLang).onChange(
+                    async (value) => {
+                        try {
+                            settings.typstRenderLang = value;
+                            await saveSettings(this.app.vault, {
+                                typstRenderLang: value,
+                            });
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    },
+                );
+            })
+            .setClass(settings.typstMode ? "typst-render-area" : "hidden");
 
         // typst 内容编辑器
         const typstStyleSetting = new Setting(containerEl)
