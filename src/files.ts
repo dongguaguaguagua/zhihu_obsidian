@@ -1,6 +1,6 @@
-import { Vault, FileSystemAdapter, TFile, normalizePath } from "obsidian";
+import { App, Notice, FileSystemAdapter, TFile, normalizePath } from "obsidian";
+import * as fs from "fs";
 import * as path from "path";
-import { Notice, App} from "obsidian";
 
 interface FileSearchResult {
     file: TFile;
@@ -42,10 +42,12 @@ export async function getFilePathFromName(
         const activeFile = app.workspace.getActiveFile?.();
         if (activeFile) {
             const activeFileAbsPath = path.join(vaultBasePath, activeFile.path);
-            const imageAbsPath = path.resolve(path.dirname(activeFileAbsPath), fileName);
+            const imageAbsPath = path.resolve(
+                path.dirname(activeFileAbsPath),
+                fileName,
+            );
 
             try {
-                const fs = require("fs");
                 if (fs.existsSync(imageAbsPath)) {
                     // new Notice(`图片文件存在: ${imageAbsPath}`);
                     return imageAbsPath;
