@@ -30,6 +30,7 @@ import * as fsp from "fs/promises";
 import i18n, { type Lang } from "../locales";
 import { execFileSync } from "child_process";
 import rehypeRaw from "rehype-raw";
+import { typstCode2Img } from "./typst";
 
 const locale = i18n.current;
 
@@ -235,49 +236,48 @@ export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
             node.value = tex;
         });
         visit(tree, "math", (node: any) => {
-            const typst = node.value;
-            const presetStyle = settings.typstPresetStyle;
-            const typstContent = `${presetStyle}\n$ ${typst} $`;
+            const typstEq = node.value;
             const toPicTask = (async () => {
                 try {
-                    const tmpDir = await mkdtemp(
-                        path.join(os.tmpdir(), "typst-"),
-                    );
-                    const typFile = path.join(tmpDir, "formula.typ");
-                    const pngFile = path.join(tmpDir, "formula.png");
-                    await writeFile(typFile, typstContent, "utf8");
-                    // 使用命令行转换成png图片
-                    const typstPath = settings.typstCliPath.trim();
-                    console.log(typstPath);
-
-                    execFileSync(typstPath, [
-                        "compile",
-                        "--ppi",
-                        settings.typstImgPPI.toString(),
-                        typFile,
-                        pngFile,
-                    ]);
-                    const imgBuffer = fs.readFileSync(pngFile);
-                    const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                    const presetStyle = settings.typstPresetStyle;
+                    const typstContent = `${presetStyle}\n$ ${typstEq} $`;
+                    const imgLink = await typstCode2Img(typstContent, vault);
                     node.type = "image"; // 转换成 img 节点
                     node.url = imgLink;
                     node.alt = "";
-                    await fsp.rm(tmpDir, { recursive: true, force: true }); // 清理临时文件夹
                 } catch (error) {
-                    console.error("Typst conversion failed:", error);
-                    new Notice("Typst 未找到！请在设置中添加 Typst 路径");
+                    console.error("Typst equation conversion failed:", error);
                     return;
                 }
             })();
             const toTeXTask = (async () => {
-                const typst = node.value;
-                const tex = typst2tex(typst);
+                const tex = typst2tex(typstEq);
                 node.value = tex;
             })();
             // 在设置中查看如何处理行间公式
             settings.typstDisplayToTeX
                 ? tasks.push(toTeXTask) // 转换成TeX
                 : tasks.push(toPicTask); // 转换成图片
+        });
+        visit(tree, "code", (node: any) => {
+            const typstCode = node.value;
+            const lang = node.lang;
+            if (lang !== "typrender") {
+                return;
+            }
+            const task = (async () => {
+                try {
+                    const presetStyle = settings.typstPresetStyle;
+                    const typstContent = `${presetStyle}\n${typstCode}`;
+                    const imgLink = await typstCode2Img(typstContent, vault);
+                    node.type = "image"; // 转换成 img 节点
+                    node.url = imgLink;
+                    node.alt = "";
+                } catch (error) {
+                    console.error("Typst code conversion failed:", error);
+                }
+            })();
+            tasks.push(task);
         });
         await Promise.all(tasks);
     };

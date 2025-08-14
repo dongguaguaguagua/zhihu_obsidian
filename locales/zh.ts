@@ -87,6 +87,7 @@ export default {
         typstNotFound: "未找到 Typst",
         typstPathEmpty: "Typst 路径为空",
         typstVersion: "Typst 版本",
+        enterPathInstruction: "请在设置中添加 Typst 路径",
     },
     error: {
         unknownError: "未知错误",
@@ -184,6 +185,9 @@ export default {
         displayMathTransTex: "转换为LaTeX",
         typstPicPPI: "Typst 行间公式图片清晰度",
         typstPicPPIDesc: "设置行间公式图片的清晰度，单位为像素每英寸(PPI)",
+        typstRenderSetting: "需要渲染的 Typst 代码块语言",
+        typstRenderSettingDesc:
+            "如果您需要将一部分 Typst 代码渲染成图片，可以将包含 Typst 代码的代码块设置成该语言。",
         typstPresetStyle: "Typst 行间公式预设样式",
         typstPresetStyleDesc:
             "插件将使用该样式转换您的公式，具体是将行间公式附加在样式后面。\

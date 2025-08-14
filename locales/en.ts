@@ -91,6 +91,7 @@ export default {
         typstNotFound: "Typst not found",
         typstPathEmpty: "Typst path is empty",
         typstVersion: "Typst Version",
+        enterPathInstruction: "Please enter Typst path in settings",
     },
     error: {
         unknownError: "Unknown error",
@@ -195,6 +196,9 @@ export default {
         typstPicPPI: "Typst Display Formula Image Resolution",
         typstPicPPIDesc:
             "Set the resolution of display formula images, in pixels per inch (PPI)",
+        typstRenderSetting: "Typst code block language to render",
+        typstRenderSettingDesc:
+            "If you need to render certain Typst code as images, set the code block containing the Typst code to this language.",
         typstPresetStyle: "Typst Display Formula Preset Style",
         typstPresetStyleDesc:
             "The plugin will use this style to convert your formulas, specifically by appending display formulas after the style.\
