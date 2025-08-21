@@ -502,7 +502,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                     .onClick(async () => {
                         const path = settings.typstCliPath.trim();
                         if (!path) {
-                            new Notice(locale.settings.typstPathEmpty);
+                            new Notice(locale.notice.typstPathEmpty);
                             return;
                         }
                         try {
