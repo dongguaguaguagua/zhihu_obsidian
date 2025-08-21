@@ -580,7 +580,7 @@ export async function remarkMdToHTML(app: App, md: string) {
         .use(remarkZhihuImgs, app) // 将上面解析的图片节点和维基链接节点转换为知乎图片
         .use(remarkRehype, undefined, rehypeOpts) // 转换其余不需要异步的节点
         .use(rehypeRaw) // 解析 HTML 标签
-        .use(rehypeFormat, { indent: 0 })
+        // .use(rehypeFormat, { indent: 0 }) // 会导致行内公式被强制换行
         .use(rehypeStringify)
         .process(md);
 
