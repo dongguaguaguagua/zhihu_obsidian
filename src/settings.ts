@@ -35,7 +35,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     autoOpenZhihuLink: true,
     mermaidScale: 3,
     popularize: true,
-    typstMode: true,
+    typstMode: false,
     typstCliPath: "",
     typstImgPPI: 300,
     typstRenderLang: "typrender",
