@@ -124,14 +124,27 @@ export async function zhihuWebLogin(app: App): Promise<void> {
     const remote = window.require("@electron/remote");
     const { BrowserWindow, session } = remote;
 
-    await session.defaultSession.clearStorageData();
-    await session.defaultSession.clearCache();
+    // 为“无痕”登录窗创建独立的非持久分区（注意：没有 'persist:' 前缀）
+    const partition = `zhihu-login-${Date.now()}`;
+    const ses = session.fromPartition(partition); // 非持久化，会在窗口全关后销毁
+
+    // 只清理这个分区，避免：
+    // DOMException: Failed to execute 'transaction' on 'IDBDatabase':
+    // The database connection is closing.
+    await ses.clearStorageData({
+        origin: "https://www.zhihu.com",
+        storages: ["cookies", "localstorage", "serviceworkers", "cachestorage"],
+    });
 
     return new Promise<void>((resolve, reject) => {
         const win = new BrowserWindow({
             width: 800,
             height: 600,
-            webPreferences: { nodeIntegration: false, contextIsolation: true },
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+                partition,
+            },
         });
 
         const loginUrl = "https://www.zhihu.com/signin";
@@ -142,13 +155,15 @@ export async function zhihuWebLogin(app: App): Promise<void> {
         win.webContents.on("did-finish-load", async () => {
             try {
                 const url = win.webContents.getURL();
+
                 if (url === "https://www.zhihu.com/") {
                     await win.loadURL(exampleQuestionUrl);
                     return;
                 }
 
                 if (url.startsWith(exampleQuestionUrl)) {
-                    const cookies = await session.defaultSession.cookies.get({
+                    // 从“无痕分区”的 cookies 取值
+                    const cookies = await ses.cookies.get({
                         url: "https://www.zhihu.com",
                     });
                     const zse = cookies.find((c: any) => c.name === "__zse_ck");
@@ -157,14 +172,15 @@ export async function zhihuWebLogin(app: App): Promise<void> {
                         return;
                     }
                     new Notice(`${locale.notice.loginSuccess}`);
-                    // convert cookies to {string: string} format
-                    const cookieObj: { [key: string]: string } = {};
+                    // 将获取的 cookie 转换成 JSON 形式
+                    const cookieObj: Record<string, string> = {};
                     cookies.forEach((c: { name: string; value: string }) => {
                         cookieObj[c.name] = c.value;
                     });
-                    // save cookies to vault
+
                     await dataUtil.updateData(vault, { cookies: cookieObj });
                     await getUserInfo(vault);
+
                     win.close();
                     resolve();
                 }
@@ -173,10 +189,7 @@ export async function zhihuWebLogin(app: App): Promise<void> {
             }
         });
 
-        win.on("closed", () => {
-            // 如果窗口被关掉但没成功登录，可以 reject
-            reject(new Error("用户关闭了登录窗口"));
-        });
+        win.on("closed", () => reject(new Error("用户关闭了登录窗口")));
     });
 }
 
