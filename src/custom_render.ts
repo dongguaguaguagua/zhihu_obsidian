@@ -246,17 +246,19 @@ export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
         visit(tree, "math", (node: any) => {
             const typstEq = node.value;
             const toPicTask = (async () => {
+                let imgLink = "";
                 try {
                     const presetStyle = settings.typstPresetStyle;
                     const typstContent = `${presetStyle}\n$ ${typstEq} $`;
-                    const imgLink = await typstCode2Img(typstContent, vault);
-                    node.type = "image"; // 转换成 img 节点
-                    node.url = imgLink;
-                    node.alt = "";
+                    imgLink = await typstCode2Img(typstContent, vault);
                 } catch (error) {
                     console.error("Typst equation conversion failed:", error);
+                    new Notice("Typst 转换图片失败，请检查语法是否正确");
                     return;
                 }
+                node.type = "image"; // 转换成 img 节点
+                node.url = imgLink;
+                node.alt = "";
             })();
             const toTeXTask = (async () => {
                 const tex = typst2tex(typstEq);
@@ -274,16 +276,19 @@ export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
                 return;
             }
             const task = (async () => {
+                let imgLink = "";
                 try {
                     const presetStyle = settings.typstPresetStyle;
                     const typstContent = `${presetStyle}\n${typstCode}`;
-                    const imgLink = await typstCode2Img(typstContent, vault);
-                    node.type = "image"; // 转换成 img 节点
-                    node.url = imgLink;
-                    node.alt = "";
+                    imgLink = await typstCode2Img(typstContent, vault);
                 } catch (error) {
                     console.error("Typst code conversion failed:", error);
+                    new Notice("Typst 转换图片失败，请检查语法是否正确");
+                    return;
                 }
+                node.type = "image"; // 转换成 img 节点
+                node.url = imgLink;
+                node.alt = "";
             })();
             tasks.push(task);
         });
