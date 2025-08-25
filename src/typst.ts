@@ -63,7 +63,6 @@ export async function typstCode2Img(
     const typFile = path.join(tmpDir, "formula.typ");
     await writeFile(typFile, code, "utf8");
     // 使用命令行转换成png图片
-    console.log(pngFile);
     execFileSync(typstPath, [
         "compile",
         "--ppi",

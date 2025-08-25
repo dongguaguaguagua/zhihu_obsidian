@@ -57,8 +57,7 @@ export default {
         QRCodeRefreshed: "二維碼已重新整理",
         loadComplete: "載入完成",
         zseckLoadFailed: "登入失敗！無法載入 zse-ck 腳本，請檢查網路連線並重試",
-        zseckFetchFailed:
-            "登入失敗！無法取得 zse-ck cookie，請檢查網路連線並重試",
+        zseckFetchFailed: "正在監聽 cookies，請耐心等待...",
         fetchInitCookiesSuccess: "取得初始 cookies 成功！",
         fetchInitCookiesFailed: "取得初始 cookies 失敗！",
         redirectionToSigninFailed: "重新導向至登入頁失敗",

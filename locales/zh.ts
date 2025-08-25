@@ -57,8 +57,7 @@ export default {
         QRCodeRefreshed: "二维码已刷新",
         loadComplete: "加载完成",
         zseckLoadFailed: "登录失败！无法加载 zse-ck 脚本，请检查网络连接并重试",
-        zseckFetchFailed:
-            "登录失败！无法获取 zse-ck cookie，请检查网络连接并重试",
+        zseckFetchFailed: "正在监听 cookies，请耐心等待...",
         fetchInitCookiesSuccess: "获取初始 cookies 成功！",
         fetchInitCookiesFailed: "获取初始 cookies 失败！",
         redirectionToSigninFailed: "重定向到登录页失败",

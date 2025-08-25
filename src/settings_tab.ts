@@ -62,13 +62,14 @@ export class ZhihuSettingTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName(locale.settings.accountTitle)
             .setDesc(locale.settings.accountTitleDesc)
-            .then((setting) => {
+            .then(async (setting) => {
                 setting.nameEl.addClass("zhihu-flex-container");
+                // 如果用户已经登录
                 if (this.isLoggedIn && this.userInfo) {
                     const userInfoContainer = setting.nameEl.createDiv({
                         cls: "zhihu-user-info",
                     });
-
+                    // 知乎头像
                     userInfoContainer.createEl("img", {
                         cls: "zhihu-avatar",
                         attr: {
@@ -81,12 +82,12 @@ export class ZhihuSettingTab extends PluginSettingTab {
                     const textContainer = userInfoContainer.createDiv({
                         cls: "zhihu-text-container",
                     });
-
+                    // 知乎用户名
                     textContainer.createEl("div", {
                         text: this.userInfo.name,
                         cls: "zhihu-username",
                     });
-
+                    // 知乎用户签名
                     if (this.userInfo.headline) {
                         textContainer.createEl("div", {
                             text: this.userInfo.headline,
@@ -94,7 +95,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                         });
                     }
 
-                    // Log out button
+                    // 登出按钮
                     setting.addButton((button) =>
                         button
                             .setButtonText(locale.settings.logoutButtonText)
@@ -115,7 +116,7 @@ export class ZhihuSettingTab extends PluginSettingTab {
                             }),
                     );
                 } else {
-                    // Log in button
+                    // 登录按钮
                     setting.addButton((button) =>
                         button
                             .setButtonText(locale.settings.loginButtonText)
@@ -141,10 +142,10 @@ export class ZhihuSettingTab extends PluginSettingTab {
                                               }
                                             : null;
                                     }
-                                    this.display();
                                 } catch (e) {
                                     console.error(locale.error.loginFailed, e);
                                 }
+                                this.display();
                             }),
                     );
                 }
