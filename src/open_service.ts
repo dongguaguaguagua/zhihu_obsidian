@@ -6,6 +6,7 @@ import {
     requestUrl,
     Modal,
     TextComponent,
+    Platform,
 } from "obsidian";
 import ZhihuObPlugin from "./main";
 import * as dataUtil from "./data";
@@ -341,7 +342,20 @@ export async function openContent(
 }
 
 function removeSpecialChars(input: string): string {
-    return input.replace(/[/\\[\]|#^:]/g, "");
+    // 删除让链接无法工作的符号：# ^ [ ] |
+    input = input.replace(/[#^[\]|]/g, "");
+    if (Platform.isMacOS) {
+        // macOS系统实测的不允许字符：\ / :
+        input = input.replace(/[\\/ :]/g, "");
+    } else {
+        // 非 macOS 的操作系统，规则较多，仅测试了 Windows 和 Android 平台
+        // 不允许字符：/ \ " * : | ? < >
+        input = input.replace(/[/\\<>"*:|]/g, "");
+        // Windows 系统不允许半角问号在标题中出现
+        // 但是知乎问题大部分都带有问号，所以做一个替换
+        input = input.replace(/\?/g, "？");
+    }
+    return input;
 }
 
 function stripHtmlTags(input: string): string {
