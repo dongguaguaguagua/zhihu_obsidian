@@ -511,7 +511,7 @@ export async function remarkMdToHTML(app: App, md: string) {
                     };
             }
         },
-
+        // Obsidian callout语法支持
         blockquote(state: any, node: any): Element {
             // 如果不存在callout，说明是普通引用块，则返回原本结果
             if (node?.data?.hProperties?.dataCallout === undefined) {
@@ -580,6 +580,8 @@ export async function remarkMdToHTML(app: App, md: string) {
                 ],
             };
         },
+        // 处理 obsidian 内链，如果内链是一篇知乎文章，则会提取链接和文件名作为知乎链接
+        // 否则就是普通的下划线文字
         wikiLink(state: any, node: WikiLinkNode): Element {
             const name = node.value;
             const mdFile = file.getFilePathFromName(app, name);
@@ -601,9 +603,9 @@ export async function remarkMdToHTML(app: App, md: string) {
             }
             return {
                 type: "element",
-                tagName: "a",
+                tagName: "u",
                 properties: {},
-                children: state.all(node),
+                children: [u("text", name)],
             };
         },
     };
