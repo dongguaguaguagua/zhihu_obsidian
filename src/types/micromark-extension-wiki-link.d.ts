@@ -1,3 +1,4 @@
 declare module "micromark-extension-wiki-link" {
-    function syntax(opts?: any): any;
+    function wikiLink(opts?: any): any;
+    function wikiImgLink(opts?: any): any;
 }
