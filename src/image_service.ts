@@ -8,7 +8,7 @@ import * as file from "./files";
 import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 import { App } from "obsidian";
-const locale = i18n.current;
+const locale: Lang = i18n.current;
 
 async function getImgIdFromHash(vault: Vault, imgHash: string) {
     try {
@@ -57,7 +57,7 @@ export async function uploadCover(app: App, cover: string) {
         return;
     } else {
         const imgName = match[1];
-        const imgLink = await file.getFilePathFromName(app, imgName);
+        const imgLink = await file.getImgPathFromName(app, imgName);
         const imgBuffer = fs.readFileSync(imgLink);
         const imgOriginalPath = await getZhihuImgLink(app.vault, imgBuffer);
         return imgOriginalPath;

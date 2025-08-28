@@ -1,16 +1,16 @@
+import { Vault, Notice, App, TFile } from "obsidian";
 import { unified, Plugin, Transformer } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeStringify from "rehype-stringify";
 import rehypeFormat from "rehype-format";
-import { syntax } from "micromark-extension-wiki-link";
-import { fromMarkdown, toMarkdown } from "mdast-util-wiki-link";
+import { wikiLink, wikiImgLink } from "micromark-extension-wiki-link";
+import * as muwl from "mdast-util-wiki-link";
 import { visit } from "unist-util-visit";
 import { u } from "unist-builder";
 import type { Element } from "hast";
 import type { Link, Image } from "mdast";
-import { Vault, Notice, App, TFile } from "obsidian";
 import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
 import { loadSettings } from "./settings";
@@ -29,12 +29,12 @@ import rehypeRaw from "rehype-raw";
 import { typstCode2Img } from "./typst";
 import { isWebUrl } from "./utilities";
 
-const locale = i18n.current;
+const locale: Lang = i18n.current;
 
 // edit from `https://github.com/landakram/mdast-util-wiki-link/blob/master/src/from-markdown.ts`
 // line 20-28
-interface WikiLinkNode extends Node {
-    type: "wikiLink";
+interface WikiImgLinkNode extends Node {
+    type: "wikiImgLink";
     value: string;
     data: {
         alias: string;
@@ -51,6 +51,16 @@ interface WikiLinkNode extends Node {
             "data-private-watermark-src": string;
         };
         hChildren: [];
+    };
+}
+
+interface WikiLinkNode extends Node {
+    type: "wikiLink";
+    value: string;
+    data: {
+        alias: string;
+        permalink: string;
+        exists: boolean;
     };
 }
 
@@ -78,9 +88,10 @@ function wikiLinkPlugin(this: any, opts = {}) {
         else data[field] = [value];
     }
 
-    add("micromarkExtensions", syntax(opts));
-    add("fromMarkdownExtensions", fromMarkdown(opts));
-    add("toMarkdownExtensions", toMarkdown(opts));
+    add("micromarkExtensions", wikiLink(opts)); // 处理 [[...]]
+    add("micromarkExtensions", wikiImgLink(opts)); // 处理 ![[...]]
+    add("fromMarkdownExtensions", muwl.fromMarkdownWikiLink(opts));
+    add("fromMarkdownExtensions", muwl.fromMarkdownWikiImgLink(opts));
 }
 
 // 获取![alt](link)格式的图片，先下载到本地，
@@ -102,7 +113,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                 if (isWebUrl(url)) {
                     imgBuffer = await getOnlineImg(vault, url);
                 } else {
-                    const imgPathOnDisk = await file.getFilePathFromName(
+                    const imgPathOnDisk = await file.getImgPathFromName(
                         app,
                         url,
                     );
@@ -131,12 +142,12 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
             })();
             tasks.push(task);
         });
-        visit(tree, "wikiLink", (node: WikiLinkNode) => {
+        visit(tree, "wikiImgLink", (node: WikiImgLinkNode) => {
             const task = (async () => {
                 let alt = node.data.alias;
                 const imgName = node.value;
                 // new Notice(`正在处理图片: ${imgName}`);
-                const imgPathOnDisk = await file.getFilePathFromName(
+                const imgPathOnDisk = await file.getImgPathFromName(
                     app,
                     imgName,
                 );
@@ -500,7 +511,7 @@ export async function remarkMdToHTML(app: App, md: string) {
                     };
             }
         },
-
+        // Obsidian callout语法支持
         blockquote(state: any, node: any): Element {
             // 如果不存在callout，说明是普通引用块，则返回原本结果
             if (node?.data?.hProperties?.dataCallout === undefined) {
@@ -567,6 +578,34 @@ export async function remarkMdToHTML(app: App, md: string) {
                     },
                     ...state.all({ children: contentNodes }),
                 ],
+            };
+        },
+        // 处理 obsidian 内链，如果内链是一篇知乎文章，则会提取链接和文件名作为知乎链接
+        // 否则就是普通的下划线文字
+        wikiLink(state: any, node: WikiLinkNode): Element {
+            const name = node.value;
+            const mdFile = file.getFilePathFromName(app, name);
+
+            if (mdFile instanceof TFile) {
+                const metadata = app.metadataCache.getFileCache(mdFile);
+                const fm = metadata?.frontmatter;
+                // 如果zhihu-link链接存在，则说明是知乎文章，进一步处理内链
+                if (fm && fm["zhihu-link"]) {
+                    const properties: { [key: string]: string } = {};
+                    properties.href = fm["zhihu-link"];
+                    return {
+                        type: "element",
+                        tagName: "a",
+                        properties,
+                        children: [u("text", name)],
+                    };
+                }
+            }
+            return {
+                type: "element",
+                tagName: "u",
+                properties: {},
+                children: [u("text", name)],
             };
         },
     };
