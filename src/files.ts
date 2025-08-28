@@ -7,7 +7,7 @@ interface FileSearchResult {
     path: string;
 }
 
-export async function getFilePathFromName(
+export async function getImgPathFromName(
     app: App,
     fileName: string,
 ): Promise<string> {
@@ -21,7 +21,7 @@ export async function getFilePathFromName(
     const normalizedName = normalizePath(fileName.trim()).toLowerCase();
     const isPath = normalizedName.includes("/");
 
-    // 支持的图片扩展名
+    // 支持的扩展名
     const imageExtensions = [".png", ".jpg", ".jpeg", ".gif", ".bmp", ".webp"];
     const hasExtension = imageExtensions.some((ext) =>
         normalizedName.endsWith(ext),
@@ -106,4 +106,17 @@ export async function getFilePathFromName(
         );
         return matches[0].path;
     }
+}
+
+/**
+ * 通过文件名（不含扩展名.md）在整个仓库中查找文件。
+ * @param fileName 文件名，例如 "这次化债是不是意味未来大通胀？-黑桦的回答"
+ * @returns TFile 对象或 null
+ */
+export function getFilePathFromName(app: App, fileName: string): TFile | null {
+    const allFiles = app.vault.getMarkdownFiles();
+    const targetFile = allFiles.find(
+        (file: TFile) => file.basename === fileName,
+    );
+    return targetFile || null;
 }
