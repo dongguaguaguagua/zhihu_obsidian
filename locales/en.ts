@@ -61,6 +61,7 @@ export default {
         zseckLoadFailed:
             "Login failed! Unable to load zse-ck script, please check your network connection and retry",
         zseckFetchFailed: "Listening for cookies, please wait...",
+        refreshCookiesSuccess: "Refresh cookies success!",
         fetchInitCookiesSuccess: "Fetch initial cookies success!",
         fetchInitCookiesFailed: "Failed to fetch initial cookies!",
         redirectionToSigninFailed: "Failed to redirect to sign in",
@@ -126,6 +127,8 @@ export default {
         accountTitleDesc: "Manage your Zhihu login status",
         loginButtonText: "Log in",
         logoutButtonText: "Log out",
+        refreshLoginButtonText: "Refresh Login Status",
+        newLoginButtonText: "Log in with New Account",
         userAgent: "User agent",
         userAgentDesc: "Custom user agent for Zhihu API requests",
         userAgentPlaceholder: "Enter custom user agent",
