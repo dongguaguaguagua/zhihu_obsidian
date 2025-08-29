@@ -71,6 +71,18 @@ function AccountSetting(containerEl: HTMLElement, tab: ZhihuSettingTab) {
         tab.display();
     }
 
+    async function handleRefresh() {
+        await login.zhihuRefreshZseCookies(tab.app);
+    }
+
+    async function handleNewLogin() {
+        await login.zhihuWebLogin(tab.app, true);
+        const { isLoggedIn, userInfo } = await fetchUserStatus(tab.app.vault);
+        tab.isLoggedIn = isLoggedIn;
+        tab.userInfo = userInfo;
+        tab.display();
+    }
+
     new Setting(containerEl)
         .setName(locale.settings.accountTitle)
         .setDesc(locale.settings.accountTitleDesc)
@@ -85,12 +97,22 @@ function AccountSetting(containerEl: HTMLElement, tab: ZhihuSettingTab) {
                         .setWarning()
                         .onClick(() => handleLogout()),
                 );
+                setting.addButton((btn) =>
+                    btn
+                        .setButtonText("刷新登录状态")
+                        .onClick(() => handleRefresh()),
+                );
             } else {
                 setting.addButton((btn) =>
                     btn
                         .setButtonText(locale.settings.loginButtonText)
                         .setCta()
                         .onClick(() => handleLogin()),
+                );
+                setting.addButton((btn) =>
+                    btn
+                        .setButtonText("登录新账号")
+                        .onClick(() => handleNewLogin()),
                 );
             }
         });

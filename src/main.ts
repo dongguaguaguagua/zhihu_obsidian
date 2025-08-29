@@ -99,6 +99,13 @@ export default class ZhihuObPlugin extends Plugin {
                     await login.zhihuWebLogin(this.app);
                 },
             });
+            this.addCommand({
+                id: "refresh-cookie",
+                name: "Refresh ZSE cookie",
+                callback: async () => {
+                    await login.zhihuRefreshZseCookies(this.app);
+                },
+            });
         }
 
         this.addCommand({
