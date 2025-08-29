@@ -122,6 +122,8 @@ export default {
         accountTitleDesc: "管理您的知乎登录状态",
         loginButtonText: "登录",
         logoutButtonText: "登出",
+        refreshLoginButtonText: "刷新登录状态",
+        newLoginButtonText: "登录新账号",
         userAgent: "用户代理",
         userAgentDesc: "在知乎API请求中自定义用户代理",
         userAgentPlaceholder: "请输入自定义用户代理",

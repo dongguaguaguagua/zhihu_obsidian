@@ -127,6 +127,8 @@ export default {
         accountTitleDesc: "Manage your Zhihu login status",
         loginButtonText: "Log in",
         logoutButtonText: "Log out",
+        refreshLoginButtonText: "Refresh Login Status",
+        newLoginButtonText: "Log in with New Account",
         userAgent: "User agent",
         userAgentDesc: "Custom user agent for Zhihu API requests",
         userAgentPlaceholder: "Enter custom user agent",

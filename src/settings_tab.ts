@@ -99,7 +99,7 @@ function AccountSetting(containerEl: HTMLElement, tab: ZhihuSettingTab) {
                 );
                 setting.addButton((btn) =>
                     btn
-                        .setButtonText("刷新登录状态")
+                        .setButtonText(locale.settings.refreshLoginButtonText)
                         .onClick(() => handleRefresh()),
                 );
             } else {
@@ -111,7 +111,7 @@ function AccountSetting(containerEl: HTMLElement, tab: ZhihuSettingTab) {
                 );
                 setting.addButton((btn) =>
                     btn
-                        .setButtonText("登录新账号")
+                        .setButtonText(locale.settings.newLoginButtonText)
                         .onClick(() => handleNewLogin()),
                 );
             }
