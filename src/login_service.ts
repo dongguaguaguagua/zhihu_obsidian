@@ -6,7 +6,7 @@ import { loadSettings, saveSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 import en from "locales/en";
 import { toCurl } from "./utilities";
-const locale = i18n.current;
+const locale: Lang = i18n.current;
 
 export class QRCodeModal extends Modal {
     private link: string;
@@ -258,7 +258,7 @@ export async function zhihuRefreshZseCookies(app: App): Promise<void> {
                     });
 
                     await dataUtil.updateData(vault, { cookies: cookieObj });
-                    new Notice(`刷新 cookie 成功！`);
+                    new Notice(`${locale.notice.refreshCookiesSuccess}`);
 
                     win.close();
                     resolve();

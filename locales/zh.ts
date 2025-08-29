@@ -58,6 +58,7 @@ export default {
         loadComplete: "加载完成",
         zseckLoadFailed: "登录失败！无法加载 zse-ck 脚本，请检查网络连接并重试",
         zseckFetchFailed: "正在监听 cookies，请耐心等待...",
+        refreshCookiesSuccess: "刷新 cookie 成功！",
         fetchInitCookiesSuccess: "获取初始 cookies 成功！",
         fetchInitCookiesFailed: "获取初始 cookies 失败！",
         redirectionToSigninFailed: "重定向到登录页失败",

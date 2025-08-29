@@ -61,6 +61,7 @@ export default {
         zseckLoadFailed:
             "Login failed! Unable to load zse-ck script, please check your network connection and retry",
         zseckFetchFailed: "Listening for cookies, please wait...",
+        refreshCookiesSuccess: "Refresh cookies success!",
         fetchInitCookiesSuccess: "Fetch initial cookies success!",
         fetchInitCookiesFailed: "Failed to fetch initial cookies!",
         redirectionToSigninFailed: "Failed to redirect to sign in",
