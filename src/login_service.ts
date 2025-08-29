@@ -274,7 +274,6 @@ export async function zhihuRefreshZseCookies(app: App): Promise<void> {
 export async function checkIsUserLogin(vault: Vault) {
     const data = await dataUtil.loadData(vault);
     if (data && "userInfo" in data && data.userInfo) {
-        new Notice(`${locale.notice.welcome},${data.userInfo.name}`);
         return true;
     } else {
         return false;
@@ -658,7 +657,7 @@ export async function getUserInfo(vault: Vault) {
         });
         const new_BEC = cookieUtil.getCookiesFromHeader(response);
         const userInfo = response.json;
-        new Notice(`${locale.notice.welcome},${userInfo.name}`);
+        new Notice(`${locale.notice.welcome} ${userInfo.name}`);
         await dataUtil.updateData(vault, { cookies: new_BEC });
         await dataUtil.updateData(vault, { userInfo: userInfo });
     } catch (error) {
