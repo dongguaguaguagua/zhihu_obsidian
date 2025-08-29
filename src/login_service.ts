@@ -2,7 +2,7 @@ import { App, Vault, Notice, Modal, requestUrl } from "obsidian";
 import QRCode from "qrcode";
 import * as dataUtil from "./data";
 import * as cookieUtil from "./cookies";
-import { loadSettings } from "./settings";
+import { loadSettings, saveSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 import en from "locales/en";
 import { toCurl } from "./utilities";
@@ -119,13 +119,17 @@ export async function zhihuQRcodeLogin(app: App) {
     });
 }
 
-export async function zhihuWebLogin(app: App): Promise<void> {
+export async function zhihuWebLogin(app: App, isNew = false): Promise<void> {
     const vault = app.vault;
     const remote = window.require("@electron/remote");
     const { BrowserWindow, session } = remote;
+    const settings = await loadSettings(vault);
 
     // 为“无痕”登录窗创建独立的非持久分区（注意：没有 'persist:' 前缀）
-    const partition = `zhihu-login-${Date.now()}`;
+    // 如果是新的登录窗口，则创建一个新分区，否则使用已有的，已经登录账号的分区。
+    const newPartition = `zhihu-login-${new Date().getTime()}`;
+    const partition = isNew ? newPartition : settings.partition;
+    console.log("partition:", partition);
     const ses = session.fromPartition(partition); // 非持久化，会在窗口全关后销毁
 
     // 只清理这个分区，避免：
@@ -181,6 +185,10 @@ export async function zhihuWebLogin(app: App): Promise<void> {
                     await dataUtil.updateData(vault, { cookies: cookieObj });
                     await getUserInfo(vault);
 
+                    if (isNew) {
+                        await saveSettings(vault, { partition: newPartition });
+                    }
+
                     win.close();
                     resolve();
                 }
@@ -193,6 +201,76 @@ export async function zhihuWebLogin(app: App): Promise<void> {
     });
 }
 
+// 这个函数用于自动刷新zse_ck cookie，因为它会定时失效
+export async function zhihuRefreshZseCookies(app: App): Promise<void> {
+    const vault = app.vault;
+    const remote = window.require("@electron/remote");
+    const { BrowserWindow, session } = remote;
+    const settings = await loadSettings(vault);
+
+    // 为“无痕”登录窗创建独立的非持久分区（注意：没有 'persist:' 前缀）
+    const partition = settings.partition;
+    const ses = session.fromPartition(partition); // 非持久化，会在窗口全关后销毁
+
+    // 只清理这个分区，避免：
+    // DOMException: Failed to execute 'transaction' on 'IDBDatabase':
+    // The database connection is closing.
+    await ses.clearStorageData({
+        origin: "https://www.zhihu.com",
+        storages: ["cookies", "localstorage", "serviceworkers", "cachestorage"],
+    });
+
+    return new Promise<void>((resolve, reject) => {
+        const win = new BrowserWindow({
+            width: 100,
+            height: 100,
+            webPreferences: {
+                nodeIntegration: false,
+                contextIsolation: true,
+                partition,
+            },
+        });
+
+        const exampleQuestionUrl = "https://www.zhihu.com/question/19550225";
+
+        win.loadURL(exampleQuestionUrl).catch(reject);
+
+        win.webContents.on("did-finish-load", async () => {
+            try {
+                const url = win.webContents.getURL();
+
+                if (url.startsWith(exampleQuestionUrl)) {
+                    // 从“无痕分区”的 cookies 取值
+                    // 此时只会有三个cookie：_xsrf、BEC、__zse_ck
+                    // 最重要的是__zse_ck cookie
+                    const cookies = await ses.cookies.get({
+                        url: "https://www.zhihu.com",
+                    });
+                    const zse = cookies.find((c: any) => c.name === "__zse_ck");
+                    if (!zse) {
+                        new Notice(`${locale.notice.zseckFetchFailed}`);
+                        return;
+                    }
+                    // 将获取的 cookie 转换成 JSON 形式
+                    const cookieObj: Record<string, string> = {};
+                    cookies.forEach((c: { name: string; value: string }) => {
+                        cookieObj[c.name] = c.value;
+                    });
+
+                    await dataUtil.updateData(vault, { cookies: cookieObj });
+                    new Notice(`刷新 cookie 成功！`);
+
+                    win.close();
+                    resolve();
+                }
+            } catch (e) {
+                reject(e);
+            }
+        });
+
+        win.on("closed", () => reject(new Error("用户关闭了登录窗口")));
+    });
+}
 export async function checkIsUserLogin(vault: Vault) {
     const data = await dataUtil.loadData(vault);
     if (data && "userInfo" in data && data.userInfo) {
