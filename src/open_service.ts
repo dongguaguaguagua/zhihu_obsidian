@@ -12,10 +12,11 @@ import ZhihuObPlugin from "./main";
 import * as dataUtil from "./data";
 import * as cookies from "./cookies";
 import i18n, { type Lang } from "../locales";
-const locale = i18n.current;
+const locale: Lang = i18n.current;
 import { htmlToMd } from "./html_to_markdown";
 import { StateField } from "@codemirror/state";
 import { ViewUpdate, EditorView } from "@codemirror/view";
+import { zhihuRefreshZseCookies } from "./login_service";
 
 // 定义一个 StateField 来持有插件实例
 // 这个 StateField 将被添加到编辑器的 state 中
@@ -131,9 +132,8 @@ export async function clickInPreview(plugin: ZhihuObPlugin, evt: MouseEvent) {
         }
     }
 }
-
 async function getZhihuContentHTML(app: App, zhihuLink: string) {
-    try {
+    async function fetchWithCookies() {
         const data = await dataUtil.loadData(app.vault);
         const cookiesHeader = cookies.cookiesHeaderBuilder(data, []);
         const response = await requestUrl({
@@ -155,10 +155,23 @@ async function getZhihuContentHTML(app: App, zhihuLink: string) {
             method: "GET",
         });
         return response.text;
+    }
+
+    try {
+        return await fetchWithCookies(); // 第一次尝试
     } catch (error) {
-        console.error(locale.notice.requestAnswerFailed, error);
-        new Notice(`${locale.notice.requestAnswerFailed},${error.message}`);
-        return "";
+        console.warn(error);
+        new Notice("cookie 已失效，正在尝试刷新...");
+        try {
+            await zhihuRefreshZseCookies(app); // 刷新 cookies
+            return await fetchWithCookies(); // 再次尝试
+        } catch (error2) {
+            console.error(locale.notice.requestAnswerFailed, error2);
+            new Notice(
+                `${locale.notice.requestAnswerFailed}, ${error2.message}`,
+            );
+            return "";
+        }
     }
 }
 
