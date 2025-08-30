@@ -12,9 +12,9 @@ import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 import { fmtDate } from "./utilities";
 
-const locale = i18n.current;
+const locale: Lang = i18n.current;
 
-export async function publishCurrentArticle(app: App) {
+export async function publishCurrentArticle(app: App, toDraft = false) {
     const activeFile = app.workspace.getActiveFile();
     const vault = app.vault;
     const settings = await loadSettings(vault);
@@ -87,6 +87,9 @@ export async function publishCurrentArticle(app: App) {
         can_reward: false,
     };
     await patchDraft(vault, articleId, patchBody);
+
+    if (toDraft) return; // 如果是发布为草稿，就不需要下面的步骤了
+
     // 文章加入话题，否则通常无法发表。话题是自动选取匹配的。
     for (const topic of topics) {
         try {
