@@ -121,6 +121,18 @@ export default class ZhihuObPlugin extends Plugin {
         });
 
         this.addCommand({
+            id: "draft-current-article",
+            name: "Draft current article",
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    await publish.publishCurrentArticle(this.app, true);
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
+
+        this.addCommand({
             id: "create-new-article",
             name: "Create new article",
             callback: async () => {
@@ -158,6 +170,17 @@ export default class ZhihuObPlugin extends Plugin {
             editorCallback: async (editor: Editor, view: MarkdownView) => {
                 if (await login.checkIsUserLogin(this.app.vault)) {
                     await answer.publishCurrentAnswer(this.app);
+                } else {
+                    new Notice(loginNoticeStr);
+                }
+            },
+        });
+        this.addCommand({
+            id: "draft-current-answer",
+            name: "Draft current answer",
+            editorCallback: async (editor: Editor, view: MarkdownView) => {
+                if (await login.checkIsUserLogin(this.app.vault)) {
+                    await answer.publishCurrentAnswer(this.app, true);
                 } else {
                     new Notice(loginNoticeStr);
                 }
