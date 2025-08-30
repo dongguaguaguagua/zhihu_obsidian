@@ -7,10 +7,9 @@ import * as cookies from "./cookies";
 import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
 import { fmtDate } from "./utilities";
-
 import i18n, { type Lang } from "../locales";
 
-const locale = i18n.current;
+const locale: Lang = i18n.current;
 
 export class ZhihuQuestionLinkModal extends Modal {
     inputEl: TextComponent;
@@ -53,7 +52,7 @@ export class ZhihuQuestionLinkModal extends Modal {
     }
 }
 
-export async function publishCurrentAnswer(app: App) {
+export async function publishCurrentAnswer(app: App, toDraft = false) {
     const activeFile = app.workspace.getActiveFile();
     const locale = i18n.current;
     const vault = app.vault;
@@ -123,6 +122,8 @@ export async function publishCurrentAnswer(app: App) {
     };
 
     await patchDraft(app.vault, questionId!, answerId, patchBody);
+
+    if (toDraft) return; // 如果是发布为草稿，就不需要下面的步骤了
 
     const publishResult = await publishAnswerDraft(
         app.vault,
