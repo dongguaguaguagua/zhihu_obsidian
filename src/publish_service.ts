@@ -14,7 +14,10 @@ import { fmtDate } from "./utilities";
 
 const locale: Lang = i18n.current;
 
-export async function publishCurrentArticle(app: App, toDraft = false) {
+export async function publishCurrentArticle(
+    app: App,
+    toDraft = false,
+): Promise<string | undefined> {
     const activeFile = app.workspace.getActiveFile();
     const vault = app.vault;
     const settings = await loadSettings(vault);
@@ -88,7 +91,7 @@ export async function publishCurrentArticle(app: App, toDraft = false) {
     };
     await patchDraft(vault, articleId, patchBody);
 
-    if (toDraft) return; // 如果是发布为草稿，就不需要下面的步骤了
+    if (toDraft) return articleId; // 如果是发布为草稿，就不需要下面的步骤了
 
     // 文章加入话题，否则通常无法发表。话题是自动选取匹配的。
     for (const topic of topics) {
