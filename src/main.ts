@@ -20,6 +20,7 @@ import * as open from "./open_service";
 import i18n, { type Lang } from "../locales";
 import { registerMenuCommands } from "./menu";
 import { ViewPlugin, ViewUpdate, EditorView } from "@codemirror/view";
+import { zhihuDesktopPreview } from "./preview";
 
 export default class ZhihuObPlugin extends Plugin {
     i18n: Lang;
@@ -104,6 +105,17 @@ export default class ZhihuObPlugin extends Plugin {
                 name: "Refresh cookies",
                 callback: async () => {
                     await login.zhihuRefreshZseCookies(this.app);
+                },
+            });
+            this.addCommand({
+                id: "preview-current-article",
+                name: "Preview current article",
+                editorCallback: async (editor: Editor, view: MarkdownView) => {
+                    if (await login.checkIsUserLogin(this.app.vault)) {
+                        await zhihuDesktopPreview(this.app);
+                    } else {
+                        new Notice(loginNoticeStr);
+                    }
                 },
             });
         }
