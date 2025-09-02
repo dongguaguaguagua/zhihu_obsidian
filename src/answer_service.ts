@@ -134,12 +134,12 @@ export async function publishCurrentAnswer(app: App, toDraft = false) {
         status === 1,
     );
     answerId = publishResult.publish.id;
+    const url = `https://www.zhihu.com/question/${questionId}/answer/${answerId}`;
 
     switch (status) {
         case 0:
             await app.fileManager.processFrontMatter(activeFile, (fm) => {
-                fm["zhihu-link"] =
-                    `https://www.zhihu.com/question/${questionId}/answer/${answerId}`;
+                fm["zhihu-link"] = url;
                 fm["zhihu-created-at"] = fmtDate(new Date());
             });
             new Notice(`${locale.notice.publishAnswerSuccess}`);

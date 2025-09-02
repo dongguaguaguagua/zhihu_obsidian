@@ -116,14 +116,9 @@ export async function publishCurrentArticle(
             await checkQuestion(vault, articleId, questionId);
         }
     }
-    const publishResult = await publishDraft(
-        vault,
-        articleId,
-        toc,
-        status === 1,
-    );
+    await publishDraft(vault, articleId, toc, status === 1);
+    const url = `https://zhuanlan.zhihu.com/p/${articleId}`;
 
-    const url = publishResult.publish.url;
     switch (status) {
         case 0: // 未发表
         case 2: // 未发表但已生成草稿
