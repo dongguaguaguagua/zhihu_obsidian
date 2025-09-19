@@ -310,6 +310,7 @@ export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
 
 export async function remarkMdToHTML(app: App, md: string) {
     const idMap = new Map<string, number>(); // 原始id → 新编号
+    const settings = await loadSettings(app.vault);
     const zhihuHandlers = {
         link(state: any, node: Link): Element {
             const properties: { [key: string]: string } = {};
@@ -479,7 +480,15 @@ export async function remarkMdToHTML(app: App, md: string) {
         // 如果是三个及以上的#，则是加粗处理
         heading(state: any, node: any): Element {
             const children = state.all(node) as Element[];
-
+            // 如果不使用知乎特色的标题，那么直接几级就转换成几级的HTML
+            if (!settings.useZhihuHeadings) {
+                return {
+                    type: "element",
+                    tagName: "h" + node.depth,
+                    properties: {},
+                    children,
+                };
+            }
             switch (node.depth) {
                 case 1:
                     return {
