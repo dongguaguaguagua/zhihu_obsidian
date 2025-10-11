@@ -1,6 +1,8 @@
 import { App, Notice, FileSystemAdapter, TFile, normalizePath } from "obsidian";
 import * as fs from "fs";
 import * as path from "path";
+import i18n, { type Lang } from "../locales";
+const locale: Lang = i18n.current;
 
 interface FileSearchResult {
     file: TFile;
@@ -94,6 +96,7 @@ export async function getImgPathFromName(
 
     // 处理匹配结果
     if (matches.length === 0) {
+        new Notice(`${locale.notice.imgSearchFailed}: ${fileName}`);
         return fileName;
     } else if (matches.length === 1) {
         return matches[0].path;
