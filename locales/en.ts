@@ -92,6 +92,7 @@ export default {
         typstPathEmpty: "Typst path is empty",
         typstVersion: "Typst Version",
         enterPathInstruction: "Please enter Typst path in settings",
+        imgSearchFailed: "cannot find image",
     },
     error: {
         unknownError: "Unknown error",

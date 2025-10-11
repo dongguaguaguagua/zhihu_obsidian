@@ -107,15 +107,16 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
             const task = (async () => {
                 let alt = node.alt;
                 const url = node.url || "";
+                const decodedUrl = decodeURIComponent(url); // issue 84
                 // 自动判断是否是HTTP/HTTPS协议
                 // 如果是则获取在线图片，否则按照原路经处理
                 let imgBuffer: Buffer;
-                if (isWebUrl(url)) {
+                if (isWebUrl(decodedUrl)) {
                     imgBuffer = await getOnlineImg(vault, url);
                 } else {
                     const imgPathOnDisk = await file.getImgPathFromName(
                         app,
-                        url,
+                        decodedUrl,
                     );
                     imgBuffer = fs.readFileSync(imgPathOnDisk);
                 }

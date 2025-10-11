@@ -88,6 +88,7 @@ export default {
         typstPathEmpty: "Typst 路徑為空",
         typstVersion: "Typst 版本",
         enterPathInstruction: "请在设置中添加 Typst 路径",
+        imgSearchFailed: "找不到圖片",
     },
     error: {
         unknownError: "未知錯誤",
