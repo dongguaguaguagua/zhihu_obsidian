@@ -1,0 +1,31 @@
+---
+sidebar_position: 10
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+import DisclaimerTable from "@site/src/components/DisclaimerTable";
+
+您可以在文章和回答中添加创作声明，达到这样的效果：
+
+<Tabs>
+    <TabItem value="spoiler" label="包含剧透">
+        ![包含剧透](./imgs/spoiler.jpg)
+    </TabItem>
+    <TabItem value="medical_advice" label="包含医疗建议">
+        ![包含医疗建议](./imgs/medical_advice.jpg)
+    </TabItem>
+    <TabItem value="fictional_creation" label="虚构创作">
+        ![虚构创作](./imgs/fictional_creation.jpg)
+    </TabItem>
+    <TabItem value="contain_finance" label="理财内容">
+        ![理财内容](./imgs/contain_finance.jpg)
+    </TabItem>
+    <TabItem value="ai_creation" label="AI辅助创作">
+        ![AI辅助创作](./imgs/ai_creation.jpg)
+    </TabItem>
+</Tabs>
+
+要添加创作声明，您只需要在属性中添加`zhihu-disclaimer`，然后填写下面支持的创作声明：
+
+<DisclaimerTable />
