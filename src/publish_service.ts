@@ -11,7 +11,7 @@ import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 import { fmtDate } from "./utilities";
-
+import { parseDisclaimer } from "./disclaimer";
 const locale: Lang = i18n.current;
 
 export async function publishCurrentArticle(
@@ -40,6 +40,7 @@ export async function publishCurrentArticle(
     const status = publishStatus(frontmatter["zhihu-link"]);
     const title = frontmatter["zhihu-title"] || locale.untitled;
     const toc = !!frontmatter["zhihu-toc"];
+    const disclaimer = frontmatter["zhihu-disclaimer"];
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
     // 获取文章的ID，如果未发表则新建一个。
@@ -116,7 +117,7 @@ export async function publishCurrentArticle(
             await checkQuestion(vault, articleId, questionId);
         }
     }
-    await publishDraft(vault, articleId, toc, status === 1);
+    await publishDraft(vault, articleId, toc, disclaimer, status === 1);
     const url = `https://zhuanlan.zhihu.com/p/${articleId}`;
 
     switch (status) {
@@ -304,8 +305,12 @@ async function publishDraft(
     vault: Vault,
     id: string,
     toc: boolean,
+    disclaimer: unknown,
     isPublished: boolean,
 ) {
+    const { type: disclaimerType, status: disclaimerStatus } =
+        parseDisclaimer(disclaimer);
+    console.log(disclaimerType, disclaimerStatus);
     try {
         const data = await dataUtil.loadData(vault);
         const settings = await loadSettings(vault);
@@ -354,8 +359,8 @@ async function publishDraft(
                         pc_business_params: `{\
                        "column":null,\
                        "commentPermission":"anyone",\
-                       "disclaimer_type":"none",\
-                       "disclaimer_status":"close",\
+                       "disclaimer_type":${disclaimerType},\
+                       "disclaimer_status":${disclaimerStatus},\
                        "table_of_contents_enabled":${toc},\
                        "commercial_report_info":{"commercial_types":[]},\
                        "commercial_zhitask_bind_info":null,\
@@ -369,8 +374,8 @@ async function publishDraft(
                     },
                     commentsPermission: { comment_permission: "anyone" },
                     creationStatement: {
-                        disclaimer_type: "none",
-                        disclaimer_status: "close",
+                        disclaimer_type: disclaimerType,
+                        disclaimer_status: disclaimerStatus,
                     },
                     contentsTables: { table_of_contents_enabled: toc },
                     commercialReportInfo: { isReport: 0 },
