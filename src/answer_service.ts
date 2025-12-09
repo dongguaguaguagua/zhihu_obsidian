@@ -8,6 +8,7 @@ import { addPopularizeStr } from "./popularize";
 import { loadSettings } from "./settings";
 import { fmtDate } from "./utilities";
 import i18n, { type Lang } from "../locales";
+import { parseDisclaimer } from "./disclaimer";
 
 const locale: Lang = i18n.current;
 
@@ -75,7 +76,7 @@ export async function publishCurrentAnswer(app: App, toDraft = false) {
     const questionId = extractQuestionId(questionLink);
     const status = publishStatus(frontmatter["zhihu-link"]);
     const toc = !!frontmatter["zhihu-toc"];
-
+    const disclaimer = frontmatter["zhihu-disclaimer"];
     const rawContent = await app.vault.read(activeFile);
     const rmFmContent = fm.removeFrontmatter(rawContent);
 
@@ -131,6 +132,7 @@ export async function publishCurrentAnswer(app: App, toDraft = false) {
         answerId,
         toc,
         zhihuHTML,
+        disclaimer,
         status === 1,
     );
     answerId = publishResult.publish.id;
@@ -212,8 +214,11 @@ async function publishAnswerDraft(
     answerId: string,
     toc: boolean,
     html: string,
+    disclaimer: unknown,
     isPublished: boolean,
 ) {
+    const { type: disclaimerType, status: disclaimerStatus } =
+        parseDisclaimer(disclaimer);
     try {
         const data = await dataUtil.loadData(vault);
         const settings = await loadSettings(vault);
@@ -293,8 +298,8 @@ async function publishAnswerDraft(
                         draft_type: "normal",
                     },
                     creationStatement: {
-                        disclaimer_status: "close",
-                        disclaimer_type: "none",
+                        disclaimer_status: disclaimerStatus,
+                        disclaimer_type: disclaimerType,
                     },
                     commercialReportInfo: {
                         isReport: 0,
