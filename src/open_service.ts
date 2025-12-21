@@ -17,6 +17,7 @@ import { htmlToMd } from "./html_to_markdown";
 import { StateField } from "@codemirror/state";
 import { ViewUpdate, EditorView } from "@codemirror/view";
 import { zhihuRefreshZseCookies } from "./login_service";
+import { turnImgOffline } from "./img_offline";
 
 // 定义一个 StateField 来持有插件实例
 // 这个 StateField 将被添加到编辑器的 state 中
@@ -336,13 +337,20 @@ export async function openContent(
     const file = app.vault.getAbstractFileByPath(filePath);
 
     if (!file) {
-        const markdown = htmlToMd(content);
+        new Notice(`正在打开文件...`);
+        let markdown = htmlToMd(content);
+        // 将 markdown 中的在线图片转换为本地图片，采用分桶存储
+        markdown = await turnImgOffline({
+            app: app,
+            markdown: markdown,
+            destFolder: `${folderPath}/images`,
+        });
         const newFile = await app.vault.create(filePath, markdown);
         await app.fileManager.processFrontMatter(newFile, (fm) => {
             fm.tags = `zhihu-${type}`;
             fm["zhihu-link"] = url;
         });
-        const leaf = this.app.workspace.getLeaf();
+        const leaf = app.workspace.getLeaf();
         await leaf.openFile(newFile as TFile);
         return;
     } else if (!(file instanceof TFile)) {
@@ -350,7 +358,7 @@ export async function openContent(
         return;
     }
 
-    const leaf = this.app.workspace.getLeaf();
+    const leaf = app.workspace.getLeaf();
     await leaf.openFile(file as TFile);
 }
 
