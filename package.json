@@ -41,6 +41,7 @@
         "@r4ai/remark-callout": "^0.6.2",
         "file-type": "^20.4.1",
         "hast-util-to-string": "^3.0.1",
+        "magic-string": "^0.30.21",
         "marked": "^15.0.8",
         "mdast-util-math": "^3.0.0",
         "mdast-util-to-markdown": "^2.1.2",

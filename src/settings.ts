@@ -21,6 +21,7 @@ interface ZhihuSettings {
     typstPresetStyle: string;
     typstFallbackToTeX: boolean;
     typstDisplayToTeX: boolean;
+    turnImgOffline: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -45,6 +46,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
         "#set page(width: auto, height: auto, margin:(x: 40pt, y: 10pt))",
     typstFallbackToTeX: true,
     typstDisplayToTeX: false,
+    turnImgOffline: true,
 };
 
 /**

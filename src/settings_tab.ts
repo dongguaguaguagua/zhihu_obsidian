@@ -277,6 +277,28 @@ function AutoOpenZhihuLinkSetting(
         );
 }
 
+function TurnImgOfflineSetting(
+    containerEl: HTMLElement,
+    tab: ZhihuSettingTab,
+    turnImgOffline: boolean,
+) {
+    // auto open zhihulink
+    new Setting(containerEl)
+        .setName(locale.settings.turnImgOffline)
+        .setDesc(locale.settings.turnImgOfflineDesc)
+        .addToggle((toggle) =>
+            toggle.setValue(turnImgOffline).onChange(async (value) => {
+                try {
+                    await saveSettings(tab.app.vault, {
+                        turnImgOffline: value,
+                    });
+                } catch (e) {
+                    console.error("save settings failed:", e);
+                }
+            }),
+        );
+}
+
 function MermaidScaleSetting(
     containerEl: HTMLElement,
     tab: ZhihuSettingTab,
@@ -645,6 +667,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
         UseImgNameDefaultSetting(containerEl, this, sts.useImgNameDefault);
         // 自动在 Obsidian 打开知乎链接
         AutoOpenZhihuLinkSetting(containerEl, this, sts.autoOpenZhihuLink);
+        // 打开知乎链接时是否离线加载图片
+        TurnImgOfflineSetting(containerEl, this, sts.turnImgOffline);
         // mermaid 图片的清晰程度
         MermaidScaleSetting(containerEl, this, sts.mermaidScale);
         // 是否添加推广语句
