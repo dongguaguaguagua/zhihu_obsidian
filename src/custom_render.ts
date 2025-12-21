@@ -252,34 +252,48 @@ export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
         }
         visit(tree, "inlineMath", (node: any) => {
             const typst = node.value;
-            const tex = typst2tex(typst);
-            node.value = tex;
+            try {
+                const tex = typst2tex(typst);
+                node.value = tex;
+            } catch (e) {
+                console.error(`Typst inline math ${typst} conversion failed`);
+                new Notice(`${locale.notice.inlineTypstConvertFailed}`);
+            }
         });
         visit(tree, "math", (node: any) => {
             const typstEq = node.value;
-            const toPicTask = (async () => {
+            const toPicTask = async () => {
                 let imgLink = "";
                 try {
                     const presetStyle = settings.typstPresetStyle;
                     const typstContent = `${presetStyle}\n$ ${typstEq} $`;
                     imgLink = await typstCode2Img(typstContent, vault);
-                } catch (error) {
-                    console.error("Typst equation conversion failed:", error);
-                    new Notice("Typst 转换图片失败，请检查语法是否正确");
+                } catch (e) {
+                    console.error("Typst display math conversion failed:", e);
+                    new Notice(`${locale.notice.typstConvertImgFailed}`);
                     return;
                 }
                 node.type = "image"; // 转换成 img 节点
                 node.url = imgLink;
                 node.alt = "";
-            })();
-            const toTeXTask = (async () => {
-                const tex = typst2tex(typstEq);
-                node.value = tex;
-            })();
+            };
+
+            const toTeXTask = async () => {
+                try {
+                    const tex = typst2tex(typstEq);
+                    node.value = tex;
+                } catch (e) {
+                    console.error(
+                        `Typst display math ${typstEq} conversion failed`,
+                    );
+                    new Notice(`${locale.notice.displayTypstConvertFailed}`);
+                    return;
+                }
+            };
             // 在设置中查看如何处理行间公式
             settings.typstDisplayToTeX
-                ? tasks.push(toTeXTask) // 转换成TeX
-                : tasks.push(toPicTask); // 转换成图片
+                ? tasks.push(toTeXTask()) // 转换成TeX
+                : tasks.push(toPicTask()); // 转换成图片
         });
         visit(tree, "code", (node: any) => {
             const typstCode = node.value;
