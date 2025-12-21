@@ -165,6 +165,9 @@ export default {
         autoOpenZhihuLink: "Auto open Zhihu link",
         autoOpenZhihuLinkDesc:
             "If this enabled, Zhihu link will be opened in Obsidian automatically when you click it. (Plugin reload required)",
+        turnImgOffline: "Save images offline when opening Zhihu links",
+        turnImgOfflineDesc:
+            "If enabled, images will be downloaded and stored in the zhihu folder, with filenames set to their MD5 hashes",
         mermaidScale: "Mermaid image clarity",
         mermaidScaleDesc: "Adjust the clarity of Mermaid images",
         UltraHD: "Ultra High Definition",
