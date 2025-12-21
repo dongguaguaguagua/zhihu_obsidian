@@ -91,6 +91,12 @@ export default {
         typstNotFound: "Typst not found",
         typstPathEmpty: "Typst path is empty",
         typstVersion: "Typst Version",
+        inlineTypstConvertFailed:
+            "Failed to convert inline Typst.\n Please check the syntax",
+        displayTypstConvertFailed:
+            "Failed to convert display Typst.\n Please check the syntax",
+        typstConvertImgFailed:
+            "Failed to convert Typst image.\n Please check the syntax",
         enterPathInstruction: "Please enter Typst path in settings",
         imgSearchFailed: "cannot find image",
     },

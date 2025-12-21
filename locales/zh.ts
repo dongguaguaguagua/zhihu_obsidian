@@ -87,6 +87,11 @@ export default {
         typstNotFound: "未找到 Typst",
         typstPathEmpty: "Typst 路径为空",
         typstVersion: "Typst 版本",
+        inlineTypstConvertFailed:
+            "Typst 转换行内公式失败，\n请检查语法是否正确",
+        displayTypstConvertFailed:
+            "Typst 转换行间公式失败，\n请检查语法是否正确",
+        typstConvertImgFailed: "Typst 转换图片失败，\n请检查语法是否正确",
         enterPathInstruction: "请在设置中添加 Typst 路径",
         imgSearchFailed: "找不到图片",
     },
