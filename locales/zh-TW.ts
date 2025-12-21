@@ -156,6 +156,9 @@ export default {
         autoOpenZhihuLink: "自动打开知乎链接",
         autoOpenZhihuLinkDesc:
             "如果启用，那么点击知乎链接时，链接将在 Obsidian 中自动打开。(需要重启插件)",
+        turnImgOffline: "開啟知乎連結時將圖片離線儲存",
+        turnImgOfflineDesc:
+            "若啟用，圖片將會被下載並儲存在 zhihu 資料夾中，圖片名稱為其 MD5 值",
         mermaidScale: "Mermaid 圖像清晰度",
         mermaidScaleDesc: "調整 Mermaid 圖像的清晰度",
         UltraHD: "超清",
