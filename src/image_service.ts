@@ -71,10 +71,10 @@ async function uploadImg(vault: Vault, imgBuffer: Buffer, uploadToken: any) {
             .createHash("md5")
             .update(imgBuffer)
             .digest("hex");
-        const arrayBuffer = imgBuffer.buffer.slice(
+        const arrayBuffer: ArrayBuffer = imgBuffer.buffer.slice(
             imgBuffer.byteOffset,
             imgBuffer.byteOffset + imgBuffer.byteLength,
-        );
+        ) as ArrayBuffer;
         const fileType = await fileTypeFromBuffer(imgBuffer);
         if (!fileType) throw new Error(locale.error.recognizeFileTypeFailed);
         const mimeType = fileType.mime;

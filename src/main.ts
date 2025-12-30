@@ -21,6 +21,7 @@ import i18n, { type Lang } from "../locales";
 import { registerMenuCommands } from "./menu";
 import { ViewPlugin, ViewUpdate, EditorView } from "@codemirror/view";
 import { zhihuDesktopPreview } from "./preview";
+import * as path from "path";
 
 export default class ZhihuObPlugin extends Plugin {
     i18n: Lang;
@@ -253,15 +254,11 @@ export default class ZhihuObPlugin extends Plugin {
             const altText = div.getAttribute("alt");
             const srcText = div.getAttribute("src");
             if (!altText || !srcText) return;
-            // 获取图片名，因为有时候是图片路径
-            let imgName = srcText.split("/").pop() || "";
-            if (imgName.includes("?")) {
-                imgName = imgName.split("?")[0];
-            }
+
             if (altText === srcText) {
                 div.setAttribute(
                     "zhihu-img-caption",
-                    useImgName ? imgName : "",
+                    useImgName ? path.basename(srcText) : "",
                 );
             } else {
                 div.setAttribute("zhihu-img-caption", altText);
