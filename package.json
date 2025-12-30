@@ -1,4 +1,7 @@
 {
+    "overrides": {
+        "esbuild": "0.17.3"
+    },
     "name": "zhihu-obsidian",
     "version": "0.3.8",
     "description": "Enable you to publish your articles and answers to Zhihu",
