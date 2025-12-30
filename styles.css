@@ -132,8 +132,8 @@
 }
 
 /* image caption */
-.image-embed[alt]:after {
-    content: attr(alt);
+.image-embed[zhihu-img-caption]:after {
+    content: attr(zhihu-img-caption);
     display: block;
     margin: 0.2rem 1rem 1rem 1rem;
     font-size: 90%;

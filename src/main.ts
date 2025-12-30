@@ -25,6 +25,7 @@ import { zhihuDesktopPreview } from "./preview";
 export default class ZhihuObPlugin extends Plugin {
     i18n: Lang;
     public lastCursorPos: number | null = null; // 记录上一次光标的位置
+    intervalId: number | undefined;
 
     constructor(app: App, manifest: PluginManifest) {
         super(app, manifest);
@@ -33,6 +34,14 @@ export default class ZhihuObPlugin extends Plugin {
 
     async onload() {
         const settings = await loadSettings(this.app.vault);
+
+        // 当设置中关闭了默认图片备注为图片名称时
+        // 需要判断图片 alt 是否与图片 src 相同
+        // 但是 CSS 无法做逻辑判断，所以需要轮询 DOM
+        this.intervalId = window.setInterval(async () => {
+            const settings = await loadSettings(this.app.vault);
+            this.processImages(settings.useImgNameDefault);
+        }, 1000);
 
         // 注册 EditorViewPlugin 来跟踪光标位置 (lastCursorPos)
         // 这是 CodeMirror 6 中跟踪状态（如光标位置）的标准方式
@@ -234,9 +243,38 @@ export default class ZhihuObPlugin extends Plugin {
         this.addSettingTab(new ZhihuSettingTab(this.app, this));
     }
 
+    // 修补DOM，增加zhihu-img-caption，来显示自定义caption
+    processImages(useImgName: boolean) {
+        // Live Preview 中图片容器通常有 .image-embed 类
+        // 但是`![]()`这样的格式不存在这个类，所以就无法选择，无法在下面显示image caption
+        const images = document.querySelectorAll(".image-embed");
+        images.forEach((el) => {
+            const div = el as HTMLElement;
+            const altText = div.getAttribute("alt");
+            const srcText = div.getAttribute("src");
+            if (!altText || !srcText) return;
+            // 获取图片名，因为有时候是图片路径
+            let imgName = srcText.split("/").pop() || "";
+            if (imgName.includes("?")) {
+                imgName = imgName.split("?")[0];
+            }
+            if (altText === srcText) {
+                div.setAttribute(
+                    "zhihu-img-caption",
+                    useImgName ? imgName : "",
+                );
+            } else {
+                div.setAttribute("zhihu-img-caption", altText);
+            }
+        });
+    }
+
     onunload() {
         // Avoid detaching leaves in onunload
         // https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines#Don't+detach+leaves+in+%60onunload%60
         // this.app.workspace.detachLeavesOfType(SIDES_VIEW_TYPE);
+        if (this.intervalId) {
+            window.clearInterval(this.intervalId);
+        }
     }
 }
