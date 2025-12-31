@@ -82,6 +82,7 @@ export type ZhihuOpenRequest = {
     type?: ZhihuType; // 不传则自动识别
     destFolder?: string; // vault 内目录，默认 "zhihu"
     offlineImages?: boolean; // 覆盖全局 settings.turnImgOffline
+    overwrite?: boolean; // 是否覆盖已有文件（默认 true）
 };
 
 type ParsedZhihu = {
@@ -95,6 +96,7 @@ type ParsedZhihu = {
 type ResolvedOpenOptions = {
     destFolder: string;
     offlineImages: boolean;
+    overwrite: boolean;
 };
 
 /**
@@ -203,6 +205,7 @@ export class ZhihuOpener {
             offlineImages:
                 opt?.offlineImages ??
                 (await loadSettings(this.app.vault)).turnImgOffline,
+            overwrite: opt?.overwrite ?? true, // 默认覆盖
         };
         await this.saveAndOpen(parsed, resolved);
     }
@@ -225,6 +228,30 @@ export class ZhihuOpener {
 
         const existed = app.vault.getAbstractFileByPath(filePath);
         if (existed instanceof TFile) {
+            // 不覆盖：直接打开旧文件
+            if (!opt.overwrite) {
+                await app.workspace.getLeaf().openFile(existed);
+                return;
+            }
+
+            // 覆盖：重写内容 + 更新 frontmatter
+            new Notice("正在覆盖已有文件...");
+
+            let markdown = htmlToMd(parsed.html);
+            if (opt.offlineImages) {
+                markdown = await turnImgOffline({
+                    app,
+                    markdown,
+                    destFolder: `${opt.destFolder}/images`,
+                });
+            }
+
+            await app.vault.modify(existed, markdown);
+            await app.fileManager.processFrontMatter(existed, (fm) => {
+                fm.tags = `zhihu-${parsed.type}`;
+                fm["zhihu-link"] = parsed.url;
+            });
+
             await app.workspace.getLeaf().openFile(existed);
             return;
         } else if (existed) {
@@ -232,6 +259,7 @@ export class ZhihuOpener {
             return;
         }
 
+        // 原逻辑：不存在则创建
         new Notice("正在打开文件...");
         let markdown = htmlToMd(parsed.html);
 
@@ -269,8 +297,9 @@ async function resolveOpenOptions(
     if (!destFolder) throw new Error("destFolder 不能为空");
 
     const offlineImages = req.offlineImages ?? settings.turnImgOffline;
+    const overwrite = req.overwrite ?? true; // 默认覆盖
 
-    return { destFolder, offlineImages };
+    return { destFolder, offlineImages, overwrite };
 }
 
 async function ensureFolder(app: App, folderPath: string) {
@@ -585,6 +614,7 @@ function getQestionId(link: string): string {
 
 export class ZhihuInputLinkModal extends Modal {
     inputEl: TextComponent;
+    private overwrite = true; // 默认覆盖
 
     constructor(app: App) {
         super(app);
@@ -605,7 +635,10 @@ export class ZhihuInputLinkModal extends Modal {
             async (event: KeyboardEvent) => {
                 if (event.key !== "Enter") return;
                 const value = this.inputEl.getValue().trim();
-                await new ZhihuOpener(this.app).open({ url: value });
+                await new ZhihuOpener(this.app).open({
+                    url: value,
+                    overwrite: this.overwrite,
+                });
                 this.close();
             },
         );
@@ -629,6 +662,17 @@ export class ZhihuInputLinkModal extends Modal {
         const spacer = row.createDiv();
         spacer.style.flex = "1 1 auto";
 
+        // 覆盖已有文件
+        const owLabel = row.createSpan({ text: "覆盖已有文件" });
+        owLabel.style.marginRight = "4px";
+
+        const owToggle = new ToggleComponent(row);
+        owToggle.setValue(true); // 默认覆盖
+        owToggle.onChange((v) => {
+            this.overwrite = v;
+        });
+
+        // 保存图片（你原来的）
         const label = row.createSpan({ text: "保存图片" });
         label.style.marginRight = "4px";
 
@@ -664,6 +708,7 @@ export class ZhihuBatchLinkModal extends Modal {
     private folderPathRel = "zhihu"; // vault 内相对路径（真正用于写入）
     private pickedAbsPath: string | null = null; // 仅展示
     private offline = false; // 本次批量开关（覆盖全局）
+    private overwrite = true; // 默认覆盖
 
     constructor(app: App) {
         super(app);
@@ -729,7 +774,7 @@ export class ZhihuBatchLinkModal extends Modal {
             dirValueEl.setText(`${this.folderPathRel}/`);
         });
 
-        // （可选）在下面展示绝对路径，便于用户确认
+        // 在下面展示绝对路径，便于用户确认
         const absHint = contentEl.createDiv({ cls: "zhihu-batch-abs-hint" });
         absHint.style.marginTop = "-4px";
         absHint.style.marginBottom = "10px";
@@ -760,6 +805,28 @@ export class ZhihuBatchLinkModal extends Modal {
         offlineToggle.onChange((v) => {
             this.offline = v;
         });
+
+        /**
+         * =========
+         * 第三行：覆盖已有文件
+         * =========
+         */
+        const overwriteRow = contentEl.createDiv({
+            cls: "zhihu-batch-overwrite-row",
+        });
+        overwriteRow.style.display = "flex";
+        overwriteRow.style.alignItems = "center";
+        overwriteRow.style.gap = "8px";
+        overwriteRow.style.marginBottom = "10px";
+
+        overwriteRow.createSpan({ text: "覆盖已有文件" });
+
+        const overwriteSpacer = overwriteRow.createDiv();
+        overwriteSpacer.style.flex = "1 1 auto";
+
+        const overwriteToggle = new ToggleComponent(overwriteRow);
+        overwriteToggle.setValue(true); // 默认覆盖
+        overwriteToggle.onChange((v) => (this.overwrite = v));
 
         /**
          * =========
@@ -821,6 +888,7 @@ export class ZhihuBatchLinkModal extends Modal {
                     url,
                     destFolder: this.folderPathRel,
                     offlineImages: this.offline,
+                    overwrite: this.overwrite,
                 });
                 ok++;
             } catch (e) {
