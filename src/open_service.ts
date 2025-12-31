@@ -249,6 +249,7 @@ export class ZhihuOpener {
             await app.vault.modify(existed, markdown);
             await app.fileManager.processFrontMatter(existed, (fm) => {
                 fm.tags = `zhihu-${parsed.type}`;
+                fm["zhihu-title"] = parsed.title;
                 fm["zhihu-link"] = parsed.url;
             });
 
@@ -274,6 +275,7 @@ export class ZhihuOpener {
         const newFile = await app.vault.create(filePath, markdown);
         await app.fileManager.processFrontMatter(newFile, (fm) => {
             fm.tags = `zhihu-${parsed.type}`;
+            fm["zhihu-title"] = parsed.title;
             fm["zhihu-link"] = parsed.url;
         });
 

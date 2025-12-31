@@ -10,7 +10,7 @@ import * as muwl from "mdast-util-wiki-link";
 import { visit } from "unist-util-visit";
 import { u } from "unist-builder";
 import type { Element } from "hast";
-import type { Link, Image } from "mdast";
+import type { Link, Image, Text } from "mdast";
 import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
 import { loadSettings } from "./settings";
@@ -333,9 +333,11 @@ export async function remarkMdToHTML(app: App, md: string) {
                 // EXAMPLE:
                 // [Github](https://github.com/ "card")
                 // <a data-draft-node="block" data-draft-type="link-card" href="https://github.com/">Github</a>
+                properties.href = node.url;
                 properties["data-draft-node"] = "block";
                 properties["data-draft-type"] = "link-card";
-                properties.href = node.url;
+                properties["data-draft-title"] = getLinkText(node);
+                properties["data-draft-cover"] = "";
             } else if (node.title && node.title.includes("member_mention")) {
                 // EXAMPLE:
                 // [@Dong](https://www.zhihu.com/people/dong-jun-kai "member_mention_ed006411b00ce202f72d45c413246050")
@@ -608,6 +610,8 @@ export async function remarkMdToHTML(app: App, md: string) {
         // 否则就是普通的下划线文字
         wikiLink(state: any, node: WikiLinkNode): Element {
             const name = node.value;
+            const alias = node.data.alias;
+            const alt = alias ? alias : name; // 一般来说`alias`都是存在的
             const mdFile = file.getFilePathFromName(app, name);
 
             if (mdFile instanceof TFile) {
@@ -617,11 +621,19 @@ export async function remarkMdToHTML(app: App, md: string) {
                 if (fm && fm["zhihu-link"]) {
                     const properties: { [key: string]: string } = {};
                     properties.href = fm["zhihu-link"];
+                    const source = String(state.options.file.value ?? "");
+                    if (isNodeAloneInLine(node, source)) {
+                        // 如果内链前没有任何内容，视为另起一行，做成card链接
+                        properties["data-draft-node"] = "block";
+                        properties["data-draft-type"] = "link-card";
+                        properties["data-draft-title"] = alias;
+                        properties["data-draft-cover"] = "";
+                    }
                     return {
                         type: "element",
                         tagName: "a",
                         properties,
-                        children: [u("text", name)],
+                        children: [u("text", alt)],
                     };
                 }
             }
@@ -656,34 +668,23 @@ export async function remarkMdToHTML(app: App, md: string) {
     console.log(htmlOutput);
     return htmlOutput;
 }
+// 检测node是否单独一行
+function isNodeAloneInLine(node: any, source: string): boolean {
+    const pos = node.position;
+    if (!pos?.start || !pos?.end) return false;
+    const { start, end } = pos;
+    if (start.line !== end.line) return false;
 
-// 由于中间换行不会被检测到，所以需要将所有\n替换成break节点。
-// function replaceTextWithBreaks(node: any): any[] {
-//     if (node.type === "text") {
-//         const parts = node.value.split(/\n/);
-//         const result = [];
+    const line = source.split(/\r?\n/)[start.line - 1] ?? "";
+    const before = line.slice(0, start.column - 1).trim();
+    const after = line.slice(end.column - 1).trim();
+    return before === "" && after === "";
+}
 
-//         for (let i = 0; i < parts.length; i++) {
-//             result.push(u("text", parts[i]));
-//             if (i < parts.length - 1) {
-//                 result.push({
-//                     type: "break",
-//                 });
-//             }
-//         }
-
-//         return result;
-//     }
-
-//     // 如果是段落、强调等元素，也递归处理它的 children
-//     if (node.children && Array.isArray(node.children)) {
-//         return [
-//             {
-//                 ...node,
-//                 children: node.children.flatMap(replaceTextWithBreaks),
-//             },
-//         ];
-//     }
-
-//     return [node];
-// }
+// 提取[link_text](link_url)中的`link_text`
+function getLinkText(node: Link): string {
+    return node.children
+        .filter((child): child is Text => child.type === "text")
+        .map((child) => child.value)
+        .join("");
+}
