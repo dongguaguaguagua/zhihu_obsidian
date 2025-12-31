@@ -1,12 +1,4 @@
-import {
-    App,
-    Vault,
-    Notice,
-    View,
-    WorkspaceLeaf,
-    TFile,
-    setIcon,
-} from "obsidian";
+import { App, Vault, Notice, View, WorkspaceLeaf, setIcon } from "obsidian";
 import {
     Recommendation,
     loadRecommendations,
@@ -19,7 +11,7 @@ import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 const locale = i18n.current;
 export const SIDES_VIEW_TYPE = "zhihu-sides-view";
-import { openContent, phaseQuestion } from "./open_service";
+import { phaseQuestion, ZhihuOpener, asZhihuType } from "./open_service";
 
 export async function activateSideView() {
     const { workspace } = this.app;
@@ -231,14 +223,16 @@ export class ZhihuSideView extends View {
                         recommendation.id,
                     );
                 }
-                openContent(
-                    this.app,
-                    recommendation.title,
-                    recommendation.url,
-                    recommendation.content,
-                    recommendation.type,
-                    recommendation.author_name,
-                );
+                const opener = new ZhihuOpener(this.app);
+                const zhType = asZhihuType(recommendation.type);
+                if (!zhType) return;
+                await opener.openParsed({
+                    type: zhType,
+                    url: recommendation.url,
+                    title: recommendation.title,
+                    html: recommendation.content,
+                    author: recommendation.author_name ?? "知乎用户",
+                });
             });
         });
     }
@@ -278,14 +272,16 @@ export class ZhihuSideView extends View {
                 if (settings.sendReadToZhihu !== false) {
                     await touchToRead(this.vault, follow.type, follow.id);
                 }
-                openContent(
-                    this.app,
-                    follow.title,
-                    follow.url,
-                    follow.content,
-                    follow.type,
-                    follow.author_name,
-                );
+                const opener = new ZhihuOpener(this.app);
+                const zhType = asZhihuType(follow.type);
+                if (!zhType) return;
+                await opener.openParsed({
+                    type: zhType,
+                    url: follow.url,
+                    title: follow.title,
+                    html: follow.content,
+                    author: follow.author_name ?? "知乎用户",
+                });
             });
         });
     }
@@ -320,26 +316,17 @@ export class ZhihuSideView extends View {
                 hot.link,
             );
             item.onClickEvent(async () => {
-                openContent(
-                    this.app,
-                    qTitle,
-                    hot.link,
-                    qContent,
-                    hot.type,
-                    qAsker,
-                );
+                const opener = new ZhihuOpener(this.app);
+                const zhType = asZhihuType(hot.type);
+                if (!zhType) return;
+                await opener.openParsed({
+                    type: zhType,
+                    url: hot.link,
+                    title: qTitle,
+                    html: qContent,
+                    author: qAsker,
+                });
             });
         });
-    }
-}
-
-function changePageNumber(url: string, pageNumber: number): string {
-    try {
-        const parsedUrl = new URL(url);
-        parsedUrl.searchParams.set("page_number", pageNumber.toString());
-        return parsedUrl.toString();
-    } catch (error) {
-        console.error(locale.notice.linkInvalid, error);
-        return url;
     }
 }
