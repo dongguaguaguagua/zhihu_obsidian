@@ -20,13 +20,13 @@ function HomepageHeader() {
                 <div className={styles.buttons}>
                     <Link
                         className="button button--primary button--lg"
-                        to="/docs/快速开始/安装插件"
+                        to="/docs/begin/install"
                     >
                         快速开始
                     </Link>
                     <Link
                         className="button button--secondary button--lg"
-                        to="/docs/语法/通用语法"
+                        to="/docs/syntax"
                     >
                         语法文档
                     </Link>

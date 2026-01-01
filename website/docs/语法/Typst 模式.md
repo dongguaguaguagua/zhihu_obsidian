@@ -1,5 +1,6 @@
 ---
 sidebar_position: 9
+slug: /syntax/typst
 ---
 
 :::warning

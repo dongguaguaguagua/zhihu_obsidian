@@ -68,6 +68,62 @@ const config: Config = {
             crossorigin: "anonymous",
         },
     ],
+    // 重定向以兼容旧的中文路径
+    plugins: [
+        [
+            "@docusaurus/plugin-client-redirects",
+            {
+                redirects: [
+                    { from: "/docs/介绍", to: "/docs/intro" },
+                    {
+                        from: "/docs/快速开始/安装插件",
+                        to: "/docs/begin/install",
+                    },
+                    {
+                        from: "/docs/快速开始/登录知乎",
+                        to: "/docs/begin/login",
+                    },
+                    {
+                        from: "/docs/快速开始/发布文章",
+                        to: "/docs/begin/create-new-article",
+                    },
+                    {
+                        from: "/docs/快速开始/发布回答",
+                        to: "/docs/begin/create-new-answer",
+                    },
+                    {
+                        from: "/docs/快速开始/浏览知乎",
+                        to: "/docs/begin/browse",
+                    },
+                    { from: "/docs/语法/通用语法", to: "/docs/syntax/common" },
+                    { from: "/docs/语法/图片", to: "/docs/syntax/image" },
+                    { from: "/docs/语法/@知友", to: "/docs/syntax/at-members" },
+                    { from: "/docs/语法/目录", to: "/docs/syntax/toc" },
+                    { from: "/docs/语法/链接", to: "/docs/syntax/link" },
+                    {
+                        from: "/docs/语法/数学公式",
+                        to: "/docs/syntax/math-formula",
+                    },
+                    {
+                        from: "/docs/语法/标注块",
+                        to: "/docs/syntax/callout",
+                    },
+                    {
+                        from: "/docs/语法/Mermaid",
+                        to: "/docs/syntax/mermaid",
+                    },
+                    {
+                        from: "/docs/语法/Typst 模式",
+                        to: "/docs/syntax/typst",
+                    },
+                    {
+                        from: "/docs/语法/创作声明",
+                        to: "/docs/syntax/typst",
+                    },
+                ],
+            },
+        ],
+    ],
     themeConfig: {
         image: "img/social-card.jpg",
         navbar: {
@@ -103,15 +159,15 @@ const config: Config = {
                     items: [
                         {
                             label: "介绍",
-                            to: "/docs/介绍",
+                            to: "/docs/intro",
                         },
                         {
                             label: "快速开始",
-                            to: "/docs/快速开始/安装插件",
+                            to: "/docs/begin/install",
                         },
                         {
                             label: "语法",
-                            to: "/docs/语法/通用语法",
+                            to: "/docs/syntax",
                         },
                     ],
                 },
