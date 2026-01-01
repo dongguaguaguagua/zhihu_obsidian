@@ -118,7 +118,7 @@ const config: Config = {
                     },
                     {
                         from: "/docs/语法/创作声明",
-                        to: "/docs/syntax/typst",
+                        to: "/docs/syntax/disclaimer",
                     },
                 ],
             },
@@ -199,6 +199,13 @@ const config: Config = {
         prism: {
             theme: prismThemes.github,
             darkTheme: prismThemes.dracula,
+        },
+        algolia: {
+            appId: "1TKNQLWHXL",
+            apiKey: "9f887dfda6c953a9d102342890456522",
+            indexName: "zhihu-obsidian-docsearch",
+            contextualSearch: true,
+            searchPagePath: "search",
         },
     } satisfies Preset.ThemeConfig,
 };
