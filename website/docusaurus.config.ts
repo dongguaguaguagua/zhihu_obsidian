@@ -7,7 +7,7 @@ import rehypeKatex from "rehype-katex";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-    title: "Zhihu on Obsidian",
+    title: "知乎 Obsidian 插件",
     tagline: "重拾知乎创作的乐趣",
     favicon: "img/logo.svg",
 
@@ -69,10 +69,9 @@ const config: Config = {
         },
     ],
     themeConfig: {
-        // Replace with your project's social card
-        image: "img/docusaurus-social-card.jpg",
+        image: "img/social-card.jpg",
         navbar: {
-            title: "Zhihu Obsidian",
+            title: "知乎 Obsidian",
             logo: {
                 alt: "Zhihu on Obsidian Logo",
                 src: "img/logo.svg",
@@ -83,6 +82,11 @@ const config: Config = {
                     sidebarId: "tutorialSidebar",
                     position: "left",
                     label: "文档",
+                },
+                {
+                    href: "https://zhuanlan.zhihu.com/p/1901622331102696374",
+                    label: "知乎文章",
+                    position: "left",
                 },
                 {
                     href: "https://github.com/dongguaguaguagua/zhihu_obsidian",
