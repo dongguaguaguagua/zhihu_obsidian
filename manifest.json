@@ -1,7 +1,7 @@
 {
     "id": "zhihu",
     "name": "Zhihu",
-    "version": "0.3.8",
+    "version": "0.3.9",
     "minAppVersion": "1.6.7",
     "description": "Enable you to publish your articles and answers to Zhihu",
     "author": "dgg",
