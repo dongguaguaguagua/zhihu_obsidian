@@ -1,5 +1,6 @@
 ---
 sidebar_position: 8
+slug: /syntax/mermaid
 ---
 
 插件允许您上传 Obsidian 内的 mermaid 流程图，仅需在添加一个 mermaid 语法的代码块。
