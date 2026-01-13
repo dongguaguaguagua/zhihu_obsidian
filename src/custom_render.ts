@@ -380,7 +380,7 @@ export async function remarkMdToHTML(app: App, md: string) {
             };
         },
         math(state: any, node: any): Element {
-            const eq = node.value + "\\\\";
+            const eq = node.value;
             const alt = eq.replace(/[\n\r]/g, " ");
             const encoded = encodeURI(eq);
             return {
@@ -392,7 +392,7 @@ export async function remarkMdToHTML(app: App, md: string) {
                         type: "element",
                         tagName: "img",
                         properties: {
-                            eeimg: "1",
+                            eeimg: "2",
                             src: `//www.zhihu.com/equation?tex=${encoded}`,
                             alt: alt,
                         },
