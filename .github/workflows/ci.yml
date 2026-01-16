@@ -28,5 +28,14 @@ jobs:
             - name: Build Plugin
               run: npm run build
 
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: zhihu-obsidian-${{ github.sha }}
+                  path: |
+                      main.js
+                      manifest.json
+                      styles.css
+
             # - name: Test (可选)
             #   run: npm test
