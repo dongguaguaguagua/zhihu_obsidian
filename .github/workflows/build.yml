@@ -40,3 +40,12 @@ jobs:
                       Zhihu-on-Obsidian-${{ github.ref_name }}.zip
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v3
+              with:
+                  name: zhihu-obsidian-${{ github.sha }}
+                  path: |
+                      main.js
+                      manifest.json
+                      styles.css
