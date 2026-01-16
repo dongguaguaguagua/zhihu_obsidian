@@ -14,7 +14,11 @@ import type { Link, Image, Text } from "mdast";
 import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
 import { loadSettings } from "./settings";
-import { getOnlineImg, getZhihuImgLink } from "./image_service";
+import {
+    getOnlineImg,
+    getZhihuImgLink,
+    getImgDimensions,
+} from "./image_service";
 import * as file from "./files";
 import * as fs from "fs";
 import * as path from "path";
@@ -45,6 +49,8 @@ interface WikiImgLinkNode extends Node {
             src: string;
             "data-caption": string;
             "data-size": string;
+            "data-rawwidth": string;
+            "data-rawheight": string;
             "data-watermark": string;
             "data-original-src": string;
             "data-watermark-src": string;
@@ -121,6 +127,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                     imgBuffer = fs.readFileSync(imgPathOnDisk);
                 }
                 const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                const { width, height } = getImgDimensions(imgBuffer);
                 if (!alt) {
                     // 如果alt为空，则通过设置判断是否加alt
                     alt = settings.useImgNameDefault ? imgLink : "";
@@ -133,6 +140,8 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                         src: imgLink,
                         "data-caption": alt,
                         "data-size": "normal",
+                        "data-rawwidth": `${width}`,
+                        "data-rawheight": `${height}`,
                         "data-watermark": "watermark",
                         "data-original-src": imgLink,
                         "data-watermark-src": "",
@@ -155,6 +164,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                 try {
                     const imgBuffer = fs.readFileSync(imgPathOnDisk);
                     const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                    const { width, height } = getImgDimensions(imgBuffer);
                     if (alt === imgName) {
                         // 图片名称和alt相同，说明没加alt，则通过设置判断是否加alt
                         alt = settings.useImgNameDefault
@@ -171,6 +181,8 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                             src: imgLink,
                             "data-caption": alt,
                             "data-size": "normal",
+                            "data-rawwidth": `${width}`,
+                            "data-rawheight": `${height}`,
                             "data-watermark": "watermark",
                             "data-original-src": imgLink,
                             "data-watermark-src": "",
@@ -211,7 +223,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                         console.error(locale.error.uploadMermaidImgFailed);
                         return;
                     }
-
+                    const { width, height } = getImgDimensions(imgBuffer);
                     // 将代码块节点替换为图片节点
                     const alt = "";
                     node.type = "image"; // 改变节点类型
@@ -224,6 +236,8 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                             src: imgLink,
                             "data-caption": alt,
                             "data-size": "normal",
+                            "data-rawwidth": `${width}`,
+                            "data-rawheight": `${height}`,
                             "data-watermark": "watermark",
                             "data-original-src": imgLink,
                             "data-watermark-src": "",
