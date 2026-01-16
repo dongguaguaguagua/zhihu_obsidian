@@ -24,7 +24,7 @@ const config: Config = {
 
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
-    organizationName: "dongguaguaguagua", // Usually your GitHub org/user name.
+    organizationName: "zimya", // Usually your GitHub org/user name.
     projectName: "zhihu_obsidian", // Usually your repo name.
 
     onBrokenLinks: "throw",
@@ -47,7 +47,7 @@ const config: Config = {
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
                     editUrl:
-                        "https://github.com/dongguaguaguagua/zhihu_obsidian/tree/master/website/",
+                        "https://github.com/zimya/zhihu_obsidian/tree/master/website/",
                     remarkPlugins: [remarkMath],
                     rehypePlugins: [rehypeKatex],
                 },
@@ -145,7 +145,7 @@ const config: Config = {
                     position: "left",
                 },
                 {
-                    href: "https://github.com/dongguaguaguagua/zhihu_obsidian",
+                    href: "https://github.com/zimya/zhihu_obsidian",
                     label: "GitHub",
                     position: "right",
                 },
@@ -189,7 +189,7 @@ const config: Config = {
                     items: [
                         {
                             label: "GitHub",
-                            href: "https://github.com/dongguaguaguagua/zhihu_obsidian",
+                            href: "https://github.com/zimya/zhihu_obsidian",
                         },
                     ],
                 },

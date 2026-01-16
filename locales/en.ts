@@ -185,7 +185,7 @@ export default {
         closePopularStrWarning:
             "**Are you sure you want to turn it off?**\nCreating plugins is not easy. If this plugin has been helpful to you, consider supporting the author!\n\
 * Like the author's Zhihu article: https://zhuanlan.zhihu.com/p/1901622331102696374\n\
-* Star the plugin's GitHub repository: https://github.com/dongguaguaguagua/zhihu_obsidian\
+* Star the plugin's GitHub repository: https://github.com/zimya/zhihu_obsidian\
         ",
         closePopularStrWarningButtonText: "Turn off promotional statement",
         typstMode: "Typst Mode (Experimental)",
@@ -195,7 +195,7 @@ export default {
             "**This is an experimental feature**\n\
 * For a better Typst editing experience, it is recommended to install the [Typsidian](https://github.com/fogsong233/Typsidian) or [Wypst](obsidian://show-plugin?id=wypst) plugin.\n\
 * This feature requires that the [Typst](https://github.com/typst/typst) command-line program is installed on your computer.\n\
-* Since this is an experimental feature, if you encounter any issues or bugs, you can submit an [issue](https://github.com/dongguaguaguagua/zhihu_obsidian/issues) on GitHub.\n\
+* Since this is an experimental feature, if you encounter any issues or bugs, you can submit an [issue](https://github.com/zimya/zhihu_obsidian/issues) on GitHub.\n\
 ",
         typstVersion: "Typst Version:",
         typstPathDesc: "Please enter the path to the Typst executable file",

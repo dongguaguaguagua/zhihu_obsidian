@@ -175,7 +175,7 @@ export default {
         closePopularStrWarning:
             "**您确认要关闭吗？**\n制作插件不易，如果插件对您有帮助的话，不妨动动手指支持一下作者吧！\n\
 * 点赞作者的知乎文章：https://zhuanlan.zhihu.com/p/1901622331102696374\n\
-* 给插件的 GitHub 仓库打个星星：https://github.com/dongguaguaguagua/zhihu_obsidian\
+* 给插件的 GitHub 仓库打个星星：https://github.com/zimya/zhihu_obsidian\
 ",
         closePopularStrWarningButtonText: "关闭推广语句",
         typstMode: "Typst 模式 (实验性)",
@@ -184,7 +184,7 @@ export default {
             "**这是一个实验性功能**\n\
 * 为了保证更好的 Typst 编辑体验，推荐安装 [Typsidian](https://github.com/fogsong233/Typsidian) 或 [Wypst](obsidian://show-plugin?id=wypst) 插件。\n\
 * 本功能需要您电脑上已安装了 [Typst](https://github.com/typst/typst) 命令行程序，\n\
-* 由于这是一个实验性功能，如果您遇到了问题或者bug，可以在GitHub发 [issue](https://github.com/dongguaguaguagua/zhihu_obsidian/issues) 给我。\n\
+* 由于这是一个实验性功能，如果您遇到了问题或者bug，可以在GitHub发 [issue](https://github.com/zimya/zhihu_obsidian/issues) 给我。\n\
 ",
         typstVersion: "Typst 版本：",
         typstPathDesc: "请输入 Typst 可执行文件的路径",

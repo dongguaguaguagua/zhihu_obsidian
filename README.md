@@ -5,17 +5,17 @@
 <h1>Zhihu on Obsidian</h1>
 
 <p align="center">
-<a href="https://github.com/dongguaguaguagua/zhihu_obsidian/actions">
-<img src="https://img.shields.io/github/actions/workflow/status/dongguaguaguagua/zhihu_obsidian/ci.yml?&branch=master">
+<a href="https://github.com/zimya/zhihu_obsidian/actions">
+	<img src="https://img.shields.io/github/actions/workflow/status/zimya/zhihu_obsidian/ci.yml?&branch=master">
 </a>
-<a href="https://github.com/dongguaguaguagua/zhihu_obsidian/releases">
-<img src="https://img.shields.io/github/v/release/dongguaguaguagua/zhihu_obsidian?&sort=semver">
+<a href="https://github.com/zimya/zhihu_obsidian/releases">
+<img src="https://img.shields.io/github/v/release/zimya/zhihu_obsidian?&sort=semver">
 </a>
-<a href="https://github.com/dongguaguaguagua/zhihu_obsidian/releases">
-<img src="https://img.shields.io/github/downloads/dongguaguaguagua/zhihu_obsidian/total">
+<a href="https://github.com/zimya/zhihu_obsidian/releases">
+<img src="https://img.shields.io/github/downloads/zimya/zhihu_obsidian/total">
 </a>
-<a href="https://github.com/dongguaguaguagua/zhihu_obsidian?tab=0BSD-1-ov-file#0BSD-1-ov-file">
-<img src="https://img.shields.io/github/license/dongguaguaguagua/zhihu_obsidian">
+<a href="https://github.com/zimya/zhihu_obsidian?tab=0BSD-1-ov-file#0BSD-1-ov-file">
+<img src="https://img.shields.io/github/license/zimya/zhihu_obsidian">
 </a>
 <a href="https://zhihu.melonhu.cn">
 <img src="https://img.shields.io/badge/doc-cn-blue">
@@ -153,10 +153,10 @@ You can fork this repo to `vault/.obsidian/plugins`, make sure your NodeJS is at
 
 You can support me by star⭐ the repo!
 
-<a href="https://github.com/dongguaguaguagua/zhihu_obsidian/stargazers">
+<a href="https://github.com/zimya/zhihu_obsidian/stargazers">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=dongguaguaguagua/zhihu_obsidian&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=zimya/zhihu_obsidian&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=zimya/zhihu_obsidian&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=zimya/zhihu_obsidian&type=Date" />
  </picture>
 </a>
