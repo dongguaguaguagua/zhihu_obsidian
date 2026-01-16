@@ -8,6 +8,8 @@ import * as file from "./files";
 import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 import { App } from "obsidian";
+import sizeOf from "image-size";
+
 const locale: Lang = i18n.current;
 
 async function getImgIdFromHash(vault: Vault, imgHash: string) {
@@ -255,4 +257,12 @@ async function calculateSignature(
 
 function imgOriginalPathBuilder(hash: string, ext: string) {
     return `https://picx.zhimg.com/v2-${hash}.${ext}`;
+}
+
+export function getImgDimensions(imgBuffer: Buffer): {
+    width: number;
+    height: number;
+} {
+    const dimensions = sizeOf(imgBuffer);
+    return { width: dimensions.width, height: dimensions.height };
 }
