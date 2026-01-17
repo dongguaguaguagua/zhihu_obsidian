@@ -14,11 +14,7 @@ import type { Link, Image, Text } from "mdast";
 import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
 import { loadSettings } from "./settings";
-import {
-    getOnlineImg,
-    getZhihuImgLink,
-    getImgDimensions,
-} from "./image_service";
+import { getOnlineImg, getZhihuImg, getImgDimensions } from "./image_service";
 import * as file from "./files";
 import * as fs from "fs";
 import * as path from "path";
@@ -32,6 +28,7 @@ import i18n, { type Lang } from "../locales";
 import rehypeRaw from "rehype-raw";
 import { typstCode2Img } from "./typst";
 import { isWebUrl } from "./utilities";
+import { fileTypeFromBuffer } from "file-type";
 
 const locale: Lang = i18n.current;
 
@@ -126,25 +123,29 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                     );
                     imgBuffer = fs.readFileSync(imgPathOnDisk);
                 }
-                const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                console.log("正在获取图片：", alt);
+                const imgRes = await getZhihuImg(vault, imgBuffer);
+                console.log("获取图片完成", imgRes);
+                const fileType = await fileTypeFromBuffer(imgBuffer);
+                const ext = fileType ? fileType.ext : "";
                 const { width, height } = getImgDimensions(imgBuffer);
                 if (!alt) {
                     // 如果alt为空，则通过设置判断是否加alt
-                    alt = settings.useImgNameDefault ? imgLink : "";
+                    alt = settings.useImgNameDefault ? imgRes.original_src : "";
                 }
-                node.url = imgLink;
+                node.url = `${imgRes.original_src}.${ext}`;
                 node.data = {
                     ...node.data,
                     hName: "img",
                     hProperties: {
-                        src: imgLink,
+                        src: `${imgRes.original_src}.${ext}`,
                         "data-caption": alt,
                         "data-size": "normal",
                         "data-rawwidth": `${width}`,
                         "data-rawheight": `${height}`,
-                        "data-watermark": "watermark",
-                        "data-original-src": imgLink,
-                        "data-watermark-src": "",
+                        "data-watermark": `${imgRes.watermark}`,
+                        "data-original-src": `${imgRes.original_src}.${ext}`,
+                        "data-watermark-src": `${imgRes.watermark_src}.${ext}`,
                         "data-private-watermark-src": "",
                     },
                     hChildren: [],
@@ -163,7 +164,11 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                 );
                 try {
                     const imgBuffer = fs.readFileSync(imgPathOnDisk);
-                    const imgLink = await getZhihuImgLink(vault, imgBuffer);
+                    console.log("正在获取图片：", alt);
+                    const imgRes = await getZhihuImg(vault, imgBuffer);
+                    console.log("获取图片完成", imgRes);
+                    const fileType = await fileTypeFromBuffer(imgBuffer);
+                    const ext = fileType ? fileType.ext : "";
                     const { width, height } = getImgDimensions(imgBuffer);
                     if (alt === imgName) {
                         // 图片名称和alt相同，说明没加alt，则通过设置判断是否加alt
@@ -172,20 +177,20 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                             : "";
                     }
                     (node as any).type = "image";
-                    (node as any).url = imgLink;
+                    (node as any).url = `${imgRes.original_src}.${ext}`;
                     (node as any).alt = alt;
                     node.data = {
                         ...node.data,
                         hName: "img",
                         hProperties: {
-                            src: imgLink,
+                            src: `${imgRes.original_src}.${ext}`,
                             "data-caption": alt,
                             "data-size": "normal",
                             "data-rawwidth": `${width}`,
                             "data-rawheight": `${height}`,
-                            "data-watermark": "watermark",
-                            "data-original-src": imgLink,
-                            "data-watermark-src": "",
+                            "data-watermark": `${imgRes.watermark}`,
+                            "data-original-src": `${imgRes.original_src}.${ext}`,
+                            "data-watermark-src": `${imgRes.watermark_src}.${ext}`,
                             "data-private-watermark-src": "",
                         },
                         hChildren: [],
@@ -218,29 +223,33 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                     );
 
                     // 上传图片到知乎
-                    const imgLink = await getZhihuImgLink(vault, imgBuffer);
-                    if (!imgLink) {
+                    console.log("正在获取mermaid图片");
+                    const imgRes = await getZhihuImg(vault, imgBuffer);
+                    console.log("获取图片完成", imgRes);
+                    const fileType = await fileTypeFromBuffer(imgBuffer);
+                    if (!imgRes.original_src || !fileType) {
                         console.error(locale.error.uploadMermaidImgFailed);
                         return;
                     }
+                    const ext = fileType.ext;
                     const { width, height } = getImgDimensions(imgBuffer);
                     // 将代码块节点替换为图片节点
                     const alt = "";
                     node.type = "image"; // 改变节点类型
-                    node.url = imgLink;
+                    node.url = `${imgRes.original_src}.${ext}`;
                     node.alt = alt;
                     node.data = {
                         ...node.data,
                         hName: "img",
                         hProperties: {
-                            src: imgLink,
+                            src: `${imgRes.original_src}.${ext}`,
                             "data-caption": alt,
                             "data-size": "normal",
                             "data-rawwidth": `${width}`,
                             "data-rawheight": `${height}`,
-                            "data-watermark": "watermark",
-                            "data-original-src": imgLink,
-                            "data-watermark-src": "",
+                            "data-watermark": `${imgRes.watermark}`,
+                            "data-original-src": `${imgRes.original_src}.${ext}`,
+                            "data-watermark-src": `${imgRes.watermark_src}.${ext}`,
                             "data-private-watermark-src": "",
                         },
                         hChildren: [],
@@ -679,7 +688,6 @@ export async function remarkMdToHTML(app: App, md: string) {
         .process(md);
 
     const htmlOutput = String(output);
-    console.log(htmlOutput);
     return htmlOutput;
 }
 // 检测node是否单独一行

@@ -7,7 +7,7 @@ import { execFileSync } from "child_process";
 import * as os from "os";
 import * as fs from "fs";
 import * as path from "path";
-import { getZhihuImgLink } from "./image_service";
+import { getZhihuImg } from "./image_service";
 import { writeFile, mkdtemp, rm } from "fs/promises";
 
 export async function createTypstEditor(
@@ -71,8 +71,8 @@ export async function typstCode2Img(
         pngFile,
     ]);
     const imgBuffer = fs.readFileSync(pngFile);
-    const imgLink = await getZhihuImgLink(vault, imgBuffer);
-
+    const imgRes = await getZhihuImg(vault, imgBuffer);
+    const imgLink = imgRes.original_src;
     await rm(tmpDir, { recursive: true, force: true }); // 清理临时文件夹
     return imgLink;
 }
