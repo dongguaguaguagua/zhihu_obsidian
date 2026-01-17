@@ -4,8 +4,6 @@ import * as dataUtil from "./data";
 import * as cookieUtil from "./cookies";
 import { loadSettings, saveSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
-import en from "locales/en";
-import { toCurl } from "./utilities";
 const locale: Lang = i18n.current;
 
 export class QRCodeModal extends Modal {
@@ -18,8 +16,7 @@ export class QRCodeModal extends Modal {
         this.link = link;
     }
     async onOpen() {
-        this.modalEl.style.width = "320px";
-        this.modalEl.style.height = "360px";
+        this.modalEl.addClass("zhihu-qrcode-modal");
         const { contentEl } = this;
         const titleContainer = contentEl.createEl("div", {
             cls: "qrcode-title",

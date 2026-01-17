@@ -647,11 +647,7 @@ export class ZhihuInputLinkModal extends Modal {
 
         // ===== 纯 HTML 行 =====
         const row = contentEl.createDiv();
-        row.addClass("zhihu-modal-row");
-        row.style.display = "flex";
-        row.style.alignItems = "center";
-        row.style.marginTop = "10px";
-        row.style.gap = "8px";
+        row.addClass("open-link-model-raw");
 
         // 批量打开链接按钮
         const batchBtn = new ButtonComponent(row);
@@ -662,11 +658,11 @@ export class ZhihuInputLinkModal extends Modal {
 
         // 弹性空白
         const spacer = row.createDiv();
-        spacer.style.flex = "1 1 auto";
+        spacer.addClass("open-link-model-spacer");
 
         // 覆盖已有文件
         const owLabel = row.createSpan({ text: "覆盖已有文件" });
-        owLabel.style.marginRight = "4px";
+        owLabel.addClass("open-link-model-label");
 
         const owToggle = new ToggleComponent(row);
         owToggle.setValue(true); // 默认覆盖
@@ -674,9 +670,9 @@ export class ZhihuInputLinkModal extends Modal {
             this.overwrite = v;
         });
 
-        // 保存图片（你原来的）
+        // 保存图片
         const label = row.createSpan({ text: "保存图片" });
-        label.style.marginRight = "4px";
+        label.addClass("open-link-model-label");
 
         const toggle = new ToggleComponent(row);
 
@@ -732,27 +728,17 @@ export class ZhihuBatchLinkModal extends Modal {
          * =========
          */
         const dirRow = contentEl.createDiv({ cls: "zhihu-batch-dir-row" });
-        dirRow.style.display = "flex";
-        dirRow.style.alignItems = "center";
-        dirRow.style.gap = "8px";
-        dirRow.style.marginBottom = "8px";
-
+        dirRow.addClass("open-link-batch-model-dir");
         dirRow.createSpan({ text: "存储目录" });
 
         const dirValueEl = dirRow.createSpan({
             text: `${this.folderPathRel}/`,
         });
-        dirValueEl.addClass("zhihu-dir-value");
-        dirValueEl.style.opacity = "0.85";
-        dirValueEl.style.fontFamily = "var(--font-monospace)";
-        dirValueEl.style.whiteSpace = "nowrap";
-        dirValueEl.style.overflow = "hidden";
-        dirValueEl.style.textOverflow = "ellipsis";
-        dirValueEl.style.maxWidth = "60%";
+        dirValueEl.addClass("open-link-batch-model-dir-value");
 
         // 弹性空白
         const spacer = dirRow.createDiv();
-        spacer.style.flex = "1 1 auto";
+        spacer.addClass("open-link-model-spacer");
 
         const pickBtn = new ButtonComponent(dirRow);
         pickBtn.setButtonText("选择…");
@@ -778,10 +764,7 @@ export class ZhihuBatchLinkModal extends Modal {
 
         // 在下面展示绝对路径，便于用户确认
         const absHint = contentEl.createDiv({ cls: "zhihu-batch-abs-hint" });
-        absHint.style.marginTop = "-4px";
-        absHint.style.marginBottom = "10px";
-        absHint.style.opacity = "0.7";
-        absHint.style.fontSize = "12px";
+        absHint.addClass("open-link-batch-model-path-hint");
         absHint.setText("默认：zhihu/（仅支持 Vault 内目录）");
 
         /**
@@ -792,15 +775,11 @@ export class ZhihuBatchLinkModal extends Modal {
         const offlineRow = contentEl.createDiv({
             cls: "zhihu-batch-offline-row",
         });
-        offlineRow.style.display = "flex";
-        offlineRow.style.alignItems = "center";
-        offlineRow.style.gap = "8px";
-        offlineRow.style.marginBottom = "10px";
-
+        offlineRow.addClass("open-link-batch-model-row");
         offlineRow.createSpan({ text: "保存图片" });
 
         const offlineSpacer = offlineRow.createDiv();
-        offlineSpacer.style.flex = "1 1 auto";
+        offlineSpacer.addClass("open-link-model-spacer");
 
         const offlineToggle = new ToggleComponent(offlineRow);
         offlineToggle.setValue(this.offline);
@@ -816,15 +795,11 @@ export class ZhihuBatchLinkModal extends Modal {
         const overwriteRow = contentEl.createDiv({
             cls: "zhihu-batch-overwrite-row",
         });
-        overwriteRow.style.display = "flex";
-        overwriteRow.style.alignItems = "center";
-        overwriteRow.style.gap = "8px";
-        overwriteRow.style.marginBottom = "10px";
-
+        overwriteRow.addClass("open-link-batch-model-row");
         overwriteRow.createSpan({ text: "覆盖已有文件" });
 
         const overwriteSpacer = overwriteRow.createDiv();
-        overwriteSpacer.style.flex = "1 1 auto";
+        overwriteSpacer.addClass("open-link-model-spacer");
 
         const overwriteToggle = new ToggleComponent(overwriteRow);
         overwriteToggle.setValue(true); // 默认覆盖
@@ -836,13 +811,9 @@ export class ZhihuBatchLinkModal extends Modal {
          * =========
          */
         this.textareaEl = contentEl.createEl("textarea");
-        this.textareaEl.addClass("zhihu-link-batch-textarea");
+        this.textareaEl.addClass("open-link-batch-model-text-area");
         this.textareaEl.placeholder =
             "每行一个链接\n支持知乎回答、文章、问题、想法";
-        this.textareaEl.style.width = "100%";
-        this.textareaEl.style.minHeight = "340px"; // 你要“长一点”，这里比之前 260 更长
-        this.textareaEl.style.boxSizing = "border-box";
-        this.textareaEl.style.resize = "vertical";
 
         /**
          * =========
@@ -850,10 +821,7 @@ export class ZhihuBatchLinkModal extends Modal {
          * =========
          */
         const footer = contentEl.createDiv({ cls: "zhihu-batch-footer" });
-        footer.style.display = "flex";
-        footer.style.justifyContent = "flex-end";
-        footer.style.gap = "8px";
-        footer.style.marginTop = "12px";
+        footer.addClass("open-link-batch-model-footer");
 
         const cancelBtn = new ButtonComponent(footer);
         cancelBtn.setButtonText("取消");
