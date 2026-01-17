@@ -407,7 +407,7 @@ async function fetchImgStatus(vault: Vault, imgId: string) {
             },
             method: "GET",
         });
-        new Notice(`${locale.notice.getImageStatusSuccess}`);
+        // new Notice(`${locale.notice.getImageStatusSuccess}`);
         return response.json;
     } catch (error) {
         new Notice(`${locale.notice.getImageStatusFailed},${error}`);
@@ -440,7 +440,6 @@ async function pollImgStatus(
     for (let i = 0; i < maxRetry; i++) {
         try {
             const status = await fetchImgStatus(vault, imgId);
-            console.log(`fetchImgStatus (${i + 1}/${maxRetry}):`, status);
 
             if (status.status === "success") {
                 return status;
@@ -479,7 +478,6 @@ export async function getZhihuImg(
         // 或者：该图片是第一次上传的GIF，包含了一些expiration和auth_key
         // 不储存缓存，直接返回默认结果
         if (imgStatus.fallback || imgStatus.src.contains("auth_key")) {
-            console.log("imgStatus:", imgStatus);
             return imgStatus;
         }
         // 存储缓存

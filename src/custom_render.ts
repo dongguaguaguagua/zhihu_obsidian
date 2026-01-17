@@ -123,9 +123,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                     );
                     imgBuffer = fs.readFileSync(imgPathOnDisk);
                 }
-                console.log("正在获取图片：", alt);
                 const imgRes = await getZhihuImg(vault, imgBuffer);
-                console.log("获取图片完成", imgRes);
                 const fileType = await fileTypeFromBuffer(imgBuffer);
                 const ext = fileType ? fileType.ext : "";
                 const { width, height } = getImgDimensions(imgBuffer);
@@ -164,9 +162,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                 );
                 try {
                     const imgBuffer = fs.readFileSync(imgPathOnDisk);
-                    console.log("正在获取图片：", alt);
                     const imgRes = await getZhihuImg(vault, imgBuffer);
-                    console.log("获取图片完成", imgRes);
                     const fileType = await fileTypeFromBuffer(imgBuffer);
                     const ext = fileType ? fileType.ext : "";
                     const { width, height } = getImgDimensions(imgBuffer);
@@ -223,9 +219,7 @@ export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
                     );
 
                     // 上传图片到知乎
-                    console.log("正在获取mermaid图片");
                     const imgRes = await getZhihuImg(vault, imgBuffer);
-                    console.log("获取图片完成", imgRes);
                     const fileType = await fileTypeFromBuffer(imgBuffer);
                     if (!imgRes.original_src || !fileType) {
                         console.error(locale.error.uploadMermaidImgFailed);
