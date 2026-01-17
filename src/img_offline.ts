@@ -86,7 +86,7 @@ export async function turnImgOffline(opts: {
         Promise<{ start: number; end: number; replacement: string } | null>
     > = [];
 
-    visit(tree as any, "image", (node: MdastImage) => {
+    visit(tree, "image", (node: MdastImage) => {
         const url = node.url;
         if (!url || !isHttpUrl(url)) return;
 

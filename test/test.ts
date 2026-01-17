@@ -146,7 +146,7 @@ const zhihuHandlers = {
         const para = def.children[0];
         let text = "";
         let url = "";
-        for (const child of para.children as any[]) {
+        for (const child of para.children) {
             if (child.type === "text") text += child.value.trim();
             if (child.type === "link") url = child.url;
         }

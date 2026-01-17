@@ -2,7 +2,7 @@ import { Vault } from "obsidian";
 import { loadData, updateData } from "./data";
 
 // Define the structure of the settings
-interface ZhihuSettings {
+export interface ZhihuSettings {
     partition: string;
     user_agent: string;
     restrictToZhihuFM: boolean;

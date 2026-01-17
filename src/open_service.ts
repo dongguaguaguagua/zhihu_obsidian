@@ -23,21 +23,23 @@ import { turnImgOffline } from "./img_offline";
 import { loadSettings, saveSettings } from "./settings";
 import { pickDirectoryDesktop, tryMapAbsPathToVaultRel } from "./utilities";
 
+//====================================================================
 // 下面是2025年12月30日采用GPT 5.2重构后的open_service代码
 // 原版过于臃肿，函数的传参层层嵌套
+// ====================================================================
 
 /**
  * =========================
  * Editor Cursor Trace
  * =========================
  */
-export const pluginField = StateField.define<ZhihuObPlugin>({
-    create: () => null as any,
+export const pluginField = StateField.define<ZhihuObPlugin | null>({
+    create: () => null,
     update: (value) => value,
 });
 
 export class CursorPosTrace {
-    plugin: ZhihuObPlugin;
+    plugin: ZhihuObPlugin | null;
 
     constructor(view: EditorView) {
         this.plugin = view.state.field(pluginField);
@@ -130,12 +132,15 @@ export async function clickInReadMode(app: App, evt: MouseEvent) {
 }
 
 export async function clickInPreview(plugin: ZhihuObPlugin, evt: MouseEvent) {
+    interface CMEditorWrapper {
+        cm: EditorView;
+    }
     const app = plugin.app;
     const markdownView = app.workspace.getActiveViewOfType(MarkdownView);
     if (!markdownView) return;
 
     const editor = markdownView.editor;
-    const cmEditor = (editor as any).cm;
+    const cmEditor = (editor as unknown as CMEditorWrapper).cm;
     if (!cmEditor) return;
 
     const pos = cmEditor.posAtCoords({ x: evt.clientX, y: evt.clientY });
