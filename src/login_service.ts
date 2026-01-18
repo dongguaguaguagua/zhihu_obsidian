@@ -4,8 +4,6 @@ import * as dataUtil from "./data";
 import * as cookieUtil from "./cookies";
 import { loadSettings, saveSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
-import en from "locales/en";
-import { toCurl } from "./utilities";
 const locale: Lang = i18n.current;
 
 export class QRCodeModal extends Modal {
@@ -18,8 +16,7 @@ export class QRCodeModal extends Modal {
         this.link = link;
     }
     async onOpen() {
-        this.modalEl.style.width = "320px";
-        this.modalEl.style.height = "360px";
+        this.modalEl.addClass("zhihu-qrcode-modal");
         const { contentEl } = this;
         const titleContainer = contentEl.createEl("div", {
             cls: "qrcode-title",
@@ -129,7 +126,6 @@ export async function zhihuWebLogin(app: App, isNew = false): Promise<void> {
     // 如果是新的登录窗口，则创建一个新分区，否则使用已有的，已经登录账号的分区。
     const newPartition = `zhihu-login-${new Date().getTime()}`;
     const partition = isNew ? newPartition : settings.partition;
-    console.log("partition:", partition);
     const ses = session.fromPartition(partition); // 非持久化，会在窗口全关后销毁
 
     // 只清理这个分区，避免：

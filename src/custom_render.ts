@@ -10,10 +10,10 @@ import * as muwl from "mdast-util-wiki-link";
 import { visit } from "unist-util-visit";
 import { u } from "unist-builder";
 import type { Element } from "hast";
-import type { Link, Image, Text } from "mdast";
+import type { Link, Image, Text, Code } from "mdast";
 import type { Options as RemarkRehypeOptions } from "remark-rehype";
 import type { Parent, Node } from "unist";
-import { loadSettings } from "./settings";
+import { loadSettings, ZhihuSettings } from "./settings";
 import { getOnlineImg, getZhihuImg, getImgDimensions } from "./image_service";
 import * as file from "./files";
 import * as fs from "fs";
@@ -29,6 +29,7 @@ import rehypeRaw from "rehype-raw";
 import { typstCode2Img } from "./typst";
 import { isWebUrl } from "./utilities";
 import { fileTypeFromBuffer } from "file-type";
+import { State } from "mdast-util-to-markdown";
 
 const locale: Lang = i18n.current;
 
@@ -96,168 +97,151 @@ function wikiLinkPlugin(this: any, opts = {}) {
     add("fromMarkdownExtensions", muwl.fromMarkdownWikiLink(opts));
     add("fromMarkdownExtensions", muwl.fromMarkdownWikiImgLink(opts));
 }
-
+// ===================================================
 // 获取![alt](link)格式的图片，先下载到本地，
 // 再上传到知乎，获得链接URL，最后转换为知乎HTML
 // 获取![[link|alt]]格式的本地图片，再上传到知乎
+// ===================================================
 export const remarkZhihuImgs: Plugin<[App], Parent, Parent> = (app) => {
     const vault = app.vault;
-    // 处理图片和Mermaid代码块的转换
     const transformer: Transformer<Parent, Parent> = async (tree) => {
         const settings = await loadSettings(vault);
         const tasks: Promise<void>[] = [];
-        visit(tree, "image", (node: Image) => {
-            const task = (async () => {
-                let alt = node.alt;
-                const url = node.url || "";
-                const decodedUrl = decodeURIComponent(url); // issue 84
-                // 自动判断是否是HTTP/HTTPS协议
-                // 如果是则获取在线图片，否则按照原路经处理
-                let imgBuffer: Buffer;
-                if (isWebUrl(decodedUrl)) {
-                    imgBuffer = await getOnlineImg(vault, url);
-                } else {
-                    const imgPathOnDisk = await file.getImgPathFromName(
-                        app,
-                        decodedUrl,
-                    );
-                    imgBuffer = fs.readFileSync(imgPathOnDisk);
-                }
-                const imgRes = await getZhihuImg(vault, imgBuffer);
-                const fileType = await fileTypeFromBuffer(imgBuffer);
-                const ext = fileType ? fileType.ext : "";
-                const { width, height } = getImgDimensions(imgBuffer);
-                if (!alt) {
-                    // 如果alt为空，则通过设置判断是否加alt
-                    alt = settings.useImgNameDefault ? imgRes.original_src : "";
-                }
-                node.url = `${imgRes.original_src}.${ext}`;
-                node.data = {
-                    ...node.data,
-                    hName: "img",
-                    hProperties: {
-                        src: `${imgRes.original_src}.${ext}`,
-                        "data-caption": alt,
-                        "data-size": "normal",
-                        "data-rawwidth": `${width}`,
-                        "data-rawheight": `${height}`,
-                        "data-watermark": `${imgRes.watermark}`,
-                        "data-original-src": `${imgRes.original_src}.${ext}`,
-                        "data-watermark-src": `${imgRes.watermark_src}.${ext}`,
-                        "data-private-watermark-src": "",
-                    },
-                    hChildren: [],
-                };
-            })();
-            tasks.push(task);
-        });
-        visit(tree, "wikiImgLink", (node: WikiImgLinkNode) => {
-            const task = (async () => {
-                let alt = node.data.alias;
-                const imgName = node.value;
-                // new Notice(`正在处理图片: ${imgName}`);
-                const imgPathOnDisk = await file.getImgPathFromName(
-                    app,
-                    imgName,
-                );
-                try {
-                    const imgBuffer = fs.readFileSync(imgPathOnDisk);
-                    const imgRes = await getZhihuImg(vault, imgBuffer);
-                    const fileType = await fileTypeFromBuffer(imgBuffer);
-                    const ext = fileType ? fileType.ext : "";
-                    const { width, height } = getImgDimensions(imgBuffer);
-                    if (alt === imgName) {
-                        // 图片名称和alt相同，说明没加alt，则通过设置判断是否加alt
-                        alt = settings.useImgNameDefault
-                            ? path.basename(imgName)
-                            : "";
-                    }
-                    (node as any).type = "image";
-                    (node as any).url = `${imgRes.original_src}.${ext}`;
-                    (node as any).alt = alt;
-                    node.data = {
-                        ...node.data,
-                        hName: "img",
-                        hProperties: {
-                            src: `${imgRes.original_src}.${ext}`,
-                            "data-caption": alt,
-                            "data-size": "normal",
-                            "data-rawwidth": `${width}`,
-                            "data-rawheight": `${height}`,
-                            "data-watermark": `${imgRes.watermark}`,
-                            "data-original-src": `${imgRes.original_src}.${ext}`,
-                            "data-watermark-src": `${imgRes.watermark_src}.${ext}`,
-                            "data-private-watermark-src": "",
-                        },
-                        hChildren: [],
-                    };
-                } catch (error) {
-                    new Notice(`图片读取失败: ${error.message}`);
-                }
-                // new Notice(`图片处理完成: ${imgPathOnDisk}`);
-            })();
-            tasks.push(task);
-        });
-        visit(tree, "code", (node: any) => {
-            if (node.lang !== "mermaid") {
-                return;
-            }
 
-            const task = (async () => {
-                try {
-                    // 使用Obsidian API渲染Mermaid代码块以获取SVG
-                    const mermaidCode = node.value;
-                    const container = document.createElement("div");
-                    await mermaid.renderMermaid(mermaidCode, container);
-                    const svgEl = container.querySelector("svg");
-                    if (!svgEl) return;
-                    let svgString = svgEl.outerHTML;
-                    svgString = mermaid.cleanSvg(svgString); // 将svg中的动态变量变成具体值
-                    const imgBuffer = await mermaid.svgToPngBuffer(
-                        svgString,
-                        settings.mermaidScale,
-                    );
-
-                    // 上传图片到知乎
-                    const imgRes = await getZhihuImg(vault, imgBuffer);
-                    const fileType = await fileTypeFromBuffer(imgBuffer);
-                    if (!imgRes.original_src || !fileType) {
-                        console.error(locale.error.uploadMermaidImgFailed);
-                        return;
-                    }
-                    const ext = fileType.ext;
-                    const { width, height } = getImgDimensions(imgBuffer);
-                    // 将代码块节点替换为图片节点
-                    const alt = "";
-                    node.type = "image"; // 改变节点类型
-                    node.url = `${imgRes.original_src}.${ext}`;
-                    node.alt = alt;
-                    node.data = {
-                        ...node.data,
-                        hName: "img",
-                        hProperties: {
-                            src: `${imgRes.original_src}.${ext}`,
-                            "data-caption": alt,
-                            "data-size": "normal",
-                            "data-rawwidth": `${width}`,
-                            "data-rawheight": `${height}`,
-                            "data-watermark": `${imgRes.watermark}`,
-                            "data-original-src": `${imgRes.original_src}.${ext}`,
-                            "data-watermark-src": `${imgRes.watermark_src}.${ext}`,
-                            "data-private-watermark-src": "",
-                        },
-                        hChildren: [],
-                    };
-                } catch (error) {
-                    console.error(locale.error.errorHandlingMermaid, error);
-                }
-            })();
-            tasks.push(task);
+        visit(tree, "image", (node) => {
+            tasks.push(handleMdImage(app, vault, settings, node));
         });
+
+        visit(tree, "wikiImgLink", (node, idx, par) => {
+            tasks.push(handleWikiImg(app, vault, settings, node, par, idx));
+        });
+
+        visit(tree, "code", (node, idx, par) => {
+            tasks.push(handleMermaid(vault, settings, node, par, idx));
+        });
+
         await Promise.all(tasks);
     };
     return transformer;
 };
+
+async function bufferToZhihuImageNode(
+    vault: Vault,
+    imgBuffer: Buffer,
+    alt: string,
+): Promise<Image> {
+    const imgRes = await getZhihuImg(vault, imgBuffer);
+    const fileType = await fileTypeFromBuffer(imgBuffer);
+    if (!fileType) {
+        throw new Error("无法识别图片类型");
+    }
+
+    const ext = fileType.ext;
+    const { width, height } = getImgDimensions(imgBuffer);
+    const url = `${imgRes.original_src}.${ext}`;
+
+    return {
+        type: "image",
+        url,
+        alt,
+        data: {
+            hName: "img",
+            hProperties: {
+                src: url,
+                "data-caption": alt,
+                "data-size": "normal",
+                "data-rawwidth": `${width}`,
+                "data-rawheight": `${height}`,
+                "data-watermark": `${imgRes.watermark}`,
+                "data-original-src": url,
+                "data-watermark-src": `${imgRes.watermark_src}.${ext}`,
+                "data-private-watermark-src": "",
+            },
+            hChildren: [],
+        },
+    };
+}
+
+function replaceNode(
+    parent: Parent | null,
+    index: number | null,
+    oldNode: Node,
+    newNode: Node,
+) {
+    if (parent && typeof index === "number") {
+        parent.children[index] = newNode;
+    } else {
+        Object.assign(oldNode, newNode);
+    }
+}
+// 处理 markdown 格式的图片
+async function handleMdImage(
+    app: App,
+    vault: Vault,
+    settings: ZhihuSettings,
+    node: Image,
+) {
+    let alt = node.alt;
+    const decodedUrl = decodeURIComponent(node.url ?? "");
+
+    const imgBuffer = isWebUrl(decodedUrl)
+        ? await getOnlineImg(vault, decodedUrl)
+        : fs.readFileSync(await file.getImgPathFromName(app, decodedUrl));
+
+    if (!alt) {
+        alt = settings.useImgNameDefault ? decodedUrl : "";
+    }
+
+    const imageNode = await bufferToZhihuImageNode(vault, imgBuffer, alt);
+
+    node.url = imageNode.url;
+    node.data = imageNode.data;
+}
+// 处理 ![[link]] 图片
+async function handleWikiImg(
+    app: App,
+    vault: Vault,
+    settings: ZhihuSettings,
+    node: WikiImgLinkNode,
+    parent: Parent | null,
+    index: number | null,
+) {
+    let alt = node.data.alias;
+    const imgName = node.value;
+
+    if (alt === imgName) {
+        alt = settings.useImgNameDefault ? path.basename(imgName) : "";
+    }
+
+    const imgPath = await file.getImgPathFromName(app, imgName);
+    const imgBuffer = fs.readFileSync(imgPath);
+
+    const imageNode = await bufferToZhihuImageNode(vault, imgBuffer, alt);
+
+    replaceNode(parent, index, node, imageNode);
+}
+// 处理mermaid图片
+async function handleMermaid(
+    vault: Vault,
+    settings: ZhihuSettings,
+    node: Code,
+    parent: Parent | null,
+    index: number | null,
+) {
+    if (node.lang !== "mermaid") return;
+
+    const container = document.createElement("div");
+    await mermaid.renderMermaid(node.value, container);
+
+    const svgEl = container.querySelector("svg");
+    if (!svgEl) return;
+
+    const svg = mermaid.cleanSvg(svgEl.outerHTML);
+    const imgBuffer = await mermaid.svgToPngBuffer(svg, settings.mermaidScale);
+
+    const imageNode = await bufferToZhihuImageNode(vault, imgBuffer, "");
+    replaceNode(parent, index, node, imageNode);
+}
 
 export const remarkTypst: Plugin<[App], Parent, Parent> = (app) => {
     const vault = app.vault;
@@ -487,7 +471,7 @@ export async function remarkMdToHTML(app: App, md: string) {
             const para = def.children[0];
             let text = "";
             let url = "";
-            for (const child of para.children as any[]) {
+            for (const child of para.children) {
                 if (child.type === "text") text += child.value.trim();
                 if (child.type === "link") url = child.url;
             }

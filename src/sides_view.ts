@@ -13,8 +13,8 @@ const locale = i18n.current;
 export const SIDES_VIEW_TYPE = "zhihu-sides-view";
 import { phaseQuestion, ZhihuOpener, asZhihuType } from "./open_service";
 
-export async function activateSideView() {
-    const { workspace } = this.app;
+export async function activateSideView(app: App) {
+    const { workspace } = app;
     const existingLeaf = workspace.getLeavesOfType(SIDES_VIEW_TYPE)[0];
     if (existingLeaf) {
         workspace.revealLeaf(existingLeaf);
@@ -56,7 +56,7 @@ export class ZhihuSideView extends View {
     }
 
     getViewType(): string {
-        return "zhihu-slides-view";
+        return SIDES_VIEW_TYPE;
     }
 
     getDisplayText(): string {
@@ -74,7 +74,7 @@ export class ZhihuSideView extends View {
     async render() {
         const container = this.containerEl;
         container.empty();
-        container.addClass("zhihu-slides-view");
+        container.addClass("zhihu-sides-view");
 
         // recommends
         const recom_details = container.createEl("details");
@@ -188,7 +188,7 @@ export class ZhihuSideView extends View {
         const list =
             recom_list ||
             (this.containerEl.querySelector(
-                ".zhihu-slides-view .side-list-container ul",
+                ".zhihu-sides-view .side-list-container ul",
             ) as HTMLElement);
         const settings = await loadSettings(this.vault);
         list.empty();
@@ -241,7 +241,7 @@ export class ZhihuSideView extends View {
         const list =
             follow_list ||
             (this.containerEl.querySelectorAll(
-                ".zhihu-slides-view .side-list-container ul",
+                ".zhihu-sides-view .side-list-container ul",
             )[1] as HTMLElement);
         const settings = await loadSettings(this.vault);
         list.empty();
@@ -290,7 +290,7 @@ export class ZhihuSideView extends View {
         const list =
             hotlist ||
             (this.containerEl.querySelectorAll(
-                ".zhihu-slides-view .side-list-container ul",
+                ".zhihu-sides-view .side-list-container ul",
             )[2] as HTMLElement);
         list.empty();
         this.hotLists = await loadHotList(this.vault);

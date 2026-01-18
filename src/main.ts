@@ -71,7 +71,7 @@ export default class ZhihuObPlugin extends Plugin {
         loadIcons();
         this.addRibbonIcon("zhihu-icon", "Open Zhihu side view", async () => {
             if (await login.checkIsUserLogin(this.app.vault)) {
-                side.activateSideView();
+                side.activateSideView(this.app);
             } else {
                 new Notice(loginNoticeStr);
             }

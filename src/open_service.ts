@@ -21,23 +21,25 @@ import { ViewUpdate, EditorView } from "@codemirror/view";
 import { zhihuRefreshZseCookies } from "./login_service";
 import { turnImgOffline } from "./img_offline";
 import { loadSettings, saveSettings } from "./settings";
-import { pickDirectoryDesktop, tryMapAbsPathToVaultRel } from "./utilities";
+import { FolderSuggestModal } from "./utilities";
 
+//====================================================================
 // 下面是2025年12月30日采用GPT 5.2重构后的open_service代码
 // 原版过于臃肿，函数的传参层层嵌套
+// ====================================================================
 
 /**
  * =========================
  * Editor Cursor Trace
  * =========================
  */
-export const pluginField = StateField.define<ZhihuObPlugin>({
-    create: () => null as any,
+export const pluginField = StateField.define<ZhihuObPlugin | null>({
+    create: () => null,
     update: (value) => value,
 });
 
 export class CursorPosTrace {
-    plugin: ZhihuObPlugin;
+    plugin: ZhihuObPlugin | null;
 
     constructor(view: EditorView) {
         this.plugin = view.state.field(pluginField);
@@ -130,12 +132,15 @@ export async function clickInReadMode(app: App, evt: MouseEvent) {
 }
 
 export async function clickInPreview(plugin: ZhihuObPlugin, evt: MouseEvent) {
+    interface CMEditorWrapper {
+        cm: EditorView;
+    }
     const app = plugin.app;
     const markdownView = app.workspace.getActiveViewOfType(MarkdownView);
     if (!markdownView) return;
 
     const editor = markdownView.editor;
-    const cmEditor = (editor as any).cm;
+    const cmEditor = (editor as unknown as CMEditorWrapper).cm;
     if (!cmEditor) return;
 
     const pos = cmEditor.posAtCoords({ x: evt.clientX, y: evt.clientY });
@@ -246,7 +251,7 @@ export class ZhihuOpener {
                 });
             }
 
-            await app.vault.modify(existed, markdown);
+            await app.vault.process(existed, () => markdown);
             await app.fileManager.processFrontMatter(existed, (fm) => {
                 fm.tags = `zhihu-${parsed.type}`;
                 fm["zhihu-title"] = parsed.title;
@@ -647,11 +652,7 @@ export class ZhihuInputLinkModal extends Modal {
 
         // ===== 纯 HTML 行 =====
         const row = contentEl.createDiv();
-        row.addClass("zhihu-modal-row");
-        row.style.display = "flex";
-        row.style.alignItems = "center";
-        row.style.marginTop = "10px";
-        row.style.gap = "8px";
+        row.addClass("open-link-model-raw");
 
         // 批量打开链接按钮
         const batchBtn = new ButtonComponent(row);
@@ -662,11 +663,11 @@ export class ZhihuInputLinkModal extends Modal {
 
         // 弹性空白
         const spacer = row.createDiv();
-        spacer.style.flex = "1 1 auto";
+        spacer.addClass("open-link-model-spacer");
 
         // 覆盖已有文件
         const owLabel = row.createSpan({ text: "覆盖已有文件" });
-        owLabel.style.marginRight = "4px";
+        owLabel.addClass("open-link-model-label");
 
         const owToggle = new ToggleComponent(row);
         owToggle.setValue(true); // 默认覆盖
@@ -674,9 +675,9 @@ export class ZhihuInputLinkModal extends Modal {
             this.overwrite = v;
         });
 
-        // 保存图片（你原来的）
+        // 保存图片
         const label = row.createSpan({ text: "保存图片" });
-        label.style.marginRight = "4px";
+        label.addClass("open-link-model-label");
 
         const toggle = new ToggleComponent(row);
 
@@ -708,7 +709,6 @@ export class ZhihuBatchLinkModal extends Modal {
     private textareaEl!: HTMLTextAreaElement;
 
     private folderPathRel = "zhihu"; // vault 内相对路径（真正用于写入）
-    private pickedAbsPath: string | null = null; // 仅展示
     private offline = false; // 本次批量开关（覆盖全局）
     private overwrite = true; // 默认覆盖
 
@@ -732,56 +732,34 @@ export class ZhihuBatchLinkModal extends Modal {
          * =========
          */
         const dirRow = contentEl.createDiv({ cls: "zhihu-batch-dir-row" });
-        dirRow.style.display = "flex";
-        dirRow.style.alignItems = "center";
-        dirRow.style.gap = "8px";
-        dirRow.style.marginBottom = "8px";
-
+        dirRow.addClass("open-link-batch-model-dir");
         dirRow.createSpan({ text: "存储目录" });
 
         const dirValueEl = dirRow.createSpan({
             text: `${this.folderPathRel}/`,
         });
-        dirValueEl.addClass("zhihu-dir-value");
-        dirValueEl.style.opacity = "0.85";
-        dirValueEl.style.fontFamily = "var(--font-monospace)";
-        dirValueEl.style.whiteSpace = "nowrap";
-        dirValueEl.style.overflow = "hidden";
-        dirValueEl.style.textOverflow = "ellipsis";
-        dirValueEl.style.maxWidth = "60%";
+        dirValueEl.addClass("open-link-batch-model-dir-value");
 
         // 弹性空白
         const spacer = dirRow.createDiv();
-        spacer.style.flex = "1 1 auto";
+        spacer.addClass("open-link-model-spacer");
 
         const pickBtn = new ButtonComponent(dirRow);
         pickBtn.setButtonText("选择…");
-        pickBtn.onClick(async () => {
-            const abs = await pickDirectoryDesktop();
-            if (!abs) return;
+        pickBtn.onClick(() => {
+            // 打开文件夹选择器
+            new FolderSuggestModal(this.app, (folder) => {
+                this.folderPathRel = folder.path;
+                // if (this.folderPathRel === "/")
 
-            this.pickedAbsPath = abs;
-
-            const rel = tryMapAbsPathToVaultRel(this.app, abs);
-            if (!rel) {
-                new Notice(
-                    "选择的目录不在当前 Vault 内，将继续使用默认 zhihu/ 保存",
-                );
-                this.folderPathRel = "zhihu";
-                dirValueEl.setText(`${this.folderPathRel}/`);
-                return;
-            }
-
-            this.folderPathRel = rel;
-            dirValueEl.setText(`${this.folderPathRel}/`);
+                // 更新 UI
+                const displayPath = folder.path === "/" ? "" : folder.path;
+                dirValueEl.setText(`${displayPath}/`);
+            }).open();
         });
-
         // 在下面展示绝对路径，便于用户确认
         const absHint = contentEl.createDiv({ cls: "zhihu-batch-abs-hint" });
-        absHint.style.marginTop = "-4px";
-        absHint.style.marginBottom = "10px";
-        absHint.style.opacity = "0.7";
-        absHint.style.fontSize = "12px";
+        absHint.addClass("open-link-batch-model-path-hint");
         absHint.setText("默认：zhihu/（仅支持 Vault 内目录）");
 
         /**
@@ -792,15 +770,11 @@ export class ZhihuBatchLinkModal extends Modal {
         const offlineRow = contentEl.createDiv({
             cls: "zhihu-batch-offline-row",
         });
-        offlineRow.style.display = "flex";
-        offlineRow.style.alignItems = "center";
-        offlineRow.style.gap = "8px";
-        offlineRow.style.marginBottom = "10px";
-
+        offlineRow.addClass("open-link-batch-model-row");
         offlineRow.createSpan({ text: "保存图片" });
 
         const offlineSpacer = offlineRow.createDiv();
-        offlineSpacer.style.flex = "1 1 auto";
+        offlineSpacer.addClass("open-link-model-spacer");
 
         const offlineToggle = new ToggleComponent(offlineRow);
         offlineToggle.setValue(this.offline);
@@ -816,15 +790,11 @@ export class ZhihuBatchLinkModal extends Modal {
         const overwriteRow = contentEl.createDiv({
             cls: "zhihu-batch-overwrite-row",
         });
-        overwriteRow.style.display = "flex";
-        overwriteRow.style.alignItems = "center";
-        overwriteRow.style.gap = "8px";
-        overwriteRow.style.marginBottom = "10px";
-
+        overwriteRow.addClass("open-link-batch-model-row");
         overwriteRow.createSpan({ text: "覆盖已有文件" });
 
         const overwriteSpacer = overwriteRow.createDiv();
-        overwriteSpacer.style.flex = "1 1 auto";
+        overwriteSpacer.addClass("open-link-model-spacer");
 
         const overwriteToggle = new ToggleComponent(overwriteRow);
         overwriteToggle.setValue(true); // 默认覆盖
@@ -836,13 +806,9 @@ export class ZhihuBatchLinkModal extends Modal {
          * =========
          */
         this.textareaEl = contentEl.createEl("textarea");
-        this.textareaEl.addClass("zhihu-link-batch-textarea");
+        this.textareaEl.addClass("open-link-batch-model-text-area");
         this.textareaEl.placeholder =
             "每行一个链接\n支持知乎回答、文章、问题、想法";
-        this.textareaEl.style.width = "100%";
-        this.textareaEl.style.minHeight = "340px"; // 你要“长一点”，这里比之前 260 更长
-        this.textareaEl.style.boxSizing = "border-box";
-        this.textareaEl.style.resize = "vertical";
 
         /**
          * =========
@@ -850,10 +816,7 @@ export class ZhihuBatchLinkModal extends Modal {
          * =========
          */
         const footer = contentEl.createDiv({ cls: "zhihu-batch-footer" });
-        footer.style.display = "flex";
-        footer.style.justifyContent = "flex-end";
-        footer.style.gap = "8px";
-        footer.style.marginTop = "12px";
+        footer.addClass("open-link-batch-model-footer");
 
         const cancelBtn = new ButtonComponent(footer);
         cancelBtn.setButtonText("取消");

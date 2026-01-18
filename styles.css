@@ -1,3 +1,8 @@
+/* QR code */
+.zhihu-qrcode-modal {
+    width: 320px;
+    height: 360px;
+}
 /* member mention */
 .mention-suggestion .suggestion-content {
     display: flex;
@@ -295,4 +300,63 @@
 .typst-editor-wrapper .cm-line,
 .typst-editor-wrapper .cm-lineNumbers {
     font-family: var(--font-monospace);
+}
+
+.open-link-model-raw {
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+    gap: 8px;
+}
+
+.open-link-model-spacer {
+    flex: 1 1 auto;
+}
+
+.open-link-model-label {
+    margin-right: 4px;
+}
+
+.open-link-batch-model-dir {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.open-link-batch-model-dir-value {
+    opacity: 0.85;
+    font-family: var(--font-monospace);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60%;
+}
+
+.open-link-batch-model-path-hint {
+    margin-top: 4px;
+    margin-bottom: 10px;
+    opacity: 0.7;
+    font-size: 12px;
+}
+
+.open-link-batch-model-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.open-link-batch-model-text-area {
+    width: 100%;
+    min-height: 340px;
+    box-sizing: border-box;
+    resize: vertical;
+}
+
+.open-link-batch-model-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 12px;
 }
