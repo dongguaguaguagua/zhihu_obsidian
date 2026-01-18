@@ -310,7 +310,6 @@ async function publishDraft(
 ) {
     const { type: disclaimerType, status: disclaimerStatus } =
         parseDisclaimer(disclaimer);
-    console.log(disclaimerType, disclaimerStatus);
     try {
         const data = await dataUtil.loadData(vault);
         const settings = await loadSettings(vault);

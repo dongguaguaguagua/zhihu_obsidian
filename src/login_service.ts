@@ -126,7 +126,6 @@ export async function zhihuWebLogin(app: App, isNew = false): Promise<void> {
     // 如果是新的登录窗口，则创建一个新分区，否则使用已有的，已经登录账号的分区。
     const newPartition = `zhihu-login-${new Date().getTime()}`;
     const partition = isNew ? newPartition : settings.partition;
-    console.log("partition:", partition);
     const ses = session.fromPartition(partition); // 非持久化，会在窗口全关后销毁
 
     // 只清理这个分区，避免：

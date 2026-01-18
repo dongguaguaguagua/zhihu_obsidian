@@ -750,7 +750,6 @@ export class ZhihuBatchLinkModal extends Modal {
             // 打开文件夹选择器
             new FolderSuggestModal(this.app, (folder) => {
                 this.folderPathRel = folder.path;
-                console.log(this.folderPathRel);
                 // if (this.folderPathRel === "/")
 
                 // 更新 UI
