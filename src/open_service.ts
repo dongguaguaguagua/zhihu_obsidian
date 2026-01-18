@@ -251,7 +251,7 @@ export class ZhihuOpener {
                 });
             }
 
-            await app.vault.modify(existed, markdown);
+            await app.vault.process(existed, () => markdown);
             await app.fileManager.processFrontMatter(existed, (fm) => {
                 fm.tags = `zhihu-${parsed.type}`;
                 fm["zhihu-title"] = parsed.title;
