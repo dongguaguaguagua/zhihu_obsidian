@@ -21,7 +21,7 @@ import { ViewUpdate, EditorView } from "@codemirror/view";
 import { zhihuRefreshZseCookies } from "./login_service";
 import { turnImgOffline } from "./img_offline";
 import { loadSettings, saveSettings } from "./settings";
-import { pickDirectoryDesktop, tryMapAbsPathToVaultRel } from "./utilities";
+import { FolderSuggestModal } from "./utilities";
 
 //====================================================================
 // 下面是2025年12月30日采用GPT 5.2重构后的open_service代码
@@ -709,7 +709,6 @@ export class ZhihuBatchLinkModal extends Modal {
     private textareaEl!: HTMLTextAreaElement;
 
     private folderPathRel = "zhihu"; // vault 内相对路径（真正用于写入）
-    private pickedAbsPath: string | null = null; // 仅展示
     private offline = false; // 本次批量开关（覆盖全局）
     private overwrite = true; // 默认覆盖
 
@@ -747,26 +746,18 @@ export class ZhihuBatchLinkModal extends Modal {
 
         const pickBtn = new ButtonComponent(dirRow);
         pickBtn.setButtonText("选择…");
-        pickBtn.onClick(async () => {
-            const abs = await pickDirectoryDesktop();
-            if (!abs) return;
+        pickBtn.onClick(() => {
+            // 打开文件夹选择器
+            new FolderSuggestModal(this.app, (folder) => {
+                this.folderPathRel = folder.path;
+                console.log(this.folderPathRel);
+                // if (this.folderPathRel === "/")
 
-            this.pickedAbsPath = abs;
-
-            const rel = tryMapAbsPathToVaultRel(this.app, abs);
-            if (!rel) {
-                new Notice(
-                    "选择的目录不在当前 Vault 内，将继续使用默认 zhihu/ 保存",
-                );
-                this.folderPathRel = "zhihu";
-                dirValueEl.setText(`${this.folderPathRel}/`);
-                return;
-            }
-
-            this.folderPathRel = rel;
-            dirValueEl.setText(`${this.folderPathRel}/`);
+                // 更新 UI
+                const displayPath = folder.path === "/" ? "" : folder.path;
+                dirValueEl.setText(`${displayPath}/`);
+            }).open();
         });
-
         // 在下面展示绝对路径，便于用户确认
         const absHint = contentEl.createDiv({ cls: "zhihu-batch-abs-hint" });
         absHint.addClass("open-link-batch-model-path-hint");

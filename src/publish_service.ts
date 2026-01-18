@@ -149,7 +149,7 @@ export async function createNewZhihuArticle(app: App) {
     let counter = 1;
 
     // 检查文件是否存在，如果存在则递增数字
-    while (await vault.adapter.exists(filePath)) {
+    while (vault.getAbstractFileByPath(filePath)) {
         fileName = `untitled ${counter}`;
         filePath = `${fileName}.md`;
         counter++;

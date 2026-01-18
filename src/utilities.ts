@@ -1,5 +1,5 @@
 import { execFile } from "child_process";
-import { App, Notice } from "obsidian";
+import { App, Notice, FuzzySuggestModal, TFolder } from "obsidian";
 
 type RequestOptions = {
     url: string;
@@ -94,36 +94,31 @@ export async function pickDirectoryDesktop(): Promise<string | null> {
     return dirPath ?? null;
 }
 
-function tryGetVaultBasePath(app: App): string | null {
-    const adapter: any = app.vault.adapter;
-    if (adapter && typeof adapter.getBasePath === "function") {
-        return adapter.getBasePath();
+export class FolderSuggestModal extends FuzzySuggestModal<TFolder> {
+    onChoose: (folder: TFolder) => void;
+
+    constructor(app: App, onChoose: (folder: TFolder) => void) {
+        super(app);
+        this.onChoose = onChoose;
     }
-    if (adapter && typeof adapter.basePath === "string") {
-        return adapter.basePath;
+
+    getItems(): TFolder[] {
+        const files = this.app.vault.getAllLoadedFiles();
+        const folders: TFolder[] = [];
+
+        for (const file of files) {
+            if (file instanceof TFolder) {
+                folders.push(file);
+            }
+        }
+        return folders;
     }
-    return null;
-}
 
-/**
- * 如果 absPath 在 vault 根目录内，返回相对路径（用于 app.vault.createFolder/create）
- * 否则返回 null
- */
-export function tryMapAbsPathToVaultRel(
-    app: App,
-    absPath: string,
-): string | null {
-    const base = tryGetVaultBasePath(app);
-    if (!base) return null;
+    getItemText(item: TFolder): string {
+        return item.path; // 显示文件夹路径
+    }
 
-    const norm = (p: string) => p.replace(/\\/g, "/").replace(/\/+$/g, "");
-    const baseN = norm(base);
-    const absN = norm(absPath);
-
-    if (!absN.startsWith(baseN + "/") && absN !== baseN) return null;
-
-    const rel = absN.slice(baseN.length).replace(/^\/+/, "");
-    // 空字符串代表 vault 根目录，这里不建议直接写根目录，就返回 "zhihu"
-    if (!rel) return "zhihu";
-    return rel;
+    onChooseItem(item: TFolder, evt: MouseEvent | KeyboardEvent): void {
+        this.onChoose(item);
+    }
 }
