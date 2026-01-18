@@ -13,7 +13,7 @@ export function htmlToMd(html: string): string {
         });
 
         // 规则 1：数学公式图片转为 $公式$ 或 $$公式$$
-        turndownService.addRule("mathImgToLatex", {
+        turndownService.addRule("mathInlineToLatex", {
             filter: function (node) {
                 return (
                     node.nodeName === "IMG" &&
@@ -33,6 +33,20 @@ export function htmlToMd(html: string): string {
                     return `$$${cleanAlt}$$`;
                 }
                 return `$${trimmedAlt}$`;
+            },
+        });
+
+        turndownService.addRule("mathBlockToLatex", {
+            filter: function (node) {
+                return (
+                    node.nodeName === "IMG" &&
+                    (node as HTMLElement).getAttribute("eeimg") === "2"
+                );
+            },
+            replacement: function (content, node) {
+                const alt = (node as HTMLElement).getAttribute("alt") || "";
+                const trimmedAlt = alt.trim();
+                return `$$${trimmedAlt}$$`;
             },
         });
 
