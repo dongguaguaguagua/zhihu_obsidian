@@ -145,6 +145,11 @@ const config: Config = {
                     position: "left",
                 },
                 {
+                    href: "https://t.me/zhihu_obsidian",
+                    label: "Telegram",
+                    position: "right",
+                },
+                {
                     href: "https://github.com/zimya/zhihu_obsidian",
                     label: "GitHub",
                     position: "right",
@@ -177,6 +182,10 @@ const config: Config = {
                         {
                             label: "知乎",
                             href: "https://zhuanlan.zhihu.com/p/1901622331102696374",
+                        },
+                        {
+                            label: "Telegram",
+                            href: "https://t.me/zhihu_obsidian",
                         },
                         {
                             label: "LINUX DO",

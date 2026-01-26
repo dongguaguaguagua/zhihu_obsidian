@@ -6,7 +6,7 @@
 
 <p align="center">
 <a href="https://github.com/zimya/zhihu_obsidian/actions">
-	<img src="https://img.shields.io/github/actions/workflow/status/zimya/zhihu_obsidian/ci.yml?&branch=master">
+<img src="https://img.shields.io/github/actions/workflow/status/zimya/zhihu_obsidian/ci.yml?&branch=master">
 </a>
 <a href="https://github.com/zimya/zhihu_obsidian/releases">
 <img src="https://img.shields.io/github/v/release/zimya/zhihu_obsidian?&sort=semver">
@@ -17,12 +17,15 @@
 <a href="https://github.com/zimya/zhihu_obsidian?tab=0BSD-1-ov-file#0BSD-1-ov-file">
 <img src="https://img.shields.io/github/license/zimya/zhihu_obsidian">
 </a>
+<a href="https://t.me/zhihu_obsidian">
+<img src="https://img.shields.io/badge/telegram-blue?logo=telegram&logoColor=white">
+</a>
 <a href="https://zhihu.melonhu.cn">
 <img src="https://img.shields.io/badge/doc-cn-blue">
 </a>
 </p>
 
-[EN README](./README.md)
+[EN README](./README.md) | [电报交流群](https://t.me/zhihu_obsidian) | [官网/文档](https://zhihu.melonhu.cn)
 
 </div>
 
