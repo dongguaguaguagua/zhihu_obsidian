@@ -576,17 +576,14 @@ function fromTypeGetStr(type: ZhihuType) {
 }
 
 function removeSpecialChars(input: string): string {
-    // 删除让链接无法工作的符号：# ^ [ ] |
-    input = input.replace(/[#^[\]|]/g, "");
-    if (Platform.isMacOS) {
-        // macOS 不允许：\ / :
-        input = input.replace(/[\\/ :]/g, "");
-    } else {
-        // Windows/Android 等：/ \ " * : | ? < >
-        input = input.replace(/[/\\<>"*:|]/g, "");
-        input = input.replace(/\?/g, "？");
-    }
-    return input;
+    const name = input
+        // 特殊替换
+        .replace(/\?/g, "？")
+        .replace(/:/g, "：")
+        // 删除其它非法字符
+        .replace(/[\\/*"<>|#[\]^]/g, "");
+
+    return name || "untitled";
 }
 
 function stripHtmlTags(input: string): string {
