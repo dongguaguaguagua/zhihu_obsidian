@@ -163,6 +163,23 @@ function getZhihuSessionFromWebview(webviewEl: any): any {
     return wc.session;
 }
 
+function getWebContentsFromWebview(webviewEl: any): any {
+    const remote = (window as any).require?.("@electron/remote");
+    const webContents = remote?.webContents;
+    if (!webContents) {
+        throw new Error(locale.error.cannotAccessElectronWebContents);
+    }
+    const webContentsId = webviewEl?.getWebContentsId?.();
+    if (!webContentsId) {
+        throw new Error(locale.error.cannotGetWebviewWebContentsId);
+    }
+    const wc = webContents.fromId(webContentsId);
+    if (!wc) {
+        throw new Error(locale.error.cannotGetWebviewerSession);
+    }
+    return wc;
+}
+
 function isIgnorableNavigationError(error: unknown): boolean {
     const message =
         error instanceof Error ? error.message : String(error ?? "");
@@ -242,10 +259,57 @@ async function clearZhihuSessionData(webviewEl: any): Promise<void> {
 async function extractCookiesAfterNavigation(
     webviewEl: any,
     isLoginFlow: boolean,
+    previousZseCkValue: string | null,
 ): Promise<Record<string, string>> {
     return new Promise<Record<string, string>>((resolve, reject) => {
         let finished = false;
         let pollingTimer: number | null = null;
+        const startAt = Date.now();
+        let saw403ForExampleQuestion = false;
+        let debuggerAttached = false;
+        let detachDebugger: (() => void) | null = null;
+
+        try {
+            const wc = getWebContentsFromWebview(webviewEl);
+            const handler = (
+                _event: unknown,
+                method: string,
+                params: any,
+            ): void => {
+                if (method !== "Network.responseReceived") {
+                    return;
+                }
+                const url = String(params?.response?.url ?? "");
+                if (!url.startsWith(ZHIHU_EXAMPLE_QUESTION_URL)) {
+                    return;
+                }
+                const status = Number(params?.response?.status);
+                if (status === 403) {
+                    saw403ForExampleQuestion = true;
+                }
+            };
+
+            wc.debugger?.on?.("message", handler);
+            detachDebugger = () => {
+                try {
+                    wc.debugger?.removeListener?.("message", handler);
+                } catch { }
+                try {
+                    if (wc.debugger?.isAttached?.()) {
+                        wc.debugger?.detach?.();
+                    }
+                } catch { }
+            };
+
+            wc.debugger?.attach?.("1.3");
+            wc.debugger?.sendCommand?.("Network.enable");
+            debuggerAttached = true;
+        } catch {
+            debuggerAttached = false;
+            detachDebugger?.();
+            detachDebugger = null;
+        }
+
         const timer = window.setTimeout(() => {
             cleanup();
             reject(new Error(locale.error.waitLoginAndExtractCookiesTimeout));
@@ -260,6 +324,7 @@ async function extractCookiesAfterNavigation(
             webviewEl.removeEventListener("did-finish-load", onLoad);
             webviewEl.removeEventListener("did-navigate", onLoad);
             webviewEl.removeEventListener("did-navigate-in-page", onLoad);
+            detachDebugger?.();
         };
 
         const finishWithError = (error: unknown) => {
@@ -283,6 +348,15 @@ async function extractCookiesAfterNavigation(
             });
             const zse = cookies.find((c: any) => c.name === "__zse_ck");
             if (!zse) {
+                return;
+            }
+            if (
+                !isLoginFlow &&
+                previousZseCkValue &&
+                zse.value === previousZseCkValue &&
+                (saw403ForExampleQuestion ||
+                    Date.now() - startAt < (debuggerAttached ? 2000 : 4000))
+            ) {
                 return;
             }
 
@@ -343,6 +417,7 @@ async function extractZhihuCookiesViaWebviewer(
     app: App,
     initialUrl: string,
     isLoginFlow: boolean,
+    previousZseCkValue: string | null,
 ): Promise<Record<string, string>> {
     const webviewer = getWebviewerInstance(app);
     if (!webviewer) {
@@ -361,7 +436,11 @@ async function extractZhihuCookiesViaWebviewer(
     await waitForWebviewDomReady(webviewEl);
 
     try {
-        return await extractCookiesAfterNavigation(webviewEl, isLoginFlow);
+        return await extractCookiesAfterNavigation(
+            webviewEl,
+            isLoginFlow,
+            previousZseCkValue,
+        );
     } finally {
         await leaf?.detach?.();
     }
@@ -375,6 +454,7 @@ export async function zhihuWebLogin(app: App): Promise<void> {
         app,
         ZHIHU_LOGIN_URL,
         true,
+        null,
     );
 
     new Notice(`${locale.notice.loginSuccess}`);
@@ -429,12 +509,18 @@ export async function zhihuRefreshZseCookies(app: App): Promise<void> {
 
     refreshCookiesPromise = (async () => {
         const vault = app.vault;
+        const data = await dataUtil.loadData(vault);
+        const previousZseCkValue =
+            typeof data?.cookies?.__zse_ck === "string"
+                ? data.cookies.__zse_ck
+                : null;
 
         // 调用公共模块获取 Cookie（已登录状态下，直接打开目标页刷新）
         const cookies = await extractZhihuCookiesViaWebviewer(
             app,
             ZHIHU_EXAMPLE_QUESTION_URL,
             false,
+            previousZseCkValue,
         );
 
         await dataUtil.updateData(vault, { cookies });
