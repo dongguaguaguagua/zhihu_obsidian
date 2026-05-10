@@ -27,10 +27,10 @@ async function fetchUserStatus(vault: Vault) {
         isLoggedIn: true,
         userInfo: data?.userInfo
             ? {
-                avatar_url: data.userInfo.avatar_url,
-                name: data.userInfo.name,
-                headline: data.userInfo.headline,
-            }
+                  avatar_url: data.userInfo.avatar_url,
+                  name: data.userInfo.name,
+                  headline: data.userInfo.headline,
+              }
             : null,
     };
 }
@@ -277,6 +277,27 @@ function UseImgNameDefaultSetting(
         );
 }
 
+function setTocDefaultSetting(
+    containerEl: HTMLElement,
+    tab: ZhihuSettingTab,
+    setTocDefault: boolean,
+) {
+    // if to set toc = true when creating a new article/answer
+    new Setting(containerEl)
+        .setName(locale.settings.setTocDefault)
+        .setDesc(locale.settings.setTocDefaultDesc)
+        .addToggle((toggle) =>
+            toggle.setValue(setTocDefault).onChange(async (value) => {
+                try {
+                    await saveSettings(this.app.vault, {
+                        setTocDefault: value,
+                    });
+                } catch (e) {
+                    console.error(locale.error.saveUseImgNameFailed, e);
+                }
+            }),
+        );
+}
 function AutoOpenZhihuLinkSetting(
     containerEl: HTMLElement,
     tab: ZhihuSettingTab,
@@ -689,6 +710,8 @@ export class ZhihuSettingTab extends PluginSettingTab {
         ZhihuHeadingsSettings(containerEl, this, sts.useZhihuHeadings);
         // 是否使用图片名称作为图片备注
         UseImgNameDefaultSetting(containerEl, this, sts.useImgNameDefault);
+        // 是否给新创建的文章或回答默认带上目录
+        setTocDefaultSetting(containerEl, this, sts.setTocDefault);
         // 自动在 Obsidian 打开知乎链接
         AutoOpenZhihuLinkSetting(containerEl, this, sts.autoOpenZhihuLink);
         // 打开知乎链接时是否离线加载图片

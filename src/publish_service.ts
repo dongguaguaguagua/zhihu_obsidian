@@ -156,6 +156,7 @@ export async function createNewZhihuArticle(app: App) {
     }
 
     try {
+        const settings = await loadSettings(vault);
         const newFile = await vault.create(filePath, "");
         const defaultTitle = "untitled";
         const articleId = await newDraft(vault, defaultTitle);
@@ -164,6 +165,11 @@ export async function createNewZhihuArticle(app: App) {
             fm["zhihu-topics"] = "";
             fm["zhihu-link"] = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
         });
+        if (settings.setTocDefault) {
+            await fileManager.processFrontMatter(newFile, (fm) => {
+                fm["zhihu-toc"] = "True";
+            });
+        }
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);
         return filePath;
@@ -174,8 +180,7 @@ export async function createNewZhihuArticle(app: App) {
 }
 
 export async function convertToNewZhihuArticle(app: App) {
-    const vault = app.vault;
-    const workspace = app.workspace;
+    const { vault, workspace, fileManager } = app;
 
     // 获取当前活动文件
     const activeFile = workspace.getActiveFile();
@@ -185,18 +190,23 @@ export async function convertToNewZhihuArticle(app: App) {
     }
 
     try {
+        const settings = await loadSettings(vault);
         // 获取文件名作为标题（去除扩展名）
         const fileName = activeFile.name.replace(/\.md$/, "");
         const defaultTitle = fileName;
         const articleId = await newDraft(vault, defaultTitle);
 
         // 给当前文件添加/更新 frontmatter 信息
-        await app.fileManager.processFrontMatter(activeFile, (fm) => {
+        await fileManager.processFrontMatter(activeFile, (fm) => {
             fm["zhihu-title"] = defaultTitle;
             fm["zhihu-topics"] = "";
             fm["zhihu-link"] = `https://zhuanlan.zhihu.com/p/${articleId}/edit`;
         });
-
+        if (settings.setTocDefault) {
+            await fileManager.processFrontMatter(activeFile, (fm) => {
+                fm["zhihu-toc"] = "True";
+            });
+        }
         // 可选：打开当前文件
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(activeFile);

@@ -34,6 +34,7 @@ export interface ZhihuSettings {
     typstFallbackToTeX: boolean;
     typstDisplayToTeX: boolean;
     turnImgOffline: boolean;
+    setTocDefault: boolean;
 }
 
 // Default settings in case none exist in zhihu-data.json
@@ -60,6 +61,7 @@ const DEFAULT_SETTINGS: ZhihuSettings = {
     typstFallbackToTeX: true,
     typstDisplayToTeX: false,
     turnImgOffline: true,
+    setTocDefault: false,
 };
 
 /**
@@ -105,9 +107,15 @@ export class ConfirmationModal extends Modal {
         super(app);
         this.contentEl.addClass("zhihu-obsidian-confirmation-modal");
         const contentDiv = this.contentEl.createDiv();
-        const component = new (class extends Component { })();
+        const component = new (class extends Component {})();
 
-        MarkdownRenderer.render(this.app, bodyMarkdown, contentDiv, "", component);
+        MarkdownRenderer.render(
+            this.app,
+            bodyMarkdown,
+            contentDiv,
+            "",
+            component,
+        );
 
         new Setting(this.contentEl)
             .addButton((button: ButtonComponent) => {

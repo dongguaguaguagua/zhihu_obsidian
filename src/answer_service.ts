@@ -342,10 +342,16 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
     }
 
     try {
+        const settings = await loadSettings(vault);
         const newFile = await vault.create(filePath, "");
         await fileManager.processFrontMatter(newFile, (fm) => {
             fm["zhihu-question"] = questionLink;
         });
+        if (settings.setTocDefault) {
+            await fileManager.processFrontMatter(newFile, (fm) => {
+                fm["zhihu-toc"] = "True";
+            });
+        }
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(newFile);
         return filePath;
@@ -355,8 +361,7 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
     }
 }
 export async function convertToNewZhihuAnswer(app: App, questionLink: string) {
-    const vault = app.vault;
-    const workspace = app.workspace;
+    const { vault, workspace, fileManager } = app;
 
     // 获取当前活动文件
     const activeFile = workspace.getActiveFile();
@@ -366,11 +371,15 @@ export async function convertToNewZhihuAnswer(app: App, questionLink: string) {
     }
 
     try {
-        // 给当前文件添加/更新 frontmatter 信息
-        await app.fileManager.processFrontMatter(activeFile, (fm) => {
+        const settings = await loadSettings(vault); // 给当前文件添加/更新 frontmatter 信息
+        await fileManager.processFrontMatter(activeFile, (fm) => {
             fm["zhihu-question"] = questionLink;
         });
-
+        if (settings.setTocDefault) {
+            await fileManager.processFrontMatter(activeFile, (fm) => {
+                fm["zhihu-toc"] = "True";
+            });
+        }
         // 重新打开当前文件以刷新显示
         const leaf = workspace.getLeaf(false);
         await leaf.openFile(activeFile);
