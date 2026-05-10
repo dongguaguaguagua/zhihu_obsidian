@@ -195,6 +195,9 @@ export default {
         useImgNameDefault: "Default image name as caption",
         useImgNameDefaultDesc:
             "If image caption is not provided, use image file name as default. Disable it then default caption is empty.",
+        setTocDefault: "Table of contents",
+        setTocDefaultDesc:
+            "Add a table of contents to created Zhihu answers or articles by default.",
         editCookies: "Enable editing cookies manually",
         editCookiesDesc: "You can edit cookies settings in zhihu-data.json",
         editorDesc:

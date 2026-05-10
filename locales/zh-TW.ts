@@ -179,6 +179,8 @@ export default {
         useImgNameDefault: "預設圖片備註為圖片名稱",
         useImgNameDefaultDesc:
             "如果沒有圖片備註，則預設圖片備註為圖片檔案名稱。關閉此項後，預設圖片備註將為空。",
+        setTocDefault: "預設加上目錄",
+        setTocDefaultDesc: "給新建立的知乎回答或文章預設帶上目錄",
         editCookies: "手動編輯 Cookies",
         editCookiesDesc: "你可以編輯儲存在 zhihu-data.json 檔案中的 Cookies",
         editorDesc:
