@@ -21,7 +21,7 @@ import { ViewUpdate, EditorView } from "@codemirror/view";
 import { zhihuRefreshZseCookies } from "./login_service";
 import { turnImgOffline } from "./img_offline";
 import { loadSettings, saveSettings } from "./settings";
-import { FolderSuggestModal } from "./utilities";
+import { fmtDate, FolderSuggestModal } from "./utilities";
 
 //====================================================================
 // 下面是2025年12月30日采用GPT 5.2重构后的open_service代码
@@ -393,13 +393,25 @@ async function phaseAnswer(app: App, link: string): Promise<ParsedZhihu> {
     const fileName = removeSpecialChars(
         `${stripHtmlTags(title)}-${author}的回答.md`,
     );
+    const statistics = data?.reaction?.statistics;
+    const authorName = data?.author?.name;
+    const authorId = data?.author?.id;
+    const frontmatter: Record<string, FrontmatterValue> = {
+        tags: "zhihu-answer",
+        "zhihu-title": title,
+        "zhihu-link": link,
+        "zhihu-author": toMdLink(authorName, authorId),
+        "zhihu-favorites": statistics.favorites,
+        "zhihu-likes": statistics.likeCount,
+        "zhihu-downVotes": statistics.downVoteCount,
+        "zhihu-upVotes": statistics.upVoteCount,
+        "zhihu-comments": statistics.commentCount,
+        "zhihu-content-created": fmtDate(new Date(data.createdTime * 1000)),
+        "zhihu-content-updated": fmtDate(new Date(data.updatedTime * 1000)),
+    };
     const res: ParsedZhihu = {
         fileName: fileName,
-        frontmatter: {
-            tags: "zhihu-answer",
-            "zhihu-title": title,
-            "zhihu-link": link,
-        },
+        frontmatter: frontmatter,
         content: content,
     };
     return res;
@@ -417,22 +429,31 @@ async function phaseArticle(app: App, link: string): Promise<ParsedZhihu> {
     const fileName = removeSpecialChars(
         `${stripHtmlTags(title)}-${author}的文章.md`,
     );
+    const statistics = data?.reaction?.statistics;
+    const authorName = data?.author?.name;
+    const authorId = data?.author?.id;
+    const frontmatter: Record<string, FrontmatterValue> = {
+        tags: "zhihu-article",
+        "zhihu-title": title,
+        "zhihu-link": link,
+        "zhihu-author": toMdLink(authorName, authorId),
+        "zhihu-favorites": statistics.favorites,
+        "zhihu-likes": statistics.likeCount,
+        "zhihu-downVotes": statistics.downVoteCount,
+        "zhihu-upVotes": statistics.upVoteCount,
+        "zhihu-comments": statistics.commentCount,
+        "zhihu-content-created": fmtDate(new Date(data.created * 1000)),
+        "zhihu-content-updated": fmtDate(new Date(data.updated * 1000)),
+    };
     const res: ParsedZhihu = {
         fileName: fileName,
-        frontmatter: {
-            tags: "zhihu-article",
-            "zhihu-title": title,
-            "zhihu-link": link,
-        },
+        frontmatter: frontmatter,
         content: content,
     };
     return res;
 }
 
-export async function phaseQuestion(
-    app: App,
-    link: string,
-): Promise<ParsedZhihu> {
+async function phaseQuestion(app: App, link: string): Promise<ParsedZhihu> {
     const questionId = getQestionId(link);
     const htmlText = await getZhihuContentHTML(app, link);
 
@@ -478,13 +499,25 @@ export async function phaseQuestion(
     container.innerHTML = questionDetail;
     container.appendChild(answerContainer);
 
+    const authorName = quesData?.author?.name;
+    const authorId = quesData?.author?.id;
+    const frontmatter: Record<string, FrontmatterValue> = {
+        tags: "zhihu-question",
+        "zhihu-title": title,
+        "zhihu-link": link,
+        "zhihu-author": toMdLink(authorName, authorId),
+        "zhihu-answers": quesData.answerCount,
+        "zhihu-visits": quesData.visitCount,
+        "zhihu-comments": quesData.commentCount,
+        "zhihu-upVotes": quesData.voteupCount,
+        "zhihu-followers": quesData.followerCount,
+        "zhihu-content-created": fmtDate(new Date(quesData.created * 1000)),
+        "zhihu-content-updated": fmtDate(new Date(quesData.updatedTime * 1000)),
+    };
+
     const res: ParsedZhihu = {
         fileName: fileName,
-        frontmatter: {
-            tags: "zhihu-question",
-            "zhihu-title": title,
-            "zhihu-link": link,
-        },
+        frontmatter: frontmatter,
         content: container.innerHTML,
     };
     return res;
@@ -526,13 +559,23 @@ async function phasePin(app: App, link: string): Promise<ParsedZhihu> {
         }
     }
     const imgsHtml = imgs.length ? `<div>${imgs.join("\n")}</div>` : "";
+    const statistics = pinData?.reaction?.statistics;
+    const frontmatter: Record<string, FrontmatterValue> = {
+        tags: "zhihu-pin",
+        "zhihu-title": title,
+        "zhihu-link": link,
+        "zhihu-author": toMdLink(author, author),
+        "zhihu-favorites": statistics.favorites,
+        "zhihu-likes": statistics.likeCount,
+        "zhihu-downVotes": statistics.downVoteCount,
+        "zhihu-upVotes": statistics.upVoteCount,
+        "zhihu-comments": statistics.commentCount,
+        "zhihu-content-created": fmtDate(new Date(pinData.created * 1000)),
+        "zhihu-content-updated": fmtDate(new Date(pinData.updated * 1000)),
+    };
     const res: ParsedZhihu = {
         fileName: fileName,
-        frontmatter: {
-            tags: "zhihu-pin",
-            "zhihu-title": title,
-            "zhihu-link": link,
-        },
+        frontmatter: frontmatter,
         content: `${contentHtmlStr}\n${imgsHtml}`,
     };
     return res;
@@ -576,6 +619,13 @@ function removeSpecialChars(input: string): string {
 
 function stripHtmlTags(input: string): string {
     return input.replace(/<[^>]*>/g, "");
+}
+
+function toMdLink(name: string, id: string): string {
+    const label = (name ?? "").replace(/\]/g, "\\]");
+    const url = `https://www.zhihu.com/people/${id}`;
+    if (!label) return "";
+    return `[${label}](${url})`;
 }
 
 function getQuestionAndAnswerId(link: string): [string, string] {

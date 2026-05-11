@@ -349,7 +349,7 @@ export async function createNewZhihuAnswer(app: App, questionLink: string) {
         });
         if (settings.setTocDefault) {
             await fileManager.processFrontMatter(newFile, (fm) => {
-                fm["zhihu-toc"] = "True";
+                fm["zhihu-toc"] = true;
             });
         }
         const leaf = workspace.getLeaf(false);
@@ -377,7 +377,7 @@ export async function convertToNewZhihuAnswer(app: App, questionLink: string) {
         });
         if (settings.setTocDefault) {
             await fileManager.processFrontMatter(activeFile, (fm) => {
-                fm["zhihu-toc"] = "True";
+                fm["zhihu-toc"] = true;
             });
         }
         // 重新打开当前文件以刷新显示

@@ -167,7 +167,7 @@ export async function createNewZhihuArticle(app: App) {
         });
         if (settings.setTocDefault) {
             await fileManager.processFrontMatter(newFile, (fm) => {
-                fm["zhihu-toc"] = "True";
+                fm["zhihu-toc"] = true;
             });
         }
         const leaf = workspace.getLeaf(false);
@@ -204,7 +204,7 @@ export async function convertToNewZhihuArticle(app: App) {
         });
         if (settings.setTocDefault) {
             await fileManager.processFrontMatter(activeFile, (fm) => {
-                fm["zhihu-toc"] = "True";
+                fm["zhihu-toc"] = true;
             });
         }
         // 可选：打开当前文件

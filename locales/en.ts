@@ -1,6 +1,12 @@
 export default {
     untitled: "Untitled",
     ui: {
+        upVotes: "upVotes",
+        likes: "likes",
+        favorites: "favorites",
+        visits: "visits",
+        followers: "followers",
+        goodQuestion: "good question",
         enterQuestionLink: "Please enter Zhihu question link",
         enterZhihuLink: "Please enter Zhihu link",
         enterZhihuLinkPlaceholder:
