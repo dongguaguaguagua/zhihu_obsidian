@@ -1,5 +1,11 @@
 export default {
     ui: {
+        upVotes: "赞同",
+        likes: "喜欢",
+        favorites: "收藏",
+        visits: "浏览",
+        followers: "关注者",
+        goodQuestion: "好问题",
         enterQuestionLink: "请输入知乎问题链接",
         enterZhihuLink: "请输入知乎链接",
         enterZhihuLinkPlaceholder: "您可以输入知乎问题、文章、回答、想法的链接",

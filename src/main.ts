@@ -21,12 +21,15 @@ import i18n, { type Lang } from "../locales";
 import { registerMenuCommands } from "./menu";
 import { ViewPlugin, ViewUpdate, EditorView } from "@codemirror/view";
 import { zhihuDesktopPreview } from "./preview";
+import { scheduleUpdateStatusBar } from "./statusbar";
 import * as path from "path";
+import { ensureZhihuFrontmatterTypes } from "./frontmatter";
 
 export default class ZhihuObPlugin extends Plugin {
     i18n: Lang;
     public lastCursorPos: number | null = null; // 记录上一次光标的位置
     intervalId: number | undefined;
+    statusBarEl!: HTMLElement;
 
     constructor(app: App, manifest: PluginManifest) {
         super(app, manifest);
@@ -34,6 +37,8 @@ export default class ZhihuObPlugin extends Plugin {
     }
 
     async onload() {
+        // 手动为用户设置frontmatter类型。
+        await ensureZhihuFrontmatterTypes(this.app.vault);
         const settings = await loadSettings(this.app.vault);
 
         // 当设置中关闭了默认图片备注为图片名称时
@@ -50,6 +55,26 @@ export default class ZhihuObPlugin extends Plugin {
             open.pluginField.init(() => this),
             ViewPlugin.fromClass(open.CursorPosTrace),
         ]);
+        this.statusBarEl = this.addStatusBarItem();
+        this.statusBarEl.addClass("zhihu-status-bar");
+        this.registerEvent(
+            this.app.workspace.on("active-leaf-change", () => {
+                scheduleUpdateStatusBar(this.app, this.statusBarEl);
+            }),
+        );
+        this.registerEvent(
+            this.app.workspace.on("file-open", () => {
+                scheduleUpdateStatusBar(this.app, this.statusBarEl);
+            }),
+        );
+        this.registerEvent(
+            this.app.metadataCache.on("changed", (file) => {
+                const activeFile = this.app.workspace.getActiveFile();
+                if (!activeFile || activeFile.path !== file.path) return;
+                scheduleUpdateStatusBar(this.app, this.statusBarEl);
+            }),
+        );
+        scheduleUpdateStatusBar(this.app, this.statusBarEl);
 
         if (settings.autoOpenZhihuLink) {
             this.registerDomEvent(
