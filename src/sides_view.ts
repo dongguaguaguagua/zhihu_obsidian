@@ -11,7 +11,7 @@ import { loadSettings } from "./settings";
 import i18n, { type Lang } from "../locales";
 const locale = i18n.current;
 export const SIDES_VIEW_TYPE = "zhihu-sides-view";
-import { phaseQuestion, ZhihuOpener, asZhihuType } from "./open_service";
+import { ZhihuOpener, asZhihuType, ZhihuOpenRequest } from "./open_service";
 
 export async function activateSideView(app: App) {
     const { workspace } = app;
@@ -226,13 +226,14 @@ export class ZhihuSideView extends View {
                 const opener = new ZhihuOpener(this.app);
                 const zhType = asZhihuType(recommendation.type);
                 if (!zhType) return;
-                await opener.openParsed({
-                    type: zhType,
+                const req: ZhihuOpenRequest = {
                     url: recommendation.url,
-                    title: recommendation.title,
-                    html: recommendation.content,
-                    author: recommendation.author_name ?? "知乎用户",
-                });
+                    type: zhType,
+                    destFolder: settings.defaultSaveFolder,
+                    offlineImages: settings.turnImgOffline,
+                    overwrite: true,
+                };
+                await opener.open(req);
             });
         });
     }
@@ -275,13 +276,14 @@ export class ZhihuSideView extends View {
                 const opener = new ZhihuOpener(this.app);
                 const zhType = asZhihuType(follow.type);
                 if (!zhType) return;
-                await opener.openParsed({
-                    type: zhType,
+                const req: ZhihuOpenRequest = {
                     url: follow.url,
-                    title: follow.title,
-                    html: follow.content,
-                    author: follow.author_name ?? "知乎用户",
-                });
+                    type: zhType,
+                    destFolder: settings.defaultSaveFolder,
+                    offlineImages: settings.turnImgOffline,
+                    overwrite: true,
+                };
+                await opener.open(req);
             });
         });
     }
@@ -292,12 +294,10 @@ export class ZhihuSideView extends View {
             (this.containerEl.querySelectorAll(
                 ".zhihu-sides-view .side-list-container ul",
             )[2] as HTMLElement);
+        const settings = await loadSettings(this.vault);
         list.empty();
         this.hotLists = await loadHotList(this.vault);
         this.hotLists.forEach(async (hot) => {
-            let qTitle = "";
-            let qContent = "";
-            let qAsker = "";
             const item = list.createEl("li");
             item.addClass("side-item");
             item.setAttr("aria-label", `${hot.title}\n${hot.detail_text}`);
@@ -311,21 +311,18 @@ export class ZhihuSideView extends View {
                 text: `🔥${hot.detail_text}🔥`,
             });
             excerpt.appendText(": " + hot.excerpt);
-            [qTitle, qContent, qAsker] = await phaseQuestion(
-                this.app,
-                hot.link,
-            );
             item.onClickEvent(async () => {
                 const opener = new ZhihuOpener(this.app);
                 const zhType = asZhihuType(hot.type);
                 if (!zhType) return;
-                await opener.openParsed({
-                    type: zhType,
+                const req: ZhihuOpenRequest = {
                     url: hot.link,
-                    title: qTitle,
-                    html: qContent,
-                    author: qAsker,
-                });
+                    type: zhType,
+                    destFolder: settings.defaultSaveFolder,
+                    offlineImages: settings.turnImgOffline,
+                    overwrite: true,
+                };
+                await opener.open(req);
             });
         });
     }

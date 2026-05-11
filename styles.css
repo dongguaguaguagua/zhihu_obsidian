@@ -52,17 +52,11 @@
 }
 
 .side-collapsible .side-list-container {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
     padding: 0;
 }
 
-.side-collapsible[open] .side-list-container {
-    max-height: 80vh;
-    opacity: 1;
-    padding: 0px;
-    overflow-y: auto;
+.side-collapsible:not([open]) .side-list-container {
+    display: none;
 }
 
 .side-list-container ul {
