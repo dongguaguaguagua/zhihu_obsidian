@@ -1,7 +1,7 @@
 import { App, TextComponent, Vault, Modal, Notice, requestUrl } from "obsidian";
 import * as dataUtil from "./data";
 import * as fm from "./frontmatter";
-import * as render from "./custom_render";
+import * as render from "../render/modes/full";
 import { v4 as uuidv4 } from "uuid";
 import * as cookies from "./cookies";
 import { addPopularizeStr } from "./popularize";
