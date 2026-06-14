@@ -1,14 +1,44 @@
 {
   "name": "md-to-zhihu",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "这是从Zhihu Obsidian中拆分出来的一个库，这里分为了full和lite模式。lite模式下不会依赖Obsidian、cookies、typst命令行、Mermaid等，只有纯粹markdown转换。所以使用lite模式时需要先将图片转换为知乎图床URL，再进行转换。",
-  "main": "index.js",
+  "type": "module",
+  "main": "./dist/lite.mjs",
+  "module": "./dist/lite.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/lite.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "core",
+    "modes",
+    "full",
+    "README.md"
+  ],
   "scripts": {
     "build": "esbuild modes/lite.ts --bundle --format=esm --platform=neutral --main-fields=module,main --target=es2020 --outfile=dist/lite.mjs --log-level=info --define:process.env.NODE_ENV=\\\"production\\\" --define:process.env=\\\"{}\\\"",
+    "prepublishOnly": "npm run build",
     "test": "qjs lite.test.mjs"
   },
   "keywords": ["zhihu","markdown","html","ast"],
   "author": "dgg",
   "license": "ISC",
-  "type": "commonjs"
+  "dependencies": {
+    "@r4ai/remark-callout": "^0.6.2",
+    "esbuild": "0.17.3",
+    "mdast-util-math": "^3.0.0",
+    "mdast-util-wiki-link": "github:zimya/mdast-util-wiki-link",
+    "micromark-extension-math": "github:zimya/micromark-extension-math",
+    "micromark-extension-wiki-link": "github:zimya/micromark-extension-wiki-link",
+    "rehype-raw": "github:zimya/rehype-raw",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "github:zimya/remark-gfm",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "unified": "^11.0.5",
+    "unist-builder": "^4.0.0",
+    "unist-util-visit": "^5.0.0"
+  }
 }
